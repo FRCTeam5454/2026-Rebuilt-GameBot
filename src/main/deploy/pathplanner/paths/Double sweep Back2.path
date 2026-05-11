@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.056823425022182,
+        "y": 3.3871428571428566
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.663037919116631,
+        "y": 2.479718704084884
+      },
+      "isLocked": false,
+      "linkedName": "Double Swipe out end2"
+    },
+    {
+      "anchor": {
+        "x": 5.742954747116238,
+        "y": 0.6347559893522623
+      },
+      "prevControl": {
+        "x": 6.940887088819216,
+        "y": 0.9521406400046107
+      },
+      "nextControl": {
+        "x": 5.4604281625817865,
+        "y": 0.5599023451097218
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.7873114463176574,
+        "y": 0.4255102040816314
+      },
+      "prevControl": {
+        "x": 4.036847378121719,
+        "y": 0.44073579893630477
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "ShootTrench2"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 1.0050860052542672
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

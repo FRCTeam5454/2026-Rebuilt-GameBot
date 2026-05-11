@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "expandIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTinNout"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shotLookUpW5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "expandIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTinNout2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shotLookUpW5"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

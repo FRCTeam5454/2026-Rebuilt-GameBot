@@ -1,0 +1,63 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.217781721384206,
+        "y": 6.107338065661047
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.217781721384204,
+        "y": 6.107338065661047
+      },
+      "isLocked": false,
+      "linkedName": "BumpIntakeOutPoint"
+    },
+    {
+      "anchor": {
+        "x": 7.6664063886424145,
+        "y": 6.630452528837622
+      },
+      "prevControl": {
+        "x": 7.179184166420193,
+        "y": 7.156652528837622
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored Centerline"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.40746887966804995,
+      "rotationDegrees": 14.999999999999998
+    },
+    {
+      "waypointRelativePos": 0.6780082987551834,
+      "rotationDegrees": 4.8529213619689875
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 36.86989764584404
+  },
+  "useDefaultConstraints": true
+}

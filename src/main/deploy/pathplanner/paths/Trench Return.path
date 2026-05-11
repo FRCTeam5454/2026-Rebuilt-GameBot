@@ -1,0 +1,99 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.814399999999999,
+        "y": 2.5733333333333324
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.116477777777778,
+        "y": 1.3455333333333328
+      },
+      "isLocked": false,
+      "linkedName": "R Trench Out Return Pick Point"
+    },
+    {
+      "anchor": {
+        "x": 5.726700000000001,
+        "y": 0.6147000000000002
+      },
+      "prevControl": {
+        "x": 6.116477777777778,
+        "y": 1.4916999999999994
+      },
+      "nextControl": {
+        "x": 5.62516538348664,
+        "y": 0.38624711284493574
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.6571999999999996,
+        "y": 0.6147000000000002
+      },
+      "prevControl": {
+        "x": 5.095513958880566,
+        "y": 0.7370730412180506
+      },
+      "nextControl": {
+        "x": 1.998189514936703,
+        "y": 0.5816258681975467
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.9226888888888891,
+        "y": 0.9557555555555552
+      },
+      "prevControl": {
+        "x": 1.290986464287824,
+        "y": 0.9981831702151734
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "R Follower End"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.9703937007873945,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.7302904564315145,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.910701107011063,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 2.0,
+    "rotation": 122.00538320808352
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 2.0,
+    "rotation": 45.0
+  },
+  "useDefaultConstraints": true
+}

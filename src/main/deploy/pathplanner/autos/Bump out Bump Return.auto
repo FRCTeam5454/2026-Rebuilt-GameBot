@@ -1,0 +1,56 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.0
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "left rotate Bump Cross"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Bump cross to close sweep"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R Sweep Back"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bump Back"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shotLookUpW5"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "Seth",
+  "choreoAuto": false
+}

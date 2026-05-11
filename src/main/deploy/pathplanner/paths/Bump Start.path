@@ -1,0 +1,82 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.5732667617689007,
+        "y": 2.268873038516405
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.469358372541542,
+        "y": 2.7785117962821895
+      },
+      "isLocked": false,
+      "linkedName": "Bump Start"
+    },
+    {
+      "anchor": {
+        "x": 5.697466666666667,
+        "y": 3.0710699001426542
+      },
+      "prevControl": {
+        "x": 5.369954177393922,
+        "y": 2.5763847847980736
+      },
+      "nextControl": {
+        "x": 5.968101897019023,
+        "y": 3.479845823285147
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.697466666666667,
+        "y": 4.0447444444444445
+      },
+      "prevControl": {
+        "x": 5.652306666667469,
+        "y": 3.782887199940174
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "R Trench Follower Out end"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "expandIntake",
+      "waypointRelativePos": 0.6808933002481291,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

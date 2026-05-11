@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.697466666666667,
+        "y": 3.956255555555555
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.851620876505674,
+        "y": 3.7078121309960315
+      },
+      "isLocked": true,
+      "linkedName": "Mirrored R Trench Follower Out end"
+    },
+    {
+      "anchor": {
+        "x": 5.814399999999999,
+        "y": 4.784533333333334
+      },
+      "prevControl": {
+        "x": 5.8257519152296595,
+        "y": 5.034275468385909
+      },
+      "nextControl": {
+        "x": 5.803048084770339,
+        "y": 4.534791198280759
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.814399999999999,
+        "y": 5.427666666666667
+      },
+      "prevControl": {
+        "x": 5.828359274721055,
+        "y": 5.178056693610176
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored R Trench Out Return Pick Point"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.5,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0.5,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": true
+}

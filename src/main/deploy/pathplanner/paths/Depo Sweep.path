@@ -1,0 +1,75 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.2119787045252877,
+        "y": 5.230115350488021
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.0027116237799454,
+        "y": 4.963176574977816
+      },
+      "isLocked": false,
+      "linkedName": "Depo Intake Extended"
+    },
+    {
+      "anchor": {
+        "x": 0.51,
+        "y": 4.731144631765749
+      },
+      "prevControl": {
+        "x": 0.7458966437009686,
+        "y": 4.50597056277846
+      },
+      "nextControl": {
+        "x": 0.3291611139641072,
+        "y": 4.903763568436374
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.51,
+        "y": 7.274285714285714
+      },
+      "prevControl": {
+        "x": 0.36549821984149455,
+        "y": 7.478293644354677
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.05,
+      "rotationDegrees": 90.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "Depo Run",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 140.4773687288289
+  },
+  "useDefaultConstraints": true
+}

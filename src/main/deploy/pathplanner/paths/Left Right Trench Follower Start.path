@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.5473894436519258,
+        "y": 7.595293865905846
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.1904308921965985,
+        "y": 7.6158600195703725
+      },
+      "isLocked": false,
+      "linkedName": "Mirrored Follower Start"
+    },
+    {
+      "anchor": {
+        "x": 4.3884022824536375,
+        "y": 7.595293865905846
+      },
+      "prevControl": {
+        "x": 3.939433303934631,
+        "y": 7.568692125487777
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored Trench Start"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -1.0050860052542672
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -0.0
+  },
+  "useDefaultConstraints": true
+}

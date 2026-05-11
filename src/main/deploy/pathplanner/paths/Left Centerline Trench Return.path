@@ -1,0 +1,91 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.470955555555555,
+        "y": 4.784533333333334
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.490444444444445,
+        "y": 5.456899999999999
+      },
+      "isLocked": false,
+      "linkedName": "Mirrored Centerline End"
+    },
+    {
+      "anchor": {
+        "x": 6.665606276747502,
+        "y": 7.09068616262482
+      },
+      "prevControl": {
+        "x": 7.503628498969724,
+        "y": 6.564486162624821
+      },
+      "nextControl": {
+        "x": 5.82320708307569,
+        "y": 7.6196344935350275
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.6608777777777783,
+        "y": 7.357066666666666
+      },
+      "prevControl": {
+        "x": 5.282569430654982,
+        "y": 7.338426532725548
+      },
+      "nextControl": {
+        "x": 1.9653444444444421,
+        "y": 7.376555555555556
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.9226888888888891,
+        "y": 7.045244444444444
+      },
+      "prevControl": {
+        "x": 1.6632666666666656,
+        "y": 7.0549888888888885
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored R Follower End"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.5771106941838742,
+      "rotationDegrees": -180.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -122.00538320808352
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

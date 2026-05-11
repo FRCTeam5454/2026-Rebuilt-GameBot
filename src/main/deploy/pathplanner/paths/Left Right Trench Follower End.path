@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.3884022824536375,
+        "y": 7.595293865905846
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.6766888888888882,
+        "y": 7.279111111111111
+      },
+      "isLocked": false,
+      "linkedName": "Mirrored Trench Start"
+    },
+    {
+      "anchor": {
+        "x": 3.1834,
+        "y": 5.612811111111112
+      },
+      "prevControl": {
+        "x": 3.4075222222222226,
+        "y": 6.139011111111111
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored R TrenchFollower End"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -0.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -1.0050860052542672
+  },
+  "useDefaultConstraints": true
+}

@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.056823425022182,
+        "y": 4.613857142857142
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.892355555555555,
+        "y": 5.2815
+      },
+      "isLocked": false,
+      "linkedName": "Mirrored Double Swipe out end2"
+    },
+    {
+      "anchor": {
+        "x": 3.5731777777777776,
+        "y": 5.495877777777778
+      },
+      "prevControl": {
+        "x": 4.830211111111112,
+        "y": 5.720000000000001
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Mirrored bumpshoot"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6782287822878222,
+      "rotationDegrees": -45.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -1.0050860052542672
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": true
+}

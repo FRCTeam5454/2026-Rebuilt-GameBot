@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.8296095829636196,
+        "y": 5.495696539485359
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.5682177421556707,
+        "y": 5.836089891054905
+      },
+      "isLocked": false,
+      "linkedName": "climb intake out"
+    },
+    {
+      "anchor": {
+        "x": 1.0751641526175684,
+        "y": 5.680798580301686
+      },
+      "prevControl": {
+        "x": 2.2090752259599684,
+        "y": 5.693865137717731
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "c1 end"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 300.0,
+    "maxAngularAcceleration": 200.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "Depo Run",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": false
+}

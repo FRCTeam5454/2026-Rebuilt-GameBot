@@ -1,0 +1,99 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.841244444444444,
+        "y": 1.910711111111111
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.855764672162571,
+        "y": 2.1602890808660833
+      },
+      "isLocked": false,
+      "linkedName": "Centerline"
+    },
+    {
+      "anchor": {
+        "x": 7.987411111111111,
+        "y": 3.472168330955778
+      },
+      "prevControl": {
+        "x": 8.059768955346064,
+        "y": 2.931666818749923
+      },
+      "nextControl": {
+        "x": 7.954239119710926,
+        "y": 3.719957795999282
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.470955555555555,
+        "y": 3.8732667617689023
+      },
+      "prevControl": {
+        "x": 7.505480576542382,
+        "y": 4.120871331447773
+      },
+      "nextControl": {
+        "x": 7.389630598899372,
+        "y": 3.290025091772804
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.470955555555555,
+        "y": 3.2164666666666655
+      },
+      "prevControl": {
+        "x": 7.540546175506519,
+        "y": 3.544406135165344
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Centerline End"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.8983114446528968,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 1.5347091932457524,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 2.06,
+      "rotationDegrees": -90.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}
