@@ -82,9 +82,7 @@ public class RobotContainer {
   //PowerDistribution m_pdh = new PowerDistribution();
   private final CommandXboxController m_xBoxDriver = new CommandXboxController(InputControllers.kXboxDrive);
   private CommandXboxController m_xBoxOperator = new CommandXboxController(InputControllers.kXboxOperator);
-  //private CommandXboxController m_CustomController = new CommandXboxController(InputControllers.kCustomController);
-  //private CommandXboxController m_FunnyController = new CommandXboxController(InputControllers.kFunnyController);
-  //public final Leds m_LEDS=new Leds(LedConstants.LedCanID,LedConstants.LedCount);
+  
   public final CommandSwerveDrivetrain m_swerve = TunerConstants.createDrivetrain();
   public final IntakeSubsystem m_intake = new IntakeSubsystem(Constants.IntakeConstants.IntakeMotorCanID, Constants.IntakeConstants.FoldMotorCanID);
   public final NewShooterSubsystem m_newShooter = new NewShooterSubsystem(Constants.ShooterConstants.shooter1CANID,
