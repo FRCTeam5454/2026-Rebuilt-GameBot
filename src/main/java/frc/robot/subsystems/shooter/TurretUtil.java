@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.Constants.TurretStates;
@@ -89,6 +90,20 @@ public class TurretUtil {
         return robotPose.plus(new Transform2d(
                 new Translation2d(TURRET_OFFSET_X, TURRET_OFFSET_Y),
                 new Rotation2d()));
+    }
+
+    /**
+     * Returns the field-relative velocity of the turret, including robot translation
+     * and the extra tangential velocity caused by robot rotation around its center.
+     */
+    public static Translation2d getFieldRelativeTurretVelocity(Pose2d robotPose, ChassisSpeeds robotRelativeSpeeds) {
+        double omega = robotRelativeSpeeds.omegaRadiansPerSecond;
+        Translation2d robotRelativeTurretVelocity =
+                new Translation2d(
+                        robotRelativeSpeeds.vxMetersPerSecond - omega * TURRET_OFFSET_Y,
+                        robotRelativeSpeeds.vyMetersPerSecond + omega * TURRET_OFFSET_X);
+
+        return robotRelativeTurretVelocity.rotateBy(robotPose.getRotation());
     }
 
     // =========================

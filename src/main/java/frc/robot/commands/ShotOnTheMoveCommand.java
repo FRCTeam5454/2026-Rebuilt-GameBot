@@ -4,6 +4,7 @@ import javax.lang.model.util.ElementScanner14;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -134,9 +135,10 @@ var pose = m_swerve.getPose2d();
 ChassisSpeeds robotRelativeSpeeds = m_swerve.getChassisSpeeds();
 ChassisSpeeds fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, pose.getRotation());
 
-double velX = fieldRelativeSpeeds.vxMetersPerSecond;
-double velY = fieldRelativeSpeeds.vyMetersPerSecond;
-ShotSolution targetShot = TurretUtil.computeLeadShotSolution(pose,velX,velY,TurretUtil.TargetType.HUB); 
+Translation2d turretFieldVelocity = TurretUtil.getFieldRelativeTurretVelocity(pose, robotRelativeSpeeds);
+double turretVelX = turretFieldVelocity.getX();
+double turretVelY = turretFieldVelocity.getY();
+ShotSolution targetShot = TurretUtil.computeLeadShotSolution(pose,turretVelX,turretVelY,TurretUtil.TargetType.HUB); 
 ShotSolution staticShot = TurretUtil.computeShotSolution(pose, TurretUtil.TargetType.HUB);
 
 double targetspeed=targetShot.shooterSpeedRPS;
@@ -153,7 +155,7 @@ double turretSourceAngle=targetShot.turretAngleDegrees;
   SmartDashboard.putNumber("Turret Util Target Angle",angle);
   double targetPos=m_turret.getTargetMotorPosition(angle);
   SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
-  publishDebug(targetShot, staticShot, robotRelativeSpeeds, fieldRelativeSpeeds, angle, targetPos);
+  publishDebug(targetShot, staticShot, robotRelativeSpeeds, fieldRelativeSpeeds, turretVelX, turretVelY, angle, targetPos);
   m_turret.moveMotor(targetPos); 
   
 switch(m_state){
@@ -340,7 +342,7 @@ switch(m_state){
   }
 
   private void publishDebug(ShotSolution leadShot, ShotSolution staticShot, ChassisSpeeds robotRelativeSpeeds,
-                            ChassisSpeeds fieldRelativeSpeeds, double turretAngle5454,
+                            ChassisSpeeds fieldRelativeSpeeds, double turretVelX, double turretVelY, double turretAngle5454,
                             double targetMotorPosition){
     double leadAngleDelta = leadShot.turretAngleDegrees - staticShot.turretAngleDegrees;
 
@@ -357,14 +359,17 @@ switch(m_state){
     SmartDashboard.putBoolean("SOTM/ShotValid",leadShot.isValid);
     SmartDashboard.putNumber("SOTM/LeadAngleDeltaDeg",leadAngleDelta);
     SmartDashboard.putNumber("SOTM/LeadDistanceMeters",leadShot.leadDistanceMeters);
-    SmartDashboard.putNumber("SOTM/AimBehindXMeters",-fieldRelativeSpeeds.vxMetersPerSecond * leadShot.timeOfFlightSeconds);
-    SmartDashboard.putNumber("SOTM/AimBehindYMeters",-fieldRelativeSpeeds.vyMetersPerSecond * leadShot.timeOfFlightSeconds);
+    SmartDashboard.putNumber("SOTM/AimBehindXMeters",-turretVelX * leadShot.timeOfFlightSeconds);
+    SmartDashboard.putNumber("SOTM/AimBehindYMeters",-turretVelY * leadShot.timeOfFlightSeconds);
     SmartDashboard.putNumber("SOTM/PredictedTurretX",leadShot.predictedTurretX);
     SmartDashboard.putNumber("SOTM/PredictedTurretY",leadShot.predictedTurretY);
     SmartDashboard.putNumber("SOTM/RobotRelVxMps",robotRelativeSpeeds.vxMetersPerSecond);
     SmartDashboard.putNumber("SOTM/RobotRelVyMps",robotRelativeSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/RobotOmegaRadPerSec",robotRelativeSpeeds.omegaRadiansPerSecond);
     SmartDashboard.putNumber("SOTM/FieldRelVxMps",fieldRelativeSpeeds.vxMetersPerSecond);
     SmartDashboard.putNumber("SOTM/FieldRelVyMps",fieldRelativeSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/TurretFieldVelXMps",turretVelX);
+    SmartDashboard.putNumber("SOTM/TurretFieldVelYMps",turretVelY);
 
     Logger.recordOutput("Shooter/SOTM/DistanceMeters",leadShot.distanceMeters);
     Logger.recordOutput("Shooter/SOTM/StaticDistanceMeters",staticShot.distanceMeters);
@@ -379,14 +384,17 @@ switch(m_state){
     Logger.recordOutput("Shooter/SOTM/ShotValid",leadShot.isValid);
     Logger.recordOutput("Shooter/SOTM/LeadAngleDeltaDeg",leadAngleDelta);
     Logger.recordOutput("Shooter/SOTM/LeadDistanceMeters",leadShot.leadDistanceMeters);
-    Logger.recordOutput("Shooter/SOTM/AimBehindXMeters",-fieldRelativeSpeeds.vxMetersPerSecond * leadShot.timeOfFlightSeconds);
-    Logger.recordOutput("Shooter/SOTM/AimBehindYMeters",-fieldRelativeSpeeds.vyMetersPerSecond * leadShot.timeOfFlightSeconds);
+    Logger.recordOutput("Shooter/SOTM/AimBehindXMeters",-turretVelX * leadShot.timeOfFlightSeconds);
+    Logger.recordOutput("Shooter/SOTM/AimBehindYMeters",-turretVelY * leadShot.timeOfFlightSeconds);
     Logger.recordOutput("Shooter/SOTM/PredictedTurretX",leadShot.predictedTurretX);
     Logger.recordOutput("Shooter/SOTM/PredictedTurretY",leadShot.predictedTurretY);
     Logger.recordOutput("Shooter/SOTM/RobotRelVxMps",robotRelativeSpeeds.vxMetersPerSecond);
     Logger.recordOutput("Shooter/SOTM/RobotRelVyMps",robotRelativeSpeeds.vyMetersPerSecond);
+    Logger.recordOutput("Shooter/SOTM/RobotOmegaRadPerSec",robotRelativeSpeeds.omegaRadiansPerSecond);
     Logger.recordOutput("Shooter/SOTM/FieldRelVxMps",fieldRelativeSpeeds.vxMetersPerSecond);
     Logger.recordOutput("Shooter/SOTM/FieldRelVyMps",fieldRelativeSpeeds.vyMetersPerSecond);
+    Logger.recordOutput("Shooter/SOTM/TurretFieldVelXMps",turretVelX);
+    Logger.recordOutput("Shooter/SOTM/TurretFieldVelYMps",turretVelY);
   }
   
 }
