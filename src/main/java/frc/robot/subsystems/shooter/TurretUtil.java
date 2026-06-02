@@ -39,16 +39,31 @@ public class TurretUtil {
         public final double shooterSpeedRPS;      // Flywheel speed from lookup table (RPS)
         public final double timeOfFlightSeconds;  // Ball time-of-flight from lookup table (s)
         public final boolean isValid;             // True if shot is within range & turret limits
+        public final double predictedTurretX;      // Field X used for lead compensation (m)
+        public final double predictedTurretY;      // Field Y used for lead compensation (m)
+        public final double leadDistanceMeters;    // How far the turret moves during flight (m)
 
         public ShotSolution(double distanceMeters, double turretAngleDegrees,
                             double trajectoryAngleDegrees, double shooterSpeedRPS,
                             double timeOfFlightSeconds, boolean isValid) {
+            this(distanceMeters, turretAngleDegrees, trajectoryAngleDegrees, shooterSpeedRPS,
+                    timeOfFlightSeconds, isValid, Double.NaN, Double.NaN, 0.0);
+        }
+
+        public ShotSolution(double distanceMeters, double turretAngleDegrees,
+                            double trajectoryAngleDegrees, double shooterSpeedRPS,
+                            double timeOfFlightSeconds, boolean isValid,
+                            double predictedTurretX, double predictedTurretY,
+                            double leadDistanceMeters) {
             this.distanceMeters = distanceMeters;
             this.turretAngleDegrees = turretAngleDegrees;
             this.trajectoryAngleDegrees = trajectoryAngleDegrees;
             this.shooterSpeedRPS = shooterSpeedRPS;
             this.timeOfFlightSeconds = timeOfFlightSeconds;
             this.isValid = isValid;
+            this.predictedTurretX = predictedTurretX;
+            this.predictedTurretY = predictedTurretY;
+            this.leadDistanceMeters = leadDistanceMeters;
         }
     }
 
@@ -280,7 +295,10 @@ public class TurretUtil {
                 params.hoodPosition,
                 params.shooterSpeed,
                 params.timeOfFlight,
-                valid);
+                valid,
+                virtualX,
+                virtualY,
+                turretNow.getDistance(new Translation2d(virtualX, virtualY)));
     }
 
     // =========================
@@ -295,8 +313,9 @@ public class TurretUtil {
 
     /** True if the turret can physically reach the requested angle. */
     public static boolean isTurretAngleReachable(double angleDegrees) {
-        return angleDegrees >= Constants.TurretConstants.kMinAngleDegrees
-                && angleDegrees <= Constants.TurretConstants.kMaxAngleDegrees;
+        double robotTurretAngle = get5454TurretAngleFromAngle(angleDegrees);
+        return robotTurretAngle >= Constants.TurretConstants.kMinAngleDegrees
+                && robotTurretAngle <= Constants.TurretConstants.kMaxAngleDegrees;
     }
 
     // =========================
