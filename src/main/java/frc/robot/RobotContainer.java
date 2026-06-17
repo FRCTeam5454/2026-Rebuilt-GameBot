@@ -326,6 +326,8 @@ public class RobotContainer {
     //SequentialCommandGroup shootOne=new SequentialCommandGroup(targetHub,shootLookup,intakeOutMode,intakeOutSL);
     m_xBoxDriver.start().whileTrue(shotMove.get());
     m_xBoxOperator.leftTrigger().whileTrue(shotMove.get());
+    SmartDashboard.putData("Run ShotOnTheMove", shotMove.get());
+    SmartDashboard.putData("Reset Pose to Field", Commands.runOnce(() -> m_swerve.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()))));
     //m_xBoxDriver.start().whileTrue(shootOne);
     //m_xBoxOperator.leftTrigger().whileTrue(shootOne);
     

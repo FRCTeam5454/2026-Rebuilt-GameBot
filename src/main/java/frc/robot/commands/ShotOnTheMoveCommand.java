@@ -169,6 +169,7 @@ switch(m_state){
     break;
     case WAIT:
               m_shooter.HoodSetPos(hoodPos);
+              m_shooter.runNewShooter(targetspeed, 0);
    
    
         if(m_shooter.atTargetSpeed(targetspeed) && checkTurretPos(targetPos)){
@@ -333,6 +334,9 @@ switch(m_state){
   }
 
   private boolean checkTurretPos(double targetPosition){
+    if (edu.wpi.first.wpilibj.RobotBase.isSimulation()) {
+      return true;
+    }
     boolean returnValue=false;
     double actual=m_turret.getCurrentPosition();
     if(Math.abs(targetPosition-actual)<kTurretPosDeadband){
