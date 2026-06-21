@@ -231,6 +231,7 @@ public final class Constants {
     public static final int encoder2CANID=12;
     public static final double kTrackingSpeed=0.05454;
     public static final double trackerDeadBand =1.0;
+    public static final double kOnTargetToleranceRotations = 0.9;
 
     public static final double kTurretOffsetX=-0.0762;
     public static final double kTurretOffsetY=0.1397;

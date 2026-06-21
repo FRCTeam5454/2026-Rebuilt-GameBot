@@ -61,6 +61,30 @@ public class NewShooterSubsystem extends SubsystemBase {
     private ObsidianCANSparkMax m_kickerMotor;
     private double m_simTargetVelocity = 0;
     private double m_simTargetHood = 0.05;
+    private java.util.function.BooleanSupplier m_turretOnTargetSupplier = () -> true;
+
+    public void setTurretOnTargetSupplier(java.util.function.BooleanSupplier supplier) {
+        m_turretOnTargetSupplier = supplier;
+    }
+
+    public boolean isTurretOnTarget() {
+        return m_turretOnTargetSupplier.getAsBoolean();
+    }
+    private double m_commandedKickerSpeed = 0.0;
+
+    public String getShooterStatus() {
+      if (m_commandedKickerSpeed != 0.0) {
+        if (!isTurretOnTarget()) {
+          return "Paused (Turret Aligning)";
+        } else {
+          return "Shooting";
+        }
+      } else if (m_simTargetVelocity > Constants.ShooterConstants.IdleSpeedThreshold) {
+        return "Spinning Up / Priming";
+      } else {
+        return "Stopped / Idle";
+      }
+    }
   public NewShooterSubsystem(int shooter1CANID, int shooter2CANID, int kickerCANID,int hoodCANID) {
     m_hoodCoder = new CANcoder(Constants.HoodConstants.hoodCoderCANID);
     m_1shooterMotor = new TalonFX(shooter1CANID);
@@ -156,11 +180,19 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
  
 
   public void runNewShooter(double speed,double kickerSpeed) {
+    m_commandedKickerSpeed = kickerSpeed;
+    if (!isTurretOnTarget()) {
+      kickerSpeed = 0.0;
+    }
     //System.out.println("Shooter Spin:" + speed);
     runShooterVelocity(speed);
     m_kickerMotor.set(kickerSpeed);
   }
 public void runKicker(double kickerSpeed){
+  m_commandedKickerSpeed = kickerSpeed;
+  if (!isTurretOnTarget()) {
+    kickerSpeed = 0.0;
+  }
   m_kickerMotor.set(kickerSpeed);
 }
 public boolean atTargetSpeed(double targetSpeed){
@@ -212,9 +244,11 @@ m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
     
       runShooterVelocity(Constants.ShooterConstants.IdleSpeed);
     }else {
+      m_simTargetVelocity = 0.0;
       m_1shooterMotor.stopMotor();
       m_2shooterMotor.stopMotor();
     }
+    m_commandedKickerSpeed = 0.0;
     m_kickerMotor.stopMotor();
     hoodMoveToZero();
 
@@ -224,15 +258,16 @@ m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
   private void configureShootermotor(TalonFX motor){
     TalonFXConfigurator configurator = motor.getConfigurator();
     TalonFXConfiguration config = new TalonFXConfiguration();
-    //apply bang Bang Controller
-      config.Slot0.kP = 999999.0;
-      config.TorqueCurrent.PeakForwardTorqueCurrent = 800.0;
-      config.TorqueCurrent.PeakReverseTorqueCurrent = -800.0;
-      config.MotorOutput.PeakForwardDutyCycle = 1.0;
-      config.MotorOutput.PeakReverseDutyCycle = -1.0;
-    //config.Slot0.kP=50;  
-    //config.Slot0.kI=0;
-    //config.Slot0.kD=0;
+    // Tune PID for smooth, efficient velocity control with fast spin-up
+    config.Slot0.kP = 0.15;  // Low feedback gain for minor adjustments
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.0;
+    config.Slot0.kV = 0.11;  // Velocity feedforward handles the bulk of spin-up (approx 11V at 100 rps)
+    config.TorqueCurrent.PeakForwardTorqueCurrent = 800.0;
+    config.TorqueCurrent.PeakReverseTorqueCurrent = -800.0;
+    config.MotorOutput.PeakForwardDutyCycle = 1.0;
+    config.MotorOutput.PeakReverseDutyCycle = -1.0;
+    
     configurator.apply(config);
     //Apply current limits
     CurrentLimitsConfigs currentLimits =  new CurrentLimitsConfigs();
@@ -272,6 +307,9 @@ public Command shutdownCommand(){
     SmartDashboard.putNumber("Shooter Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Hood CanCoder Value",m_hoodCoder.getAbsolutePosition().getValueAsDouble());  
     SmartDashboard.putNumber("Hood 'Pos'",getHoodPos());  
+    SmartDashboard.putBoolean("Shooter/Turret On Target", isTurretOnTarget());
+    SmartDashboard.putNumber("Shooter/Kicker Speed Set", m_kickerMotor.get());
+    SmartDashboard.putString("Shooter/Status Widget", getShooterStatus());
     Logger.recordOutput("Shooter/ShooterMotor1Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor2Velocity",  m_2shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor1Current", m_1shooterMotor.getSupplyCurrent().getValueAsDouble());

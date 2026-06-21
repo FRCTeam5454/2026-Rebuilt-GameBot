@@ -209,8 +209,16 @@ public double getTargetMotorPosition(double targetangle){
   }
  return returnValue;
 }
+public boolean isOnTarget() {
+  double currentPosition = getCurrentPosition();
+  double error = Math.abs(currentPosition - m_targetPos);
+  return error < Constants.TurretConstants.kOnTargetToleranceRotations;
+}
+
 public boolean isOnTargetAngle(double angle){
-  return true;
+  double targetPos = getTargetMotorPosition(angle);
+  double currentPosition = getCurrentPosition();
+  return Math.abs(currentPosition - targetPos) < Constants.TurretConstants.kOnTargetToleranceRotations;
 }
 
 public double getTurretPOTS(){
@@ -286,6 +294,8 @@ private double POTStoRotations(double POTSValue ){
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
     Logger.recordOutput("Turret/POTS Position", m_POTS.get());
+    SmartDashboard.putBoolean("Turret/On Target", isOnTarget());
+    SmartDashboard.putNumber("Turret/Error Rotations", getCurrentPosition() - m_targetPos);
    
   /*   double angle=SmartDashboard.getNumber("Target Turret Angle",0);
  
@@ -300,10 +310,18 @@ private double POTStoRotations(double POTSValue ){
 
   @Override
   public void simulationPeriodic() {
-    // Set position directly to eliminate lag in simulation
-    m_turretMotor.getSimState().setRawRotorPosition(m_targetPos);
+    // Simulate real-time lag by stepping the actual position toward the target position
+    double currentPos = m_turretMotor.getPosition().getValueAsDouble();
+    double error = m_targetPos - currentPos;
+    
+    // Max step per 20ms frame: e.g. 0.4 rotations (~3.15 degrees) per frame, representing a speed of 20 rps
+    double maxStep = 0.4;
+    double step = Math.copySign(Math.min(Math.abs(error), maxStep), error);
+    double simulatedPosition = currentPos + step;
 
-    double simulatedPOTS = (m_targetPos / 56.25) + 0.851;
+    m_turretMotor.getSimState().setRawRotorPosition(simulatedPosition);
+
+    double simulatedPOTS = (simulatedPosition / 56.25) + 0.851;
     simulatedPOTS = Math.max(0.15, Math.min(0.85, simulatedPOTS));
 
     AnalogInputSim potsSim = new AnalogInputSim(m_potsPort);
