@@ -35,32 +35,37 @@ public class HubLookUpTable {
         initializeLookupTable();
     }
     
+    /** Initialize the lookup table with known data points */
     private void initializeLookupTable() {
-    // Columns map to: Distance (m), Shooter Speed (RPS), Hood Tilt Angle, Calibrated TOF (s)
-    
-        addEntry(1.80, 45.0, 0.00, 0.385); // Danger: High elevation variance (0.69m hit)
-        addEntry(1.91, 46.0, 0.00, 0.401); // Danger: High elevation variance (0.69m hit)
-        addEntry(2.06, 47.0, 0.00, 0.425); // Danger: High elevation variance (0.66m hit)
-        addEntry(2.23, 48.0, 0.00, 0.452); // Danger: High elevation variance (0.63m hit)
-        addEntry(2.31, 50.0, 0.00, 0.451); // Danger: High elevation variance (0.68m hit)
-        addEntry(2.39, 51.0, 0.00, 0.458); // Danger: High elevation variance (0.68m hit)
-        addEntry(2.52, 51.0, 0.10, 0.505); // Danger: High elevation variance (0.78m hit)
-        addEntry(2.65, 52.0, 0.10, 0.523); // Danger: High elevation variance (0.78m hit)
-        addEntry(2.80, 53.0, 0.10, 0.544); // Danger: High elevation variance (0.76m hit)
-        addEntry(3.14, 53.0, 0.20, 0.647); // Danger: High elevation variance (0.73m hit)
-        addEntry(3.32, 53.0, 0.30, 0.730); // Danger: High elevation variance (0.73m hit)
-        addEntry(3.37, 53.2, 0.30, 0.739); // Danger: High elevation variance (0.71m hit)
-        addEntry(3.41, 53.8, 0.30, 0.740); // Danger: High elevation variance (0.73m hit)
-        addEntry(3.50, 54.5, 0.30, 0.751); // Danger: High elevation variance (0.73m hit)
-        addEntry(3.56, 56.0, 0.30, 0.745); // Danger: High elevation variance (0.82m hit)
-        addEntry(3.74, 56.3, 0.35, 0.810); // Danger: High elevation variance (0.76m hit)
-        addEntry(3.86, 57.0, 0.32, 0.811); // Danger: High elevation variance (0.70m hit)
-        addEntry(3.90, 57.5, 0.32, 0.813); // Danger: High elevation variance (0.72m hit)
-        addEntry(4.20, 57.5, 0.35, 0.902); // Danger: High elevation variance (0.46m hit)
-        addEntry(4.77, 60.0, 0.40, 1.035); // Danger: High elevation variance (0.17m hit)
-        addEntry(5.59, 64.0, 0.40, 1.165); // Danger: High elevation variance (-0.27m hit)
-        addEntry(5.84, 66.0, 0.40, 1.189); // Danger: High elevation variance (-0.25m hit)
-        addEntry(9.00, 67.0, 0.36, 1.211); // Danger: High elevation variance (-0.50m hit)
+        // Distance (m), Shooter Speed (RPS), Hood Angle (°), Time of Flight (s)
+        // KrakenX60 shooting 226g ball - optimized for constant RPS ~75
+        
+        addEntry(1.8,  45, 0.0, 1); 
+        addEntry(1.91,  46, 0.0, 1); 
+        addEntry(2.06,  47, 0.0, 1); 
+        addEntry(2.23,  48, 0.0, 1);  
+        addEntry(2.31,  50, 0.0, 1);  
+        addEntry(2.39,  51, 0.0, 1);  
+        addEntry(2.52,  51, 0.1, 0.9);  
+        addEntry(2.65,  52, 0.1, 0.85);  
+        addEntry(2.8,  53, 0.1, 0.85);  
+        addEntry(3.14,  53, 0.2, 0.85);  
+        addEntry(3.32,  53, 0.3, 0.85);  
+        addEntry(3.37,  53.2, 0.3, 0.85);  
+        addEntry(3.41,  53.8, 0.3, 0.85);  
+        addEntry(3.50,  54.54, 0.3, 0.85);  
+        addEntry(3.56,  56, 0.3, 0.85);  
+        addEntry(3.74   ,  56.3, 0.35, 0.85);  
+        addEntry(3.86   ,  57, 0.32, 0.85);  
+       
+        addEntry(3.90   ,  57.5, 0.32, 0.85);  
+        addEntry(4.2   ,  57.5, 0.35, 0.85);  
+        addEntry(4.77   ,  60, 0.4, 0.85);  
+        addEntry(5.59   ,  64, 0.4, 0.85);  
+        addEntry(5.84      ,  66, 0.4, 0.85);  
+       //GIVE IT ALL THE POWER
+       addEntry(9,  67, 0.36, 1.00);  
+       
      /*       addEntry(2,  50, 0.0, 1); 
         addEntry(2.3,  53, 0.0, 1);  
         addEntry(2.42,  53, 0.1, 1);  
