@@ -212,7 +212,6 @@ public class RobotContainer {
   public RobotContainer(){
     //filter turret limelight on center targets
     m_turretLimelight.setLimelightIDFilter(10,25);
-    m_newShooter.setTurretOnTargetSupplier(m_TurretSubsystem::isOnTarget);
     SmartDashboard.putData("field", m_Field2d);
     SmartDashboard.putNumber("Speed Adjuster:", 1);
     configureNamedCommands();
@@ -329,14 +328,6 @@ public class RobotContainer {
     m_xBoxOperator.leftTrigger().whileTrue(shotMove.get());
     SmartDashboard.putData("Run ShotOnTheMove", shotMove.get());
     SmartDashboard.putData("Reset Pose to Field", Commands.runOnce(() -> m_swerve.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()))));
-    SmartDashboard.putData("Test/Turret Move to 0 Deg", Commands.runOnce(() -> m_TurretSubsystem.moveMotor(m_TurretSubsystem.getTargetMotorPosition(0))));
-    SmartDashboard.putData("Test/Turret Move to 40 Deg", Commands.runOnce(() -> m_TurretSubsystem.moveMotor(m_TurretSubsystem.getTargetMotorPosition(40))));
-    SmartDashboard.putData("Test/Turret Force Wraparound", Commands.runOnce(() -> m_TurretSubsystem.moveMotor(m_TurretSubsystem.getTargetMotorPosition(300))));
-    SmartDashboard.putData("Test/Run Kicker and Shooter", Commands.startEnd(
-        () -> m_newShooter.runNewShooter(Constants.ShooterConstants.shootSpeed, Constants.ShooterConstants.KickerSpeed),
-        () -> m_newShooter.stopNewShooter(false),
-        m_newShooter
-    ));
     //m_xBoxDriver.start().whileTrue(shootOne);
     //m_xBoxOperator.leftTrigger().whileTrue(shootOne);
     
