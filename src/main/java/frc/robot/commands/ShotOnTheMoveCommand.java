@@ -178,12 +178,7 @@ switch(m_state){
         } 
         break;
     case SHOOT:
-        if(checkTurretPos(targetPos)==false){
-          //stop kicker until the angle is alligned
-            m_shooter.runNewShooter(targetspeed,
-                      0);
-            m_state=shooterStates.WAIT;
-        } else {          
+                
            m_shooter.runKicker(Constants.ShooterConstants.KickerSpeed);
 
           m_shooter.runNewShooter(targetspeed,
@@ -197,8 +192,6 @@ switch(m_state){
           if(checkNoFuelorFuelTimeLimit()){
             m_state=shooterStates.NOFUEL;
           }
-        
-        } 
        break;
     case NOFUEL:
         fuelcheckStartTime=Timer.getFPGATimestamp();
