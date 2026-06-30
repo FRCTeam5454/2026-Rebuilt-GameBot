@@ -253,6 +253,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("shotLookUpW8", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true).withTimeout(8));
     NamedCommands.registerCommand("shotLookUpW5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true).withTimeout(5));
     NamedCommands.registerCommand("shotLookUp128W5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, 128).withTimeout(5));
+    NamedCommands.registerCommand("shotOnTheMove",
+        Commands.sequence(
+            Commands.runOnce(() -> setTracking(TurretTrackingMethod.NOTARGET)),
+            new ShotOnTheMoveCommand(m_TurretSubsystem, m_swerve, m_newShooter, m_hopper, m_intake,
+                0)
+                .finallyDo((interrupted) -> setTracking(TurretTrackingMethod.HUB))));
     NamedCommands.registerCommand("turretTrack", new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight));
   }
 
@@ -306,20 +312,24 @@ public class RobotContainer {
                                 m_turretLimelight,Constants.ShooterConstants.kAgitateTimeLimit,true);
     m_xBoxOperator.start().whileTrue(shootMapping);
 
-    Command ShotOntheMove = new ShotOnTheMoveCommand(m_TurretSubsystem,m_swerve, m_newShooter, m_hopper, m_intake, ShooterConstants.kAgitateTimeLimit);
-    Command Notarget = Commands.runOnce(()->setTracking(TurretTrackingMethod.NOTARGET));
-    Command ReturnHub=Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
-    SequentialCommandGroup ShotMove=new SequentialCommandGroup(Notarget,ShotOntheMove,ReturnHub);
-    //m_xBoxOperator.start().whileTrue(ShotMove);
+    Supplier<Command> shotMove = () -> Commands.sequence(
+        Commands.runOnce(()->setTracking(TurretTrackingMethod.NOTARGET)),
+        new ShotOnTheMoveCommand(m_TurretSubsystem,m_swerve, m_newShooter, m_hopper, m_intake, 0)
+            .finallyDo((interrupted)->setTracking(TurretTrackingMethod.HUB)));
 
-    Command shootLookup = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,
-                                m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true);
-    Command targetHub = Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
-    Command intakeOutMode = new InstantCommand(m_intake::SetIntakeOutMode);
-    Command intakeOutSL= new IntakeFoldCommand(m_intake);
-    SequentialCommandGroup shootOne=new SequentialCommandGroup(targetHub,shootLookup,intakeOutMode,intakeOutSL);
-    m_xBoxDriver.start().whileTrue(shootOne);
-    m_xBoxOperator.leftTrigger().whileTrue(shootOne);
+    // Old lookup shot binding disabled while shoot-on-the-move is on these buttons.
+    //Command shootLookup = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,
+    //                            m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true);
+    //Command targetHub = Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
+    //Command intakeOutMode = new InstantCommand(m_intake::SetIntakeOutMode);
+    //Command intakeOutSL= new IntakeFoldCommand(m_intake);
+    //SequentialCommandGroup shootOne=new SequentialCommandGroup(targetHub,shootLookup,intakeOutMode,intakeOutSL);
+    m_xBoxDriver.start().whileTrue(shotMove.get());
+    m_xBoxOperator.leftTrigger().whileTrue(shotMove.get());
+    SmartDashboard.putData("Run ShotOnTheMove", shotMove.get());
+    SmartDashboard.putData("Reset Pose to Field", Commands.runOnce(() -> m_swerve.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()))));
+    //m_xBoxDriver.start().whileTrue(shootOne);
+    //m_xBoxOperator.leftTrigger().whileTrue(shootOne);
     
     Command pass = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true);
     Command targetPass = Commands.runOnce(()->setTracking(TurretTrackingMethod.PASS));

@@ -59,6 +59,8 @@ public class NewShooterSubsystem extends SubsystemBase {
 
     //private TalonFX m_kickerMotor;
     private ObsidianCANSparkMax m_kickerMotor;
+    private double m_simTargetVelocity = 0;
+    private double m_simTargetHood = 0.05;
   public NewShooterSubsystem(int shooter1CANID, int shooter2CANID, int kickerCANID,int hoodCANID) {
     m_hoodCoder = new CANcoder(Constants.HoodConstants.hoodCoderCANID);
     m_1shooterMotor = new TalonFX(shooter1CANID);
@@ -134,6 +136,7 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
   
 
   public void HoodSetPos(double hoodTarget) {
+    m_simTargetHood = hoodTarget;
     System.out.println("Hood Target is " + hoodTarget);
     m_hoodMotor.setControl(m_request.withPosition(hoodTarget));
   }
@@ -161,6 +164,9 @@ public void runKicker(double kickerSpeed){
   m_kickerMotor.set(kickerSpeed);
 }
 public boolean atTargetSpeed(double targetSpeed){
+  if (edu.wpi.first.wpilibj.RobotBase.isSimulation()) {
+    return true;
+  }
   double currentSpeed=m_1shooterMotor.getVelocity().getValueAsDouble();
   double speedDiff = Math.abs(currentSpeed-targetSpeed);
   //System.out.println("Compare Shooter Speed:" + currentSpeed + " - " + targetSpeed);
@@ -173,6 +179,7 @@ public boolean atTargetSpeed(double targetSpeed){
  
 }
 public void runShooterVelocity(double targetSpeed){
+m_simTargetVelocity = targetSpeed;
 // Torque-current bang-bang
 //m_1shooterMotor.setControl(new MotionMagicVelocityVoltage(targetSpeed));
 //m_1shooterMotor.setControl(new MotionMagicVelocityVoltage(-targetSpeed));
@@ -272,5 +279,13 @@ public Command shutdownCommand(){
     Logger.recordOutput("Shooter/Hood CanCoder Value", m_hoodCoder.getAbsolutePosition().getValueAsDouble());
     Logger.recordOutput("Shooter/Hood 'Pos'",getHoodPos());
    
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // Set simulated speeds and positions directly to eliminate lag in simulation
+    m_1shooterMotor.getSimState().setRotorVelocity(m_simTargetVelocity);
+    m_2shooterMotor.getSimState().setRotorVelocity(-m_simTargetVelocity);
+    m_hoodCoder.getSimState().setRawPosition(m_simTargetHood);
   }
 }
