@@ -40,6 +40,7 @@ public class ShootPopcornCommand extends Command {
   private IntakeSubsystem m_intake;
   private Limelight m_limelight;
   private boolean m_isPass;
+  private TurretSubsystemPots m_turret;
   
   private double m_lastDistance; // default distance
   private double m_lastHoodPos=0; // default hood pos
@@ -54,11 +55,16 @@ public class ShootPopcornCommand extends Command {
   private final double khoodDeadband = Constants.HoodConstants.hoodDeadband;
 
   public ShootPopcornCommand(NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, boolean isPass) {
+    this(shooter, hopper, intake, isPass, null);
+  }
+
+  public ShootPopcornCommand(NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, boolean isPass, TurretSubsystemPots turret) {
     m_hopper=hopper;
     m_shooter=shooter;
     m_intake=intake;
     m_state=shooterStates.SPINUP;
     m_isPass=isPass;
+    m_turret=turret;
     addRequirements(m_hopper);
     addRequirements(m_shooter);
     addRequirements(m_intake);
@@ -175,10 +181,11 @@ SmartDashboard.putNumber("Shot Hood",hoodPos);
             m_state=shooterStates.WAIT;
         } else { */          
           //Ready to Shoot
-          m_shooter.runKicker(Constants.ShooterConstants.KickerSpeed);
+          double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
+          m_shooter.runKicker(currentKickerSpeed);
 
           m_shooter.runNewShooter(targetspeed,
-                              Constants.ShooterConstants.KickerSpeed);
+                              currentKickerSpeed);
           m_shooter.HoodSetPos(hoodPos);     
           m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
              if(m_intake.isinNoFlyZone()){

@@ -178,11 +178,11 @@ switch(m_state){
         } 
         break;
     case SHOOT:
-                
-           m_shooter.runKicker(Constants.ShooterConstants.KickerSpeed);
+          double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
+          m_shooter.runKicker(currentKickerSpeed);
 
           m_shooter.runNewShooter(targetspeed,
-                            Constants.ShooterConstants.KickerSpeed);
+                            currentKickerSpeed);
          m_shooter.HoodSetPos(hoodPos);
        
         

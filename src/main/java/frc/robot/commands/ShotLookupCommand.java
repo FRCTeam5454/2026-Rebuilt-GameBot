@@ -35,6 +35,7 @@ public class ShotLookupCommand extends Command {
   private double m_timeLimit=0;
   private double overrideDistance=0;
   private boolean overrideDistanceFlag=false;
+  private TurretSubsystemPots m_turret;
   //private double m_heldTurretAngle=0; // Angle to hold the turret at during shooting
   private enum shooterStates{
     SPINUP,WAIT,SHOOT,NOFUEL,EMPTYHOPPER,SHOOTMORE,NOFUEL2NDCHECK,END
@@ -58,11 +59,17 @@ public class ShotLookupCommand extends Command {
   private double m_flipSpeed=0;
   public ShotLookupCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
                           Limelight limelight, double timeLimit, boolean emptyHopper) {
+    this(swerve, shooter, hopper, intake, limelight, timeLimit, emptyHopper, null);
+  }
+
+  public ShotLookupCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
+                          Limelight limelight, double timeLimit, boolean emptyHopper, TurretSubsystemPots turret) {
     m_hopper=hopper;
     m_shooter=shooter;
     m_intake=intake;
     m_swerve=swerve;
     m_limelight=limelight;
+    m_turret=turret;
     overrideDistanceFlag=false;
     
     m_emptyHopper=emptyHopper;
@@ -74,11 +81,17 @@ public class ShotLookupCommand extends Command {
 
   public ShotLookupCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
                            Limelight limelight, double timeLimit, boolean emptyHopper, double distance) {
+    this(swerve, shooter, hopper, intake, limelight, timeLimit, emptyHopper, distance, null);
+  }
+
+  public ShotLookupCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
+                           Limelight limelight, double timeLimit, boolean emptyHopper, double distance, TurretSubsystemPots turret) {
     m_hopper=hopper;
     m_shooter=shooter;
     m_intake=intake;
     m_swerve=swerve;
     m_limelight=limelight;
+    m_turret=turret;
     m_emptyHopper=emptyHopper;
     overrideDistance=distance;
     overrideDistanceFlag=true;
@@ -191,10 +204,11 @@ if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
         }
         break;
     case SHOOT:
-        m_shooter.runKicker(Constants.ShooterConstants.KickerSpeed);
+        double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
+        m_shooter.runKicker(currentKickerSpeed);
 
         m_shooter.runNewShooter(targetspeed,
-                            Constants.ShooterConstants.KickerSpeed);
+                            currentKickerSpeed);
        
           m_shooter.HoodSetPos(hoodPos); 
       

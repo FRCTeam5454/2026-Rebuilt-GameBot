@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.networktables.GenericEntry;
 import yams.mechanisms.*;
 import yams.units.EasyCRT;
 import yams.units.EasyCRTConfig;
@@ -58,6 +60,8 @@ public class TurretSubsystemPots extends SubsystemBase {
   private AnalogPotentiometer m_POTS;
   private int m_potsPort;
   private double m_targetPos = 0;
+  private boolean m_isWrappingAround = false;
+  private GenericEntry m_wrapWidgetEntry;
 
     private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
   private final double kPotsHighLimit=Constants.TurretConstants.TurretRightLimitPOTS;
@@ -81,6 +85,10 @@ public class TurretSubsystemPots extends SubsystemBase {
    
     m_turretMotor.getConfigurator().apply(motorConfig);
     configureMotionMagic();
+
+    m_wrapWidgetEntry = Shuffleboard.getTab("Turret")
+                           .add("Wrapping Around", false)
+                           .getEntry();
    
    /* m_encoder1 = new CANcoder(encoder1ID);
     
@@ -223,6 +231,16 @@ public double getCurrentAngle(){
 public double getCurrentPosition(){
   return m_turretMotor.getPosition().getValueAsDouble();
 }
+public boolean isWrappingAround() {
+  double currentPos = getCurrentPosition();
+  double diffDegrees = Math.abs(m_targetPos - currentPos) * kMotorRotationsToAngle;
+  if (diffDegrees > 180) {
+    m_isWrappingAround = true;
+  } else if (diffDegrees <= 15) {
+    m_isWrappingAround = false;
+  }
+  return m_isWrappingAround;
+}
 public void turretTrack(TargetType target){
 
 }
@@ -283,6 +301,10 @@ private double POTStoRotations(double POTSValue ){
     SmartDashboard.putNumber("POTS Angle",m_POTS.get()*3600/kGearReduction);
     SmartDashboard.putNumber("POTS Offset Angle",(m_POTS.get()*3600/kGearReduction)-225);
     SmartDashboard.putNumber("Motor Rotation Angle",getTurretAngleFromMotor());
+    SmartDashboard.putBoolean("Turret Wrapping Around", isWrappingAround());
+    if (m_wrapWidgetEntry != null) {
+      m_wrapWidgetEntry.setBoolean(isWrappingAround());
+    }
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
     Logger.recordOutput("Turret/POTS Position", m_POTS.get());
@@ -300,10 +322,17 @@ private double POTStoRotations(double POTSValue ){
 
   @Override
   public void simulationPeriodic() {
-    // Set position directly to eliminate lag in simulation
-    m_turretMotor.getSimState().setRawRotorPosition(m_targetPos);
+    // Move towards targetPos gradually in simulation to simulate motor speed
+    double currentSimPos = m_turretMotor.getPosition().getValueAsDouble();
+    double simSpeed = 1.0; // rotations per 20ms loop (50 rotations/sec)
+    if (currentSimPos < m_targetPos) {
+      currentSimPos = Math.min(m_targetPos, currentSimPos + simSpeed);
+    } else if (currentSimPos > m_targetPos) {
+      currentSimPos = Math.max(m_targetPos, currentSimPos - simSpeed);
+    }
+    m_turretMotor.getSimState().setRawRotorPosition(currentSimPos);
 
-    double simulatedPOTS = (m_targetPos / 56.25) + 0.851;
+    double simulatedPOTS = (currentSimPos / 56.25) + 0.851;
     simulatedPOTS = Math.max(0.15, Math.min(0.85, simulatedPOTS));
 
     AnalogInputSim potsSim = new AnalogInputSim(m_potsPort);

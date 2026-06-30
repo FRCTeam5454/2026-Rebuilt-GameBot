@@ -246,13 +246,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("climbUp", m_climb.climbUpCommand());
     NamedCommands.registerCommand("climbDown", m_climb.climbDownCommand());
     NamedCommands.registerCommand("completeIntake", new CompleteIntakeCommand(m_intake, m_hopper));
-    NamedCommands.registerCommand("popcorn", new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, false));
-    NamedCommands.registerCommand("pass", new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true));
-    NamedCommands.registerCommand("shotLookUp", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true));
-    NamedCommands.registerCommand("shotLookUpW3", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true).withTimeout(3));
-    NamedCommands.registerCommand("shotLookUpW8", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true).withTimeout(8));
-    NamedCommands.registerCommand("shotLookUpW5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true).withTimeout(5));
-    NamedCommands.registerCommand("shotLookUp128W5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, 128).withTimeout(5));
+    NamedCommands.registerCommand("popcorn", new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, false, m_TurretSubsystem));
+    NamedCommands.registerCommand("pass", new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true, m_TurretSubsystem));
+    NamedCommands.registerCommand("shotLookUp", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem));
+    NamedCommands.registerCommand("shotLookUpW3", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(3));
+    NamedCommands.registerCommand("shotLookUpW8", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(8));
+    NamedCommands.registerCommand("shotLookUpW5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(5));
+    NamedCommands.registerCommand("shotLookUp128W5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, 128, m_TurretSubsystem).withTimeout(5));
     NamedCommands.registerCommand("shotOnTheMove",
         Commands.sequence(
             Commands.runOnce(() -> setTracking(TurretTrackingMethod.NOTARGET)),
@@ -331,23 +331,23 @@ public class RobotContainer {
     //m_xBoxDriver.start().whileTrue(shootOne);
     //m_xBoxOperator.leftTrigger().whileTrue(shootOne);
     
-    Command pass = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true);
+    Command pass = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true, m_TurretSubsystem);
     Command targetPass = Commands.runOnce(()->setTracking(TurretTrackingMethod.PASS));
     SequentialCommandGroup passIt = new SequentialCommandGroup(targetPass,pass);
     m_xBoxDriver.x().whileTrue(passIt);
     m_xBoxOperator.rightTrigger().whileTrue(passIt);
     
-    Command shoot = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, false);
+    Command shoot = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, false, m_TurretSubsystem);
     Command targetHubPopcorn = Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
     SequentialCommandGroup PopcornShotIt = new SequentialCommandGroup(targetHubPopcorn,shoot);
 
     m_xBoxDriver.leftTrigger().whileTrue(PopcornShotIt);
     
-    Command fixedshot1 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance1);
+    Command fixedshot1 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance1, m_TurretSubsystem);
     m_xBoxDriver.povLeft().whileTrue(fixedshot1);
-    Command fixedshot2 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance2);
+    Command fixedshot2 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance2, m_TurretSubsystem);
     m_xBoxDriver.povUp().whileTrue(fixedshot2);
-    Command fixedshot3 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance3);
+    Command fixedshot3 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance3, m_TurretSubsystem);
     m_xBoxDriver.povRight().whileTrue(fixedshot3);
     /*Command shootKernelCommand = new ShootKernelCommand(m_newShooter,m_hopper,m_intake,Constants.ShooterConstants.kAgitateTimeLimit,true,m_TurretSubsystem,null);
     m_xBoxDriver.x().whileTrue(shootKernelCommand);*/

@@ -46,6 +46,8 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.networktables.GenericEntry;
 
 public class NewShooterSubsystem extends SubsystemBase {
     private TalonFX m_1shooterMotor;
@@ -54,6 +56,7 @@ public class NewShooterSubsystem extends SubsystemBase {
     private CANcoder m_hoodCoder;
     private double testLastHood=0;
     private Pose2d m_pose;
+    private GenericEntry m_kickerRunningEntry;
    private PositionVoltage m_request= new PositionVoltage(0).withSlot(0);
  //  private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
 
@@ -87,9 +90,9 @@ public class NewShooterSubsystem extends SubsystemBase {
    
     m_hoodMotor.setNeutralMode(NeutralModeValue.Brake);
    
-    SmartDashboard.putNumber("HoodMM",0);
-  
-
+    m_kickerRunningEntry = Shuffleboard.getTab("Shooter")
+                              .add("Kicker Running", false)
+                              .getEntry();
 }
 private void configureMotionMagicHood(){
   // in init function
@@ -272,6 +275,14 @@ public Command shutdownCommand(){
     SmartDashboard.putNumber("Shooter Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Hood CanCoder Value",m_hoodCoder.getAbsolutePosition().getValueAsDouble());  
     SmartDashboard.putNumber("Hood 'Pos'",getHoodPos());  
+    boolean kickerRunning = Math.abs(m_kickerMotor.get()) > 0.05;
+    SmartDashboard.putBoolean("Kicker Running", kickerRunning);
+    SmartDashboard.putNumber("Kicker Speed", m_kickerMotor.get());
+    if (m_kickerRunningEntry != null) {
+      m_kickerRunningEntry.setBoolean(kickerRunning);
+    }
+    Logger.recordOutput("Shooter/KickerRunning", kickerRunning);
+    Logger.recordOutput("Shooter/KickerSpeed", m_kickerMotor.get());
     Logger.recordOutput("Shooter/ShooterMotor1Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor2Velocity",  m_2shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor1Current", m_1shooterMotor.getSupplyCurrent().getValueAsDouble());
