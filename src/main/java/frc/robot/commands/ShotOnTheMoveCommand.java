@@ -121,6 +121,10 @@ public class ShotOnTheMoveCommand extends Command {
     m_finished=false;
     startShootTime=Timer.getFPGATimestamp();
     stateStartTime=startShootTime;
+    m_flipCount=0;
+    m_flipCountLimit=0;
+    m_flipSpeed=0;
+    m_HopperPulls=0;
     SmartDashboard.putString("SOTM/State",m_state.toString());
     Logger.recordOutput("Shooter/SOTM/State",m_state.toString());
   }
@@ -178,109 +182,37 @@ switch(m_state){
         } 
         break;
     case SHOOT:
-          double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
-          m_shooter.runKicker(currentKickerSpeed);
+        double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
+        m_shooter.runKicker(currentKickerSpeed);
 
-          m_shooter.runNewShooter(targetspeed,
-                            currentKickerSpeed);
-         m_shooter.HoodSetPos(hoodPos);
-       
-        
-          m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
-         m_intake.runIntake(Constants.IntakeConstants.highSpeed);
-        //STAY IN SHOOT
-          if(checkNoFuelorFuelTimeLimit()){
-            m_state=shooterStates.NOFUEL;
-          }
-       break;
+        m_shooter.runNewShooter(targetspeed, currentKickerSpeed);
+        m_shooter.HoodSetPos(hoodPos);
+
+        m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
+        runHopperFlip();          // Problem was intake on didn't allow for hopper flips; was: m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+      //STAY IN SHOOT
+        if(checkNoFuelorFuelTimeLimit()){
+          m_state=shooterStates.NOFUEL;
+        }
+    break;
     case NOFUEL:
-        fuelcheckStartTime=Timer.getFPGATimestamp();
-        if(m_emptyHopper){
-          m_flipCount=0; 
-          m_flipCountLimit=0;
-          m_flipSpeed=0;
-          m_HopperPulls=0;
-          m_state=shooterStates.EMPTYHOPPER;    
-          //m_intake.inFold(Constants.IntakeConstants.foldSpeedAutoMode);      
-         } else{
-          m_state=shooterStates.END;          
-         }
-      break; 
+    fuelcheckStartTime=Timer.getFPGATimestamp();
+    if(m_emptyHopper){
+      m_state=shooterStates.EMPTYHOPPER;
+     } else{
+      m_state=shooterStates.END;
+     }
+    break;
     case EMPTYHOPPER:
-         m_shooter.HoodSetPos(hoodPos);
-    
-    /*  //System.out.println("Flip Count"+ m_flipCount);
-        m_flipCount=m_flipCount+1;
-        if (m_flipCount==m_flipCountLimit){
-          //make it twice as fast
-          m_intake.inFold(Constants.IntakeConstants.foldSpeedAutoMode * 3 *  m_flipSpeed);
-          m_flipCount = 0;
-          m_flipSpeed=m_flipSpeed*-1; // FLIP SIGN TO REVERSE
-          if(m_flipCountLimit<kflipCountMax){
-            m_flipCountLimit=m_flipCountLimit+10;
-          }
-        }
-        /*if(m_intake.isAtInLimit() || m_intake.intakeCurrentLimitCheck(Constants.IntakeConstants.ampInStop)){
-          m_state=shooterStates.NOFUEL2NDCHECK;
-          m_intake.stopFold();
-        }*/
-        //if flip count (times through the loop) is greeater than limit than move to next hopper
-        if(m_flipCount>m_flipCountLimit){
-          m_flipCount=0;
-          m_HopperPulls=m_HopperPulls+1;
-        }
-        
-        switch(m_HopperPulls){
-          case 0:
-            m_flipSpeed=-0.8; // coming in speed
-            m_flipCountLimit=3;
-          break;
-          case 1:
-            m_flipSpeed=0.8;  //Out speed
-            m_flipCountLimit=2;
-          break;
-          case 2:
-            m_flipSpeed=-0.8;
-            m_flipCountLimit=8;
-          break;
-          case 3:
-            m_flipSpeed=0.8; 
-            m_flipCountLimit=6;
-          break;
-          case 4:
-            m_flipSpeed=-0.8;
-            m_flipCountLimit=12;
-          break;
-          default:
-           if (m_HopperPulls % 2 != 0) {  //EDIT if we change hopper pull limit
-              m_flipSpeed=0.8; //Out speed which we should start with first in the default case since we end with an inward pull
-              m_flipCountLimit=4;
-            } else {
-              m_flipSpeed=-0.8; // coming in speed
-              m_flipCountLimit=6; // We pull in further then we push out incase we had jamed and never pulled in enough to start
-            }
-          break;
-        }
+      m_shooter.HoodSetPos(hoodPos);
 
+      runHopperFlip();
 
-        m_flipCount=m_flipCount+1;
-        
-        //System.out.println("Flip Count:" + m_flipCount + " Hopper Pulls: "+ m_HopperPulls + " Speed:"+ m_flipSpeed);
-   
-        m_intake.inFold(m_flipSpeed);
-        
-        if(m_intake.isinNoFlyZone()){
-          m_intake.stopIntake();
-        } else {
-          m_intake.runIntake(Constants.IntakeConstants.highSpeed);
-        }
-        
-        if(m_HopperPulls>kHopperPullLimit){
-          //System.out.println("Stop Folding");
-          m_intake.stopFold();
-          m_state=shooterStates.SHOOTMORE;
-        }
-      break;
+      if(m_HopperPulls>kHopperPullLimit){
+        m_intake.stopFold();
+        m_state=shooterStates.SHOOTMORE;
+      }
+    break;
     case SHOOTMORE:
                   m_shooter.HoodSetPos(hoodPos);
    
@@ -336,6 +268,55 @@ switch(m_state){
       returnValue=true;
     }
     return returnValue;
+  }
+
+  private void runHopperFlip(){
+    if(m_flipCount>m_flipCountLimit){
+      m_flipCount=0;
+      m_HopperPulls=m_HopperPulls+1;
+    }
+
+    switch(m_HopperPulls){
+      case 0:
+        m_flipSpeed=-0.8; // coming in speed
+        m_flipCountLimit=3;
+      break;
+      case 1:
+        m_flipSpeed=0.8;  //Out speed
+        m_flipCountLimit=2;
+      break;
+      case 2:
+        m_flipSpeed=-0.8;
+        m_flipCountLimit=8;
+      break;
+      case 3:
+        m_flipSpeed=0.8;
+        m_flipCountLimit=6;
+      break;
+      case 4:
+        m_flipSpeed=-0.8;
+        m_flipCountLimit=12;
+      break;
+      default:
+       if (m_HopperPulls % 2 != 0) {
+          m_flipSpeed=0.8;
+          m_flipCountLimit=4;
+        } else {
+          m_flipSpeed=-0.8;
+          m_flipCountLimit=6;
+        }
+      break;
+    }
+
+    m_flipCount=m_flipCount+1;
+
+    m_intake.inFold(m_flipSpeed);
+
+    if(m_intake.isinNoFlyZone()){
+      m_intake.stopIntake();
+    } else {
+      m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+    }
   }
 
   private void publishDebug(ShotSolution leadShot, ShotSolution staticShot, ChassisSpeeds robotRelativeSpeeds,
