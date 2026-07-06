@@ -259,6 +259,12 @@ public class RobotContainer {
             new ShotOnTheMoveCommand(m_TurretSubsystem, m_swerve, m_newShooter, m_hopper, m_intake,
                 0)
                 .finallyDo((interrupted) -> setTracking(TurretTrackingMethod.HUB))));
+    NamedCommands.registerCommand("RunSOTM",
+        Commands.sequence(
+            Commands.runOnce(() -> setTracking(TurretTrackingMethod.NOTARGET)),
+            new ShotOnTheMoveCommand(m_TurretSubsystem, m_swerve, m_newShooter, m_hopper, m_intake,
+                0)
+                .finallyDo((interrupted) -> setTracking(TurretTrackingMethod.HUB))));
     NamedCommands.registerCommand("turretTrack", new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight));
   }
 

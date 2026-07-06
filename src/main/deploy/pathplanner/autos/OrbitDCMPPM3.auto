@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "expandIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Orbit dcmp practice 3 out"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Orbit dcmp practice 3 sweep"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Orbit dcmp practice 3 bumpcross"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Orbit dcmp practice 3 shoot+everything i forgot i could do"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Seth",
+  "choreoAuto": false
+}

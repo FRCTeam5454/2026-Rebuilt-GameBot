@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.3884022824536375,
+        "y": 0.4057061340941527
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.082497499364435,
+        "y": 0.7429202990164794
+      },
+      "isLocked": false,
+      "linkedName": "Trench Start"
+    },
+    {
+      "anchor": {
+        "x": 7.763288888888889,
+        "y": 1.1408999999999991
+      },
+      "prevControl": {
+        "x": 6.58958971115499,
+        "y": 0.9068484654411185
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "OrbitDCMPPM3end"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7161825726141036,
+      "rotationDegrees": 45.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 91.14576283817499
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 1.0050860052542672
+  },
+  "useDefaultConstraints": true
+}
