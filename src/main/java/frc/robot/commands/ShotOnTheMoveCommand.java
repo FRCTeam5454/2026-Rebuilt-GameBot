@@ -40,6 +40,7 @@ public class ShotOnTheMoveCommand extends Command {
   private double m_timeLimit=0;
   private double overrideDistance=0;
   private boolean overrideDistanceFlag=false;
+  private boolean m_withAgitate = true;
   //private double m_heldTurretAngle=0; // Angle to hold the turret at during shooting
   private enum shooterStates{
     SPINUP,WAIT,SHOOT,NOFUEL,EMPTYHOPPER,SHOOTMORE,NOFUEL2NDCHECK,END
@@ -63,40 +64,53 @@ public class ShotOnTheMoveCommand extends Command {
   private double kTurretPosDeadband=0.1;
   private boolean m_finished=false;
   private boolean m_stopWhenNoFuel=true;
-  public ShotOnTheMoveCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
-                          TurretSubsystemPots turret,Limelight limelight, double timeLimit, boolean emptyHopper) {
-    m_hopper=hopper;
-    m_shooter=shooter;
-    m_intake=intake;
-    m_swerve=swerve;
-    m_turret=turret;
-    m_limelight=limelight;
-    m_timeLimit=timeLimit;
-    m_stopWhenNoFuel=true;
-    overrideDistanceFlag=false;
-    
-    m_emptyHopper=emptyHopper;
-    m_state=shooterStates.SPINUP;
-    addRequirements(m_hopper);
-    addRequirements(m_shooter);
-    addRequirements(m_intake);
-  }
 
-  public ShotOnTheMoveCommand(TurretSubsystemPots turret,CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
-                            double timeLimit) {
-    m_hopper=hopper;
-    m_shooter=shooter;
-    m_intake=intake;
-    m_swerve=swerve;
-    m_turret=turret;
-    m_timeLimit=timeLimit;
-    m_stopWhenNoFuel=false;
-    m_state=shooterStates.SPINUP;
-    addRequirements(m_hopper);
-    addRequirements(m_shooter);
-    addRequirements(m_intake);
-    //DO NOT REQUIRE TURRET OR DRIVE
-  }
+public ShotOnTheMoveCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
+                            TurretSubsystemPots turret,Limelight limelight, double timeLimit, boolean emptyHopper){
+  this(swerve, shooter, hopper, intake, turret, limelight, timeLimit, emptyHopper, true);
+}
+
+public ShotOnTheMoveCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
+                            TurretSubsystemPots turret,Limelight limelight, double timeLimit, boolean emptyHopper, boolean withAgitate){
+  m_hopper=hopper;
+  m_shooter=shooter;
+  m_intake=intake;
+  m_swerve=swerve;
+  m_turret=turret;
+  m_limelight=limelight;
+  m_timeLimit=timeLimit;
+  m_stopWhenNoFuel=true;
+  overrideDistanceFlag=false;
+  m_withAgitate=withAgitate;
+
+  m_emptyHopper=emptyHopper;
+  m_state=shooterStates.SPINUP;
+  addRequirements(m_hopper);
+  addRequirements(m_shooter);
+  addRequirements(m_intake);
+}
+
+public ShotOnTheMoveCommand(TurretSubsystemPots turret,CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, 
+                            IntakeSubsystem intake, double timeLimit){
+  this(turret, swerve, shooter, hopper, intake, timeLimit, true);
+}
+
+public ShotOnTheMoveCommand(TurretSubsystemPots turret,CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, 
+                            IntakeSubsystem intake, double timeLimit, boolean withAgitate){
+  m_hopper=hopper;
+  m_shooter=shooter;
+  m_intake=intake;
+  m_swerve=swerve;
+  m_turret=turret;
+  m_timeLimit=timeLimit;
+  m_stopWhenNoFuel=false;
+  m_withAgitate=withAgitate;
+  m_state=shooterStates.SPINUP;
+  addRequirements(m_hopper);
+  addRequirements(m_shooter);
+  addRequirements(m_intake);
+  //DO NOT REQUIRE TURRET OR DRIVE
+}
 
   private boolean checkNoFuelorFuelTimeLimit(){
     boolean returnValue=false;
@@ -182,19 +196,24 @@ switch(m_state){
         } 
         break;
     case SHOOT:
-        double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
-        m_shooter.runKicker(currentKickerSpeed);
+      double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;
+      m_shooter.runKicker(currentKickerSpeed);
 
-        m_shooter.runNewShooter(targetspeed, currentKickerSpeed);
-        m_shooter.HoodSetPos(hoodPos);
+      m_shooter.runNewShooter(targetspeed, currentKickerSpeed);
+      m_shooter.HoodSetPos(hoodPos);
 
+      if(m_withAgitate){
         m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
-        runHopperFlip();          // Problem was intake on didn't allow for hopper flips; was: m_intake.runIntake(Constants.IntakeConstants.highSpeed);
-      //STAY IN SHOOT
-        if(checkNoFuelorFuelTimeLimit()){
-          m_state=shooterStates.NOFUEL;
-        }
-    break;
+        runHopperFlip();
+      } else {
+        m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+      }
+      
+    //STAY IN SHOOT
+      if(checkNoFuelorFuelTimeLimit()){
+        m_state=shooterStates.NOFUEL;
+      }
+   break;
     case NOFUEL:
     fuelcheckStartTime=Timer.getFPGATimestamp();
     if(m_emptyHopper){
