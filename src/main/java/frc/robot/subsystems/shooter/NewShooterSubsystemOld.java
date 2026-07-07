@@ -66,7 +66,7 @@ public class NewShooterSubsystemOld extends SubsystemBase {
     m_2shooterMotor.setNeutralMode(NeutralModeValue.Coast);
     m_hoodMotor = new TalonFX(hoodCANID);
     
-    m_kickerMotor = new ObsidianCANSparkMax(kickerCANID, MotorType.kBrushless,false,Constants.k70Amp);
+    m_kickerMotor = new ObsidianCANSparkMax(kickerCANID, MotorType.kBrushless,true,Constants.k70Amp);
     
         /* Configure CANcoder to zero the magnet appropriately */
     CANcoderConfiguration hoodCoder_cfg = new CANcoderConfiguration();

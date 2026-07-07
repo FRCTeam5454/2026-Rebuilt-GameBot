@@ -186,8 +186,9 @@ SmartDashboard.putNumber("Shot Hood",hoodPos);
 
           m_shooter.runNewShooter(targetspeed,
                               currentKickerSpeed);
-          m_shooter.HoodSetPos(hoodPos);     
-          m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
+          double currentHopperSpeed = (m_turret != null && m_turret.isWrappingAround()) ? Constants.HopperConstants.agitateLowSpeed : Constants.HopperConstants.agitateSpeed;
+          m_hopper.agitate(currentHopperSpeed);
+          m_shooter.HoodSetPos(hoodPos);
              if(m_intake.isinNoFlyZone()){
           m_intake.stopIntake();
         } else {

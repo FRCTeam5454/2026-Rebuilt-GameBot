@@ -261,6 +261,7 @@ public final class Constants {
         public static double ENC2_FORWARD_OFFSET_DEG = 175.0;
         public static final boolean ENC1_INVERT = false;
         public static final boolean ENC2_INVERT = false;
+        public static final double wraparoundEndThresholdDegrees = 10.0;
   }
 
   public static final class ClimbConstants{

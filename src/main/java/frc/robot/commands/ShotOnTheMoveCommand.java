@@ -187,10 +187,9 @@ switch(m_state){
 
           m_shooter.runNewShooter(targetspeed,
                             currentKickerSpeed);
-         m_shooter.HoodSetPos(hoodPos);
-       
-        
-          m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
+          m_shooter.HoodSetPos(hoodPos);
+          double currentHopperSpeed = (m_turret != null && m_turret.isWrappingAround()) ? Constants.HopperConstants.agitateLowSpeed : Constants.HopperConstants.agitateSpeed;
+          m_hopper.agitate(currentHopperSpeed);
           if (m_intake.getCurrentCommand() == null) {
             m_intake.runIntake(Constants.IntakeConstants.highSpeed);
           }

@@ -236,7 +236,7 @@ public boolean isWrappingAround() {
   double diffDegrees = Math.abs(m_targetPos - currentPos) * kMotorRotationsToAngle;
   if (diffDegrees > 180) {
     m_isWrappingAround = true;
-  } else if (diffDegrees <= 15) {
+  } else if (diffDegrees <= Constants.TurretConstants.wraparoundEndThresholdDegrees) {
     m_isWrappingAround = false;
   }
   return m_isWrappingAround;
