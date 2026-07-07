@@ -376,8 +376,7 @@ public class RobotContainer {
     Command intakeFoldOut = m_intake.foldCommand(-0.8);   
      m_xBoxOperator.povRight().whileTrue(intakeFoldOut);
      m_xBoxOperator.povRight().onFalse(new CompleteIntakeCommand(m_intake, m_hopper));
-    Command intakeFoldOutSlow = m_intake.foldCommand(-0.2);
-    m_xBoxOperator.povUp().whileTrue(intakeFoldOutSlow);
+    m_xBoxOperator.povUp().whileTrue(new IntakePulseCommand(m_intake));
 //    Command turretTrack = new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight);
   //  m_xBoxOperator.y().onTrue(turretTrack);
     

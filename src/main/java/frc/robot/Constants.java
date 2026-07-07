@@ -37,6 +37,11 @@ public final class Constants {
     //Rotate Joystick axis deadband - bigger deadband to avoid rotational drift
     public static final double swerveRotateDeadband = 0.17; //0.17
     public static final double MinGasPedalSpeed=0.20;
+    // Speed multiplier when running ShotOnTheMoveCommand (like gas pedal)
+    public static final double kSOTMDriveMultiplier = 0.25;
+    // Turn speed multiplier when running ShotOnTheMoveCommand
+    public static final double kSOTMTurnMultiplier = 0.25;
+
     //Support    6328 DriveConstants Class
     public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.5);
     public static final double  trackWidthY= edu.wpi.first.math.util.Units.inchesToMeters(27.5);

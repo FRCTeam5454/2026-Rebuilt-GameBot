@@ -79,7 +79,7 @@ public class ShotOnTheMoveCommand extends Command {
     m_state=shooterStates.SPINUP;
     addRequirements(m_hopper);
     addRequirements(m_shooter);
-    addRequirements(m_intake);
+    // Do not require intake so other commands can control it concurrently
   }
 
   public ShotOnTheMoveCommand(TurretSubsystemPots turret,CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 
@@ -94,7 +94,7 @@ public class ShotOnTheMoveCommand extends Command {
     m_state=shooterStates.SPINUP;
     addRequirements(m_hopper);
     addRequirements(m_shooter);
-    addRequirements(m_intake);
+    // Do not require intake so other commands can control it concurrently
     //DO NOT REQUIRE TURRET OR DRIVE
   }
 
@@ -123,7 +123,11 @@ public class ShotOnTheMoveCommand extends Command {
     stateStartTime=startShootTime;
     SmartDashboard.putString("SOTM/State",m_state.toString());
     Logger.recordOutput("Shooter/SOTM/State",m_state.toString());
+    if (m_swerve != null) {
+      m_swerve.setGasPedalMult(Constants.DriveConstants.kSOTMDriveMultiplier, Constants.DriveConstants.kSOTMTurnMultiplier);
+    }
   }
+
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -187,8 +191,10 @@ switch(m_state){
        
         
           m_hopper.agitate(Constants.HopperConstants.agitateSpeed);
-         m_intake.runIntake(Constants.IntakeConstants.highSpeed);
-        //STAY IN SHOOT
+          if (m_intake.getCurrentCommand() == null) {
+            m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+          }
+         //STAY IN SHOOT
           if(checkNoFuelorFuelTimeLimit()){
             m_state=shooterStates.NOFUEL;
           }
@@ -205,7 +211,7 @@ switch(m_state){
          } else{
           m_state=shooterStates.END;          
          }
-      break; 
+       break; 
     case EMPTYHOPPER:
          m_shooter.HoodSetPos(hoodPos);
     
@@ -252,7 +258,7 @@ switch(m_state){
             m_flipCountLimit=12;
           break;
           default:
-           if (m_HopperPulls % 2 != 0) {  //EDIT if we change hopper pull limit
+            if (m_HopperPulls % 2 != 0) {  //EDIT if we change hopper pull limit
               m_flipSpeed=0.8; //Out speed which we should start with first in the default case since we end with an inward pull
               m_flipCountLimit=4;
             } else {
@@ -267,17 +273,21 @@ switch(m_state){
         
         //System.out.println("Flip Count:" + m_flipCount + " Hopper Pulls: "+ m_HopperPulls + " Speed:"+ m_flipSpeed);
    
-        m_intake.inFold(m_flipSpeed);
+        if (m_intake.getCurrentCommand() == null) {
+          m_intake.inFold(m_flipSpeed);
         
-        if(m_intake.isinNoFlyZone()){
-          m_intake.stopIntake();
-        } else {
-          m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+          if(m_intake.isinNoFlyZone()){
+            m_intake.stopIntake();
+          } else {
+            m_intake.runIntake(Constants.IntakeConstants.highSpeed);
+          }
         }
         
         if(m_HopperPulls>kHopperPullLimit){
           //System.out.println("Stop Folding");
-          m_intake.stopFold();
+          if (m_intake.getCurrentCommand() == null) {
+            m_intake.stopFold();
+          }
           m_state=shooterStates.SHOOTMORE;
         }
       break;
@@ -311,14 +321,20 @@ switch(m_state){
   public void end(boolean interrupted) {
   //System.out.println("Stopping Shooter");
     m_shooter.hoodMoveToZero();
-    m_intake.stopFold();
-    m_intake.SetIntakeOutMode();
     m_shooter.stopNewShooter(true);
     m_hopper.stopAgitate();
-    m_intake.stopIntake();
+    if (m_intake.getCurrentCommand() == null) {
+      m_intake.stopFold();
+      m_intake.SetIntakeOutMode();
+      m_intake.stopIntake();
+    }
+    if (m_swerve != null) {
+      m_swerve.setGasPedalMult(1.0, 1.0);
+    }
     SmartDashboard.putBoolean("SOTM/Interrupted",interrupted);
     Logger.recordOutput("Shooter/SOTM/Interrupted",interrupted);
   }
+
 
   // Returns true when the command should end.
   @Override
