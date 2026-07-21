@@ -57,6 +57,7 @@ public class NewShooterSubsystem extends SubsystemBase {
     private double testLastHood=0;
     private Pose2d m_pose;
     private GenericEntry m_kickerRunningEntry;
+    private GenericEntry m_speedAdjusterEntry;
    private PositionVoltage m_request= new PositionVoltage(0).withSlot(0);
  //  private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
 
@@ -92,6 +93,9 @@ public class NewShooterSubsystem extends SubsystemBase {
    
     m_kickerRunningEntry = Shuffleboard.getTab("Shooter")
                               .add("Kicker Running", false)
+                              .getEntry();
+    m_speedAdjusterEntry = Shuffleboard.getTab("Shooter")
+                              .add("Speed Adjuster", 1.0)
                               .getEntry();
 }
 private void configureMotionMagicHood(){
@@ -271,6 +275,9 @@ public Command shutdownCommand(){
   }
     @Override
   public void periodic(){
+    if (m_speedAdjusterEntry != null) {
+      SmartDashboard.putNumber("Speed Adjuster:", m_speedAdjusterEntry.getDouble(1.0));
+    }
 
     SmartDashboard.putNumber("Shooter Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Hood CanCoder Value",m_hoodCoder.getAbsolutePosition().getValueAsDouble());  

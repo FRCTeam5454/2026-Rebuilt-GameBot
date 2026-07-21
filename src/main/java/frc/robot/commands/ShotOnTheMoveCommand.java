@@ -60,7 +60,7 @@ public class ShotOnTheMoveCommand extends Command {
   private int m_HopperPulls=0;
   //private boolean NoLimeLightMode=0;
   private double m_flipSpeed=0;
-  private double kTurretPosDeadband=0.1;
+  private double kTurretPosDeadband=0.25;
   private boolean m_finished=false;
   private boolean m_stopWhenNoFuel=true;
   public ShotOnTheMoveCommand(CommandSwerveDrivetrain swerve,NewShooterSubsystem shooter, HopperSubsystem hopper, IntakeSubsystem intake, 

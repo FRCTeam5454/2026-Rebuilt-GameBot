@@ -200,8 +200,8 @@ public final class Constants {
     public static final double KickerSpeed=-1; //pos 1 for B-bot
     public static final double shootSpeed=100; //0.8;
     public static final double kAgitateTimeLimit=5; //how long to agitate on empty
-    public static final double shooterVelocityLowDeadband=0.1;
-    public static final double shooterVelocityHighDeadband=1;
+    public static final double shooterVelocityLowDeadband=2.0;
+    public static final double shooterVelocityHighDeadband=2.0;
     //6328 Transforms for Turret
     public static Transform3d robotToTurret = new Transform3d(-0.19685, 0.0, 0.44, Rotation3d.kZero);
     public static Transform3d turretToCamera =

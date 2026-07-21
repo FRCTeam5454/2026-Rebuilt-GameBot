@@ -95,7 +95,32 @@ public class HubLookUpTable {
             return lookupTable.get(upperKey); // Below minimum distance
         }
         if (upperKey == null) {
-            return lookupTable.get(lowerKey); // Above maximum distance
+            // Extrapolate beyond the maximum distance using the last two points
+            Double lastKey = lookupTable.lastKey();
+            Double secondLastKey = lookupTable.lowerKey(lastKey);
+            if (secondLastKey != null) {
+                ShootingParameters lastVal = lookupTable.get(lastKey);
+                ShootingParameters secondLastVal = lookupTable.get(secondLastKey);
+                double dx = lastKey - secondLastKey;
+                if (dx > 0.001) {
+                    double speedSlope = (lastVal.shooterSpeed - secondLastVal.shooterSpeed) / dx;
+                    double angleSlope = (lastVal.hoodPosition - secondLastVal.hoodPosition) / dx;
+                    double tofSlope = (lastVal.timeOfFlight - secondLastVal.timeOfFlight) / dx;
+                    
+                    double overDistance = distance - lastKey;
+                    double extrapolatedSpeed = lastVal.shooterSpeed + speedSlope * overDistance;
+                    double extrapolatedAngle = lastVal.hoodPosition + angleSlope * overDistance;
+                    double extrapolatedTof = lastVal.timeOfFlight + tofSlope * overDistance;
+                    
+                    // Apply speed multiplier
+                    double multiplier = SmartDashboard.getNumber("Speed Adjuster:", 1.0);
+                    if (multiplier != 1.0) {
+                        extrapolatedSpeed = extrapolatedSpeed * multiplier;
+                    }
+                    return new ShootingParameters(extrapolatedSpeed, extrapolatedAngle, extrapolatedTof);
+                }
+            }
+            return lookupTable.get(lowerKey); // Fallback
         }
         
         // Perform linear interpolation
