@@ -231,20 +231,30 @@ m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
   private void configureShootermotor(TalonFX motor){
     TalonFXConfigurator configurator = motor.getConfigurator();
     TalonFXConfiguration config = new TalonFXConfiguration();
-    //apply bang Bang Controller
-      config.Slot0.kP = 999999.0;
-      config.TorqueCurrent.PeakForwardTorqueCurrent = 800.0;
-      config.TorqueCurrent.PeakReverseTorqueCurrent = -800.0;
-      config.MotorOutput.PeakForwardDutyCycle = 1.0;
-      config.MotorOutput.PeakReverseDutyCycle = -1.0;
-    //config.Slot0.kP=50;  
-    //config.Slot0.kI=0;
-    //config.Slot0.kD=0;
+    
+    // Closed-loop Velocity PID + Feedforward tuning
+    // kS: static friction feedforward in Volts
+    // kV: velocity feedforward in Volts per RPS (~12V / ~104 RPS)
+    // kP: proportional feedback for rapid error correction
+    // kD: derivative feedback to prevent velocity overshoot
+    config.Slot0.kS = 0.15;
+    config.Slot0.kV = 0.115;
+    config.Slot0.kP = 0.6;
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.01;
+    
+    config.TorqueCurrent.PeakForwardTorqueCurrent = 800.0;
+    config.TorqueCurrent.PeakReverseTorqueCurrent = -800.0;
+    config.MotorOutput.PeakForwardDutyCycle = 1.0;
+    config.MotorOutput.PeakReverseDutyCycle = -1.0;
     configurator.apply(config);
-    //Apply current limits
-    CurrentLimitsConfigs currentLimits =  new CurrentLimitsConfigs();
-    currentLimits.StatorCurrentLimit=80;
-    currentLimits.SupplyCurrentLimit=60;
+    
+    // Apply and enable current limits
+    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+    currentLimits.StatorCurrentLimit = 80;
+    currentLimits.StatorCurrentLimitEnable = true;
+    currentLimits.SupplyCurrentLimit = 60;
+    currentLimits.SupplyCurrentLimitEnable = true;
     configurator.apply(currentLimits);
   }
   
