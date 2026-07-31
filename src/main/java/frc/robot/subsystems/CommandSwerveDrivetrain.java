@@ -24,6 +24,7 @@ import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.OdometryObservation;
 import frc.robot.TunerConstants;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,8 +70,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private SwerveDrivePoseEstimator m_poseEstimator;
 
-    private double m_gasPedalDriveMult=1;
-    private double m_gasPedalRotMult=1;
+    private double m_targetGasPedalDriveMult = 1.0;
+    private double m_targetGasPedalRotMult = 1.0;
+    private double m_currentGasPedalDriveMult = 1.0;
+    private double m_currentGasPedalRotMult = 1.0;
+    private final SlewRateLimiter m_driveMultFilter = new SlewRateLimiter(Constants.DriveConstants.kSOTMRampRate, -Constants.DriveConstants.kSOTMRampRate, 1.0);
+    private final SlewRateLimiter m_rotMultFilter = new SlewRateLimiter(Constants.DriveConstants.kSOTMRampRate, -Constants.DriveConstants.kSOTMRampRate, 1.0);
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -351,16 +356,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         ////System.out.println("VELOCITY X SPEED: "+(-driveController.getRawAxis(translationAxis)*TunerConstants.kMaxSpeed)*m_gasPedalMult);
             
-        return this.applyRequest(() -> drive.withVelocityX((-driveController.getRawAxis(translationAxis)*TunerConstants.kMaxSpeed)*m_gasPedalDriveMult)
-            .withVelocityY((-driveController.getRawAxis(strafeAxis)*TunerConstants.kMaxSpeed)*m_gasPedalDriveMult)
-            .withRotationalRate((-driveController.getRawAxis(rotationAxis)*TunerConstants.kMaxAngularSpeed)*m_gasPedalRotMult)
+        return this.applyRequest(() -> drive.withVelocityX((-driveController.getRawAxis(translationAxis)*TunerConstants.kMaxSpeed)*m_currentGasPedalDriveMult)
+            .withVelocityY((-driveController.getRawAxis(strafeAxis)*TunerConstants.kMaxSpeed)*m_currentGasPedalDriveMult)
+            .withRotationalRate((-driveController.getRawAxis(rotationAxis)*TunerConstants.kMaxAngularSpeed)*m_currentGasPedalRotMult)
         );
     }
 
     public void setGasPedalMult(double driveMult,double rotMult){
        // //System.out.println("GAS PEDAL MULT: "+m_gasPedalMult);
-        m_gasPedalDriveMult=driveMult;
-        m_gasPedalRotMult=rotMult;
+        m_targetGasPedalDriveMult=driveMult;
+        m_targetGasPedalRotMult=rotMult;
     }
 
     /**
@@ -387,7 +392,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        
+        m_currentGasPedalDriveMult = m_driveMultFilter.calculate(m_targetGasPedalDriveMult);
+        m_currentGasPedalRotMult = m_rotMultFilter.calculate(m_targetGasPedalRotMult);
 
         /** Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -425,7 +431,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         //Add telemtry
         Logger.recordOutput("SwerveDriveTrain/Yaw", this.getPigeon2().getYaw().getValue());
         Logger.recordOutput("SwerveDriveTrain/PoseEstimate",m_poseEstimator.getEstimatedPosition());
-        Logger.recordOutput("SwerveDriveTrain/ModulePositions",this.getState().ModulePositions);                            }
+        Logger.recordOutput("SwerveDriveTrain/ModulePositions",this.getState().ModulePositions);
+        Logger.recordOutput("SwerveDriveTrain/GasPedalDriveMult", m_currentGasPedalDriveMult);
+        Logger.recordOutput("SwerveDriveTrain/GasPedalRotMult", m_currentGasPedalRotMult);
+    }
 
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();

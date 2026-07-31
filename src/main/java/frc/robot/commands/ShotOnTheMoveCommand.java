@@ -3,8 +3,11 @@ import javax.lang.model.util.ElementScanner14;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -407,6 +410,49 @@ switch(m_state){
     Logger.recordOutput("Shooter/SOTM/FieldRelVyMps",fieldRelativeSpeeds.vyMetersPerSecond);
     Logger.recordOutput("Shooter/SOTM/TurretFieldVelXMps",turretVelX);
     Logger.recordOutput("Shooter/SOTM/TurretFieldVelYMps",turretVelY);
+
+    Pose2d turretPose = TurretUtil.getTurretPose(m_swerve.getPose2d());
+    Pose2d targetPose2d = TurretUtil.getTargetPose(TurretUtil.TargetType.HUB);
+
+    // Ideal Aim Line (Turret to Hub)
+    double targetTurretHeadingRad = m_swerve.getPose2d().getRotation().getRadians() + Math.toRadians(leadShot.turretAngleDegrees);
+    Pose3d idealStart3d = new Pose3d(turretPose.getX(), turretPose.getY(), 0.44, new Rotation3d(0, 0, targetTurretHeadingRad));
+    Pose3d idealEnd3d = new Pose3d(targetPose2d.getX(), targetPose2d.getY(), 2.64, new Rotation3d());
+    Logger.recordOutput("Shooter/SOTM/AimLine3d", new Pose3d[] { idealStart3d, idealEnd3d });
+
+    // Actual Shot Vector based on REAL physical turret motor position, hood angle, and flywheel power
+    double actualMotorRotations = m_turret.getCurrentPosition();
+    double actual5454Deg = actualMotorRotations >= 0 
+        ? actualMotorRotations * 7.87499 
+        : 360.0 + (actualMotorRotations * 7.87499);
+    double actualTurretRelDeg = (actual5454Deg > 180.0) ? (360.0 - actual5454Deg) : -actual5454Deg;
+
+    double robotHeadingRad = m_swerve.getPose2d().getRotation().getRadians();
+    double actualTurretFieldHeadingRad = robotHeadingRad + Math.toRadians(actualTurretRelDeg);
+
+    double currentRps = Math.abs(m_shooter.getShooterSpeed());
+    double targetRps = leadShot.shooterSpeedRPS;
+    double powerRatio = (targetRps > 5.0) ? Math.min(Math.max(currentRps / targetRps, 0.0), 1.2) : 1.0;
+    
+    double distance = (leadShot.distanceMeters > 0 && leadShot.distanceMeters < 50.0) ? leadShot.distanceMeters : 3.0;
+    double actualShotDistanceMeters = Math.max(0.5, distance * powerRatio);
+
+    double hoodElevationRad = Math.toRadians(m_shooter.getHoodPos());
+
+    double startX = turretPose.getX();
+    double startY = turretPose.getY();
+    double startZ = 0.44;
+
+    double endX = startX + actualShotDistanceMeters * Math.cos(hoodElevationRad) * Math.cos(actualTurretFieldHeadingRad);
+    double endY = startY + actualShotDistanceMeters * Math.cos(hoodElevationRad) * Math.sin(actualTurretFieldHeadingRad);
+    double endZ = startZ + actualShotDistanceMeters * Math.sin(hoodElevationRad);
+
+    Pose3d actualShotStart3d = new Pose3d(startX, startY, startZ, new Rotation3d(0, -hoodElevationRad, actualTurretFieldHeadingRad));
+    Pose3d actualShotEnd3d = new Pose3d(endX, endY, endZ, new Rotation3d());
+
+    Logger.recordOutput("Shooter/SOTM/ActualShotLine3d", new Pose3d[] { actualShotStart3d, actualShotEnd3d });
+    Logger.recordOutput("Shooter/SOTM/ActualTurretFieldHeadingDeg", Math.toDegrees(actualTurretFieldHeadingRad));
+    Logger.recordOutput("Shooter/SOTM/FlywheelPowerRatio", powerRatio);
   }
   
 }

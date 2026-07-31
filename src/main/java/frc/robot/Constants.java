@@ -41,6 +41,8 @@ public final class Constants {
     public static final double kSOTMDriveMultiplier = 0.25;
     // Turn speed multiplier when running ShotOnTheMoveCommand
     public static final double kSOTMTurnMultiplier = 0.25;
+    // Multiplier change rate per second for ShotOnTheMove transition (0.75 units/sec = 1.0s transition between 1.0 and 0.25)
+    public static final double kSOTMRampRate = 0.75;
 
     //Support    6328 DriveConstants Class
     public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.5);

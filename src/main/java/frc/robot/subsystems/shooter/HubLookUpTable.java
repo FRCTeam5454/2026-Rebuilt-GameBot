@@ -110,7 +110,7 @@ public class HubLookUpTable {
                     double overDistance = distance - lastKey;
                     double extrapolatedSpeed = lastVal.shooterSpeed + speedSlope * overDistance;
                     double extrapolatedAngle = lastVal.hoodPosition + angleSlope * overDistance;
-                    double extrapolatedTof = lastVal.timeOfFlight + tofSlope * overDistance;
+                    double extrapolatedTof = Math.max(0.2, lastVal.timeOfFlight + tofSlope * overDistance);
                     
                     // Apply speed multiplier
                     double multiplier = SmartDashboard.getNumber("Speed Adjuster:", 1.0);
@@ -131,7 +131,7 @@ public class HubLookUpTable {
         
         double interpolatedSpeed = lerp(lower.shooterSpeed, upper.shooterSpeed, ratio);
         double interpolatedAngle = lerp(lower.hoodPosition, upper.hoodPosition, ratio);
-        double interpolatedTime = lerp(lower.timeOfFlight, upper.timeOfFlight, ratio);
+        double interpolatedTime = Math.max(0.2, lerp(lower.timeOfFlight, upper.timeOfFlight, ratio));
         
         //Speed Multiplier
         double multiplier = SmartDashboard.getNumber("Speed Adjuster:",1);
