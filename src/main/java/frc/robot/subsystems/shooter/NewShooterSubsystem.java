@@ -73,7 +73,7 @@ public class NewShooterSubsystem extends SubsystemBase {
     m_2shooterMotor = new TalonFX(shooter2CANID);
     configureShootermotor(m_2shooterMotor);
     m_2shooterMotor.setNeutralMode(NeutralModeValue.Coast);
-    //m_2shooterMotor.setControl(new Follower(m_1shooterMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_2shooterMotor.setControl(new Follower(m_1shooterMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     m_hoodMotor = new TalonFX(hoodCANID);
     
     m_kickerMotor = new ObsidianCANSparkMax(kickerCANID, MotorType.kBrushless,true,Constants.k70Amp);
@@ -196,7 +196,6 @@ m_simTargetVelocity = targetSpeed;
 //m_1shooterMotor.setControl(new MotionMagicVelocityVoltage(-targetSpeed));
 //replaced FOC 
 m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
-m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
 
 
 /*    m_1shooterMotor.setControl(new VelocityTorqueCurrentFOC(0)
