@@ -238,11 +238,10 @@ m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
   public void stopHood(){
     m_hoodMotor.stopMotor();
   }
-  
-  public Command hoodHome(){
-    return Commands.runOnce(    ()->hoodMoveToZero(),
-                                           this);
+  public void hoodHome(){
+    hoodMoveToZero();
   }
+  
   public Command shootCommand(){
     return Commands.startEnd(    ()->runNewShooter(ShooterConstants.shootSpeed,
                                     ShooterConstants.KickerSpeed),

@@ -395,10 +395,10 @@ public class RobotContainer {
         }
   }
 
-  if((m_startHub=="B") && (Shift==2 || Shift==4)){
+  if((m_startHub.equals("B")) && (Shift==2 || Shift==4)){
     //Blue Hub is Active
     m_activeHub="Blue";
-    if(currentAlliance=="Blue"){
+    if(currentAlliance.equals("Blue")){
         m_hubMatch=true;
     }else {
         m_hubMatch=false;
@@ -406,7 +406,7 @@ public class RobotContainer {
   } else {
     //RED Hub is Active
     m_activeHub="Red";
-    if(currentAlliance=="Red"){
+    if(currentAlliance.equals("Red")){
         m_hubMatch=true;
     }else {
         m_hubMatch=false;
@@ -469,7 +469,7 @@ public class RobotContainer {
 
   }
   private void updateHubStatus(){
-    if((m_activeHub=="")|| (m_activeHub=="Unknown")){
+    if((m_activeHub.equals(""))|| (m_activeHub.equals("Unknown"))){
           String gameData;
           gameData = DriverStation.getGameSpecificMessage();
           if(gameData.length() > 0) 

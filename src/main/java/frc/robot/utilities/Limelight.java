@@ -370,7 +370,7 @@ public class Limelight {
         }
 
         xAverage=xAverage/this.m_previousPoseDiffMeanForAveraging.size();
-        yAverage=xAverage/this.m_previousPoseDiffMeanForAveraging.size();
+        yAverage=yAverage/this.m_previousPoseDiffMeanForAveraging.size();
 
         return new double[]{xAverage,yAverage};
     }

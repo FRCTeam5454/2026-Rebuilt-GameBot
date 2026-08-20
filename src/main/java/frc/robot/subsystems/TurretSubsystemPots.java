@@ -32,9 +32,7 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import yams.mechanisms.*;
-import yams.units.EasyCRT;
-import yams.units.EasyCRTConfig;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
