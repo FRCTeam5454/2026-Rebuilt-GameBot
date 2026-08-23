@@ -600,7 +600,8 @@ public class RobotContainer {
       ////System.out.println("update vision back - Tag Count: " + mt2.tagCount 
       //        + " Pose:" + mt2.pose.getX() + "/"+ mt2.pose.getY());
       double timestamp=Utils.fpgaToCurrentTime(mt2.timestampSeconds); // CONVERT Time Units
-      m_swerve.addVisionMeasurement(mt2.pose,timestamp);      
+      m_swerve.addVisionMeasurement(mt2.pose,timestamp);
+      RobotState.getInstance().addVisionMeasurement(mt2.pose,timestamp);     
     } else {
         SmartDashboard.putBoolean("Vision Updating from Limelight " + limelight.getLimelightName(),false );
       }
