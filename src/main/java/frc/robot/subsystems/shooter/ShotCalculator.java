@@ -99,9 +99,13 @@ public class ShotCalculator {
     // Calculate distance from turret to target
     Translation2d target =
         AllianceFlipUtil.apply(FieldConstantsMA.Hub.topCenterPoint.toTranslation2d());
-    Pose2d turretPosition =
-        swerve.getPose2d().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
-        //RobotState.getInstance().getEstimatedPose().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
+       Pose2d turretPosition =
+        RobotState.getInstance().getEstimatedPose().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
+ 
+   // switched to using RobotState for consistency across methods and to reduce the dependency on swerve
+   //     Pose2d turretPosition =
+   //     swerve.getPose2d().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
+   ;
     double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
     
     // Calculate field relative turret velocity
