@@ -13,9 +13,12 @@ import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -72,6 +75,8 @@ import frc.robot.subsystems.shooter.ShotCalculator;
 import frc.robot.subsystems.shooter.TurretUtil;
 import frc.robot.subsystems.shooter.TurretUtil.TargetType;
 import frc.robot.subsystems.shooter.PassCalculator.ShootingParameters;
+import frc.robot.RobotState;
+
 public class RobotContainer {
   private final Field2d m_Field2d = new Field2d();
   
@@ -601,7 +606,10 @@ public class RobotContainer {
       //        + " Pose:" + mt2.pose.getX() + "/"+ mt2.pose.getY());
       double timestamp=Utils.fpgaToCurrentTime(mt2.timestampSeconds); // CONVERT Time Units
       m_swerve.addVisionMeasurement(mt2.pose,timestamp);
-      RobotState.getInstance().addVisionMeasurement(mt2.pose,timestamp);     
+      RobotState.getInstance().addVisionObservation(
+        new RobotState.VisionObservation(timestamp, new Pose3d(mt2.pose), VecBuilder.fill(0.1,0.1,9999999)) 
+     );
+   
     } else {
         SmartDashboard.putBoolean("Vision Updating from Limelight " + limelight.getLimelightName(),false );
       }
