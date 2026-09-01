@@ -67,6 +67,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private SwerveDrivePoseEstimator m_poseEstimator;
 
+    // Target = what the driver/gas pedal input requests right now.
+    // Current = slew-rate-limited value actually applied, updated once per periodic().
     private double m_targetGasPedalDriveMult = 1.0;
     private double m_targetGasPedalRotMult = 1.0;
     private double m_currentGasPedalDriveMult = 1.0;
@@ -312,9 +314,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void drive(double forward, double strafe, double rot){
-        SwerveRequest.RobotCentric newRequest=new SwerveRequest.RobotCentric();
-        newRequest.withVelocityX(forward*TunerConstants.kAutoMaxSpeed).withVelocityY(strafe*TunerConstants.kAutoMaxSpeed)
-        .withRotationalRate(rot*TunerConstants.kAutoMaxAngularSpeed);
+        SwerveRequest.RobotCentric newRequest = new SwerveRequest.RobotCentric()
+            .withVelocityX(forward * TunerConstants.kAutoMaxSpeed)
+            .withVelocityY(strafe * TunerConstants.kAutoMaxSpeed)
+            .withRotationalRate(rot * TunerConstants.kAutoMaxAngularSpeed);
         this.setControl(newRequest);
     }
 
@@ -353,14 +356,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // multiplier is applied), so it stays correct at any throttle level.
         // Do NOT use withDeadband/withRotationalDeadband here — that deadband is a
         // fixed absolute velocity threshold set once, so it becomes an increasingly
-        // large fraction of your output range as m_gasPedalDriveMult drops, and can
+        // large fraction of your output range as the gas pedal mult drops, and can
         // zero out all output entirely below a certain multiplier.
-    
+
         return this.applyRequest(() -> {
             double rawX = -driveController.getRawAxis(translationAxis);
             double rawY = -driveController.getRawAxis(strafeAxis);
             double rawRot = -driveController.getRawAxis(rotationAxis);
-    
+
             // Combined magnitude deadband for translation (avoids stray strafe/drive
             // noise when pushing straight along one axis)
             double magnitude = Math.hypot(rawX, rawY);
@@ -376,7 +379,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 rawX = directionX * scaledMagnitude;
                 rawY = directionY * scaledMagnitude;
             }
-    
+
             // Separate deadband for rotation
             double rotationDeadband = 0.1;
             if (Math.abs(rawRot) < rotationDeadband) {
@@ -384,17 +387,29 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             } else {
                 rawRot = Math.signum(rawRot) * (Math.abs(rawRot) - rotationDeadband) / (1 - rotationDeadband);
             }
-    
+
             // Input shaping: square while preserving sign for finer low-speed control
             double shapedX = Math.copySign(rawX * rawX, rawX);
             double shapedY = Math.copySign(rawY * rawY, rawY);
             double shapedRot = Math.copySign(rawRot * rawRot, rawRot);
-    
+
+            // Use the slew-rate-limited "current" mults (updated in periodic()),
+            // not the raw target, so gas pedal changes ramp smoothly rather than stepping.
             return drive
-                .withVelocityX(shapedX * TunerConstants.kMaxSpeed * m_gasPedalDriveMult)
-                .withVelocityY(shapedY * TunerConstants.kMaxSpeed * m_gasPedalDriveMult)
-                .withRotationalRate(shapedRot * TunerConstants.kMaxAngularSpeed * m_gasPedalRotMult);
+                .withVelocityX(shapedX * TunerConstants.kMaxSpeed * m_currentGasPedalDriveMult)
+                .withVelocityY(shapedY * TunerConstants.kMaxSpeed * m_currentGasPedalDriveMult)
+                .withRotationalRate(shapedRot * TunerConstants.kMaxAngularSpeed * m_currentGasPedalRotMult);
         });
+    }
+
+    /**
+     * Sets the target gas pedal multipliers. The actual applied multiplier ramps
+     * toward this target each periodic() cycle via a SlewRateLimiter, so changes
+     * (e.g. stomping the gas pedal) don't cause an instantaneous jump in speed.
+     */
+    public void setGasPedalMult(double driveMult, double rotMult){
+        m_targetGasPedalDriveMult = driveMult;
+        m_targetGasPedalRotMult = rotMult;
     }
 
     /**
