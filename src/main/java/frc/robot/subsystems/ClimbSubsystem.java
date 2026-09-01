@@ -44,17 +44,20 @@ public class ClimbSubsystem extends SubsystemBase {
     return !m_climbDownSwitch.get();
   }
 
-  public void homeClimb(double maxHomeTime){
-    //pull climb down until we hit limit switch and then reset position
-    double startTime = Timer.getFPGATimestamp();
-    double endTime = startTime + maxHomeTime;
-    //System.out.println("Climb is starting homing");
-    while(!isClimbDownLimit() && Timer.getFPGATimestamp()<endTime){
-     m_climbMotor.set(ClimbConstants.climbBackSpeed);
-    }
-    m_climbMotor.stopMotor();
-    //System.out.println("Climb has homed");
-    m_homed=true;
+  public Command homeClimbCommand(double maxHomeTime){
+    return Commands.startEnd(
+        () -> m_climbMotor.set(ClimbConstants.climbBackSpeed),
+        () -> {
+            m_climbMotor.stopMotor();
+            m_homed = true;
+        },
+        this
+    ).until(this::isClimbDownLimit).withTimeout(maxHomeTime);
+  }
+
+  // Deprecated/Blocking version replaced by command
+  public void homeClimb(double maxHomeTime) {
+      // Intentionally left blank to not break RobotContainer before it's updated
   }
 
   public void climbGo(double speed) {
@@ -91,11 +94,19 @@ public class ClimbSubsystem extends SubsystemBase {
   }
 
   public Command climbUpCommand() {
-    return Commands.runOnce(    ()->extendClimb(),this);
+    return Commands.startEnd(
+        () -> m_climbMotor.set(ClimbConstants.climbForwardSpeed),
+        () -> m_climbMotor.stopMotor(),
+        this
+    ).until(this::isClimbUpLimit);
   }
 
   public Command climbDownCommand() {
-    return Commands.runOnce(    ()->retractClimb(),this);
+    return Commands.startEnd(
+        () -> m_climbMotor.set(ClimbConstants.climbBackSpeed),
+        () -> m_climbMotor.stopMotor(),
+        this
+    ).until(this::isClimbDownLimit);
   }
 
   @Override

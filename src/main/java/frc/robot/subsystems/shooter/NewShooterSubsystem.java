@@ -213,13 +213,16 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
     return (currentSpeed<Constants.ShooterConstants.IdleSpeedThreshold);
   }
 
+  private java.util.function.BooleanSupplier m_climbDeployedSupplier = () -> false;
+
+  public void setClimbDeployedSupplier(java.util.function.BooleanSupplier supplier) {
+      m_climbDeployedSupplier = supplier;
+  }
+
   public void stopNewShooter(boolean idleMode){
     //System.out.println("stopping shooter");
-    //demo mode change 
-    idleMode=false;
     
-    if(idleMode){
-    
+    if(idleMode && !m_climbDeployedSupplier.getAsBoolean()){
       runShooterVelocity(Constants.ShooterConstants.IdleSpeed);
     }else {
       m_1shooterMotor.stopMotor();
@@ -287,6 +290,11 @@ public Command shutdownCommand(){
   }
     @Override
   public void periodic(){
+    if (m_climbDeployedSupplier.getAsBoolean()) {
+        m_1shooterMotor.stopMotor();
+        m_2shooterMotor.stopMotor();
+    }
+
     if (m_speedAdjusterEntry != null) {
       SmartDashboard.putNumber("Speed Adjuster:", m_speedAdjusterEntry.getDouble(1.0));
     }

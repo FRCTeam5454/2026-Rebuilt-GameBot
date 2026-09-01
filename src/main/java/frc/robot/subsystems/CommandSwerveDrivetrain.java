@@ -226,7 +226,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void buildPoseEstimator(){
         m_poseEstimator=new SwerveDrivePoseEstimator(getKinematics(),
-                        new Rotation2d(this.getPigeon2().getYaw().getValue()),
+                        this.getPigeon2().getRotation2d(),
                         this.getState().ModulePositions,getPose2d(), Constants.kPoseEstimatorStandardDeviations, 
                         Constants.kVisionStandardDeviations);
     }
@@ -368,16 +368,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // noise when pushing straight along one axis)
             double magnitude = Math.hypot(rawX, rawY);
             double translationDeadband = 0.1;
-            if (magnitude < translationDeadband) {
-                rawX = 0.0;
-                rawY = 0.0;
-            } else {
+            double shapedX = 0.0;
+            double shapedY = 0.0;
+            if (magnitude >= translationDeadband) {
                 // rescale so output ramps smoothly from 0 just past the deadband
                 double scaledMagnitude = (magnitude - translationDeadband) / (1 - translationDeadband);
+                // Input shaping: square magnitude for finer low-speed control
+                // (Done on magnitude to preserve the angle of the translation vector)
+                double shapedMagnitude = scaledMagnitude * scaledMagnitude;
+                
                 double directionX = rawX / magnitude;
                 double directionY = rawY / magnitude;
-                rawX = directionX * scaledMagnitude;
-                rawY = directionY * scaledMagnitude;
+                shapedX = directionX * shapedMagnitude;
+                shapedY = directionY * shapedMagnitude;
             }
 
             // Separate deadband for rotation
@@ -389,8 +392,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
 
             // Input shaping: square while preserving sign for finer low-speed control
-            double shapedX = Math.copySign(rawX * rawX, rawX);
-            double shapedY = Math.copySign(rawY * rawY, rawY);
             double shapedRot = Math.copySign(rawRot * rawRot, rawRot);
 
             // Use the slew-rate-limited "current" mults (updated in periodic()),
