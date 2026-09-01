@@ -107,7 +107,7 @@ System.out.println("Feedback config setting "+ talonFXConfigs.Feedback.FeedbackR
 
 // set slot 0 gains
 Slot0Configs slot0Configs = talonFXConfigs.Slot0;
-slot0Configs.kP = 35; // An error of 1 rps results in 0.11 V output
+slot0Configs.kP = 16; // An error of 1 rps results in 0.11 V output
 slot0Configs.kI = 0.0; // An error of 1 rps increases output by 0.5 V each second
 slot0Configs.kD = 0.05; // An acceleration of 1 rps/s results in 0.01 V output
 
