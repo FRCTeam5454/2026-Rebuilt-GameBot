@@ -127,7 +127,10 @@ public class RobotState {
   public void addTurretObservation(TurretObservation observation) {
     turretAngleBuffer.addSample(observation.timestamp(), observation.turretAngle);
   }
-
+  public void addVisionObservationRaw(Pose2d visionRobotPoseMeters, double timestampSeconds){
+    VisionObservation visionObservation = new VisionObservation(timestampSeconds, new Pose3d(visionRobotPoseMeters), new Matrix<>(VecBuilder.fill(0.1, 0.1, 0.1)));
+    addVisionObservation(visionObservation);
+  }
   /** Adds a new vision pose observation from the vision subsystem. */
   public void addVisionObservation(VisionObservation observation) {
     // If measurement is old enough to be outside the pose buffer's timespan, skip.
