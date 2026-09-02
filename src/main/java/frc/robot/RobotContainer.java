@@ -623,20 +623,19 @@ public class RobotContainer {
   
   }
   public void DisabledPeriodic(){
-     rumbleOff(); 
+     rumbleOff();
     // In disabledPeriodic or before match starts
     m_backLimelight.SetIMUMode(1);
-    AllPeriodic();
+    // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     //m_LEDS.setLedState(LEDStates.DISABLED,false);
     //m_LEDS.activateLEDS();
   }
-  
+
   public void AutoPeriodic(){
-   AllPeriodic();
-  
+   // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
    TargetTracking(m_tracking);
-   
-   
+
+
   }
 
   public void makefalsestartPose(){
@@ -731,7 +730,7 @@ return pathfindingCommand;
     }
   }
   public void TeleopPeriodic(){
-    AllPeriodic();
+    // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     TargetTracking(m_tracking);
 //    if (m_newShooter.getCurrentCommand() == null) {
       //Shooter is not being used so move hood back to zero
