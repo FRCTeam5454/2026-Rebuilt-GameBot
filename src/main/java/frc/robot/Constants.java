@@ -45,8 +45,10 @@ public final class Constants {
     public static final double kSOTMRampRate = 0.75;
 
     //Support    6328 DriveConstants Class
-    public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.5);
-    public static final double  trackWidthY= edu.wpi.first.math.util.Units.inchesToMeters(27.5);
+    // Must match TunerConstants' module X/Y positions (currently ±13.5in each) so RobotState's
+    // kinematics object agrees with the actual configured swerve geometry.
+    public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.0);
+    public static final double  trackWidthY= edu.wpi.first.math.util.Units.inchesToMeters(27.0);
   
     public static final Translation2d[] moduleTranslations = {
     new Translation2d(trackWidthX / 2, trackWidthY / 2),
