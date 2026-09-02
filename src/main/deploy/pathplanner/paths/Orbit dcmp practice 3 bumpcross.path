@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.346666666666668,
+        "y": 2.300488888888889
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.878531443866693,
+        "y": 2.3843461169736355
+      },
+      "isLocked": false,
+      "linkedName": "OrbitDCMPPM3CrossBumpoutside"
+    },
+    {
+      "anchor": {
+        "x": 3.261355555555556,
+        "y": 2.6317999999999997
+      },
+      "prevControl": {
+        "x": 4.371460288682686,
+        "y": 2.5413302866484484
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "orbitdcmppm3shootstart"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 45.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 54.92624550665172
+  },
+  "useDefaultConstraints": true
+}

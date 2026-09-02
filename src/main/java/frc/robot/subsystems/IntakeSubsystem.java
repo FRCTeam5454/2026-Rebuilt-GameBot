@@ -24,6 +24,8 @@ import frc.robot.Constants.IntakeConstants;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.RobotBase;
 
 public class IntakeSubsystem extends SubsystemBase {
   private TalonFX m_intakeMotor;
@@ -32,6 +34,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private boolean m_IntakeOutMode = false; //starts in in Mode and gets reversed on first call
   private boolean m_homed=false;
   //private SparkAbsoluteEncoder m_encoder;
+  private DIOSim m_intakeSwitchSim;
 
   public IntakeSubsystem(int CanId1, int CanId2) {
     m_intakeMotor = new TalonFX(CanId1);
@@ -41,6 +44,11 @@ public class IntakeSubsystem extends SubsystemBase {
     m_fold = new ObsidianCANSparkMax(CanId2, MotorType.kBrushless, true,50);
   
     m_intakeSwitch = new DigitalInput(IntakeConstants.intakeSwitchDIO);
+
+    if (RobotBase.isSimulation()) {
+      m_intakeSwitchSim = new DIOSim(m_intakeSwitch);
+      m_fold.getEncoder().setPosition(Constants.IntakeConstants.intakeEndStop);
+    }
   }
 
   public void outFold(double speed) {
@@ -57,6 +65,13 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void homeIntake(double maxHomeTime){
+    if (RobotBase.isSimulation()) {
+      m_fold.stopMotor();
+      m_fold.getEncoder().setPosition(0.0);
+      SetIntakeInMode();
+      m_homed = true;
+      return;
+    }
     //pull intake until we hit limit switch and then reset position
      double startTime = Timer.getFPGATimestamp();
      double endTime = startTime + maxHomeTime;
@@ -182,5 +197,21 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // //System.out.println("Amp " + m_fold.getOutputCurrent());
     // This method will be called once per scheduler run
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // Get speed from m_fold
+    double speed = m_fold.get();
+    double deltaPos = -speed * 0.2; 
+    double currentPos = m_fold.getEncoder().getPosition();
+    double newPos = currentPos + deltaPos;
+    newPos = Math.max(0.0, Math.min(15.0, newPos));
+    m_fold.getEncoder().setPosition(newPos);
+
+    if (m_intakeSwitchSim != null) {
+      boolean isSwitched = (newPos <= 0.1);
+      m_intakeSwitchSim.setValue(!isSwitched);
+    }
   }
 }

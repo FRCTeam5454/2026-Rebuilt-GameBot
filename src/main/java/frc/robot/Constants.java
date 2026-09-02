@@ -37,6 +37,13 @@ public final class Constants {
     //Rotate Joystick axis deadband - bigger deadband to avoid rotational drift
     public static final double swerveRotateDeadband = 0.17; //0.17
     public static final double MinGasPedalSpeed=0.20;
+    // Speed multiplier when running ShotOnTheMoveCommand (like gas pedal)
+    public static final double kSOTMDriveMultiplier = 0.25;
+    // Turn speed multiplier when running ShotOnTheMoveCommand
+    public static final double kSOTMTurnMultiplier = 0.25;
+    // Multiplier change rate per second for ShotOnTheMove transition (0.75 units/sec = 1.0s transition between 1.0 and 0.25)
+    public static final double kSOTMRampRate = 0.75;
+
     //Support    6328 DriveConstants Class
     // Must match TunerConstants' module X/Y positions (currently ±13.5in each) so RobotState's
     // kinematics object agrees with the actual configured swerve geometry.
@@ -197,8 +204,8 @@ public final class Constants {
     public static final double KickerSpeed=-1; //pos 1 for B-bot
     public static final double shootSpeed=100; //0.8;
     public static final double kAgitateTimeLimit=5; //how long to agitate on empty
-    public static final double shooterVelocityLowDeadband=0.1;
-    public static final double shooterVelocityHighDeadband=1;
+    public static final double shooterVelocityLowDeadband=2.0;
+    public static final double shooterVelocityHighDeadband=2.0;
     //6328 Transforms for Turret
     // X/Y now sourced from TurretConstants.kTurretOffsetX/Y (the team-measured turret position
     // already used to aim the turret) instead of the leftover 6328 template value, which put the
@@ -262,6 +269,7 @@ public final class Constants {
         public static double ENC2_FORWARD_OFFSET_DEG = 175.0;
         public static final boolean ENC1_INVERT = false;
         public static final boolean ENC2_INVERT = false;
+        public static final double wraparoundEndThresholdDegrees = 10.0;
   }
 
   public static final class ClimbConstants{

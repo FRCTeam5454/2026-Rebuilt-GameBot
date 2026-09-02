@@ -32,7 +32,8 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.networktables.GenericEntry;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,6 +44,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import edu.wpi.first.wpilibj.simulation.AnalogInputSim;
+import edu.wpi.first.wpilibj.RobotController;
 
 
 public class TurretSubsystemPots extends SubsystemBase {
@@ -52,6 +55,10 @@ public class TurretSubsystemPots extends SubsystemBase {
  // private CANcoder m_encoder1;
  // private CANcoder m_encoder2;
   private AnalogPotentiometer m_POTS;
+  private int m_potsPort;
+  private double m_targetPos = 0;
+  private boolean m_isWrappingAround = false;
+  private GenericEntry m_wrapWidgetEntry;
 
     private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
   private final double kPotsHighLimit=Constants.TurretConstants.TurretRightLimitPOTS;
@@ -62,9 +69,10 @@ public class TurretSubsystemPots extends SubsystemBase {
   private final double kDegreesPerRotation=0;
   private DutyCycleOut m_TurretDutyCycleOut = new DutyCycleOut(0.0);
   private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
- 
+  
  // private MotionMagicVelocityVoltage mmRequest = new MotionMagicVelocityVoltage (0);
   public TurretSubsystemPots(int CanId1, int potsPort) {
+    m_potsPort = potsPort;
     SmartDashboard.putNumber("Target Turret Angle",0);
     m_target=TargetType.HUB;
     m_POTS = new AnalogPotentiometer(potsPort,1,0); 
@@ -74,6 +82,10 @@ public class TurretSubsystemPots extends SubsystemBase {
    
     m_turretMotor.getConfigurator().apply(motorConfig);
     configureMotionMagic();
+
+    m_wrapWidgetEntry = Shuffleboard.getTab("Turret")
+                           .add("Wrapping Around", false)
+                           .getEntry();
    
    /* m_encoder1 = new CANcoder(encoder1ID);
     
@@ -140,13 +152,14 @@ public class TurretSubsystemPots extends SubsystemBase {
   }
  
   public void moveMotor(double targetmotorPosition){
+    m_targetPos = targetmotorPosition;
     if((targetmotorPosition>kLowerLimit) && (targetmotorPosition<kUpperLimit)){ 
          m_turretMotor.setControl(mmRequest.withPosition(targetmotorPosition)); 
  
     } else {
       //System.out.println("Move Target out of Range");
     }
-      } 
+  } 
       
     
     private void trackTurretToAngle(double angle){
@@ -215,6 +228,16 @@ public double getCurrentAngle(){
 public double getCurrentPosition(){
   return m_turretMotor.getPosition().getValueAsDouble();
 }
+public boolean isWrappingAround() {
+  double currentPos = getCurrentPosition();
+  double diffDegrees = Math.abs(m_targetPos - currentPos) * kMotorRotationsToAngle;
+  if (diffDegrees > 180) {
+    m_isWrappingAround = true;
+  } else if (diffDegrees <= Constants.TurretConstants.wraparoundEndThresholdDegrees) {
+    m_isWrappingAround = false;
+  }
+  return m_isWrappingAround;
+}
 public void turretTrack(TargetType target){
 
 }
@@ -275,6 +298,10 @@ private double POTStoRotations(double POTSValue ){
     SmartDashboard.putNumber("POTS Angle",m_POTS.get()*3600/kGearReduction);
     SmartDashboard.putNumber("POTS Offset Angle",(m_POTS.get()*3600/kGearReduction)-225);
     SmartDashboard.putNumber("Motor Rotation Angle",getTurretAngleFromMotor());
+    SmartDashboard.putBoolean("Turret Wrapping Around", isWrappingAround());
+    if (m_wrapWidgetEntry != null) {
+      m_wrapWidgetEntry.setBoolean(isWrappingAround());
+    }
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
     Logger.recordOutput("Turret/POTS Position", m_POTS.get());
@@ -288,5 +315,24 @@ private double POTStoRotations(double POTSValue ){
     }  //SmartDashboard.putBoolean("AtLimit",atLimit(m_speed));
     //SmartDashboard.putNumber("POTS",m_POTS.; 
 */
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // Move towards targetPos gradually in simulation to simulate motor speed
+    double currentSimPos = m_turretMotor.getPosition().getValueAsDouble();
+    double simSpeed = 1.0; // rotations per 20ms loop (50 rotations/sec)
+    if (currentSimPos < m_targetPos) {
+      currentSimPos = Math.min(m_targetPos, currentSimPos + simSpeed);
+    } else if (currentSimPos > m_targetPos) {
+      currentSimPos = Math.max(m_targetPos, currentSimPos - simSpeed);
+    }
+    m_turretMotor.getSimState().setRawRotorPosition(currentSimPos);
+
+    double simulatedPOTS = (currentSimPos / 56.25) + 0.851;
+    simulatedPOTS = Math.max(0.15, Math.min(0.85, simulatedPOTS));
+
+    AnalogInputSim potsSim = new AnalogInputSim(m_potsPort);
+    potsSim.setVoltage(simulatedPOTS * RobotController.getVoltage5V());
   }
 }

@@ -41,30 +41,12 @@ public class HubLookUpTable {
         // KrakenX60 shooting 226g ball - optimized for constant RPS ~75
         
         addEntry(1.8,  45, 0.0, 1); 
-        addEntry(1.91,  46, 0.0, 1); 
-        addEntry(2.06,  47, 0.0, 1); 
-        addEntry(2.23,  48, 0.0, 1);  
-        addEntry(2.31,  50, 0.0, 1);  
-        addEntry(2.39,  51, 0.0, 1);  
-        addEntry(2.52,  51, 0.1, 0.9);  
-        addEntry(2.65,  52, 0.1, 0.85);  
-        addEntry(2.8,  53, 0.1, 0.85);  
-        addEntry(3.14,  53, 0.2, 0.85);  
-        addEntry(3.32,  53, 0.3, 0.85);  
-        addEntry(3.37,  53.2, 0.3, 0.85);  
-        addEntry(3.41,  53.8, 0.3, 0.85);  
-        addEntry(3.50,  54.54, 0.3, 0.85);  
-        addEntry(3.56,  56, 0.3, 0.85);  
-        addEntry(3.74   ,  56.3, 0.35, 0.85);  
-        addEntry(3.86   ,  57, 0.32, 0.85);  
-       
-        addEntry(3.90   ,  57.5, 0.32, 0.85);  
-        addEntry(4.2   ,  57.5, 0.35, 0.85);  
-        addEntry(4.77   ,  60, 0.4, 0.85);  
-        addEntry(5.59   ,  64, 0.4, 0.85);  
-        addEntry(5.84      ,  66, 0.4, 0.85);  
-       //GIVE IT ALL THE POWER
-       addEntry(9,  67, 0.36, 1.00);  
+        addEntry(2.05,  47, 0.0, 1.05); 
+        addEntry(2.3,  47, 0.0, 1.11); 
+        addEntry(2.5,  51, 0.1, 1.12);  
+        addEntry(3.01,  53, 0.15, 1.07);  
+ 
+        
        
      /*       addEntry(2,  50, 0.0, 1); 
         addEntry(2.3,  53, 0.0, 1);  
@@ -113,7 +95,32 @@ public class HubLookUpTable {
             return lookupTable.get(upperKey); // Below minimum distance
         }
         if (upperKey == null) {
-            return lookupTable.get(lowerKey); // Above maximum distance
+            // Extrapolate beyond the maximum distance using the last two points
+            Double lastKey = lookupTable.lastKey();
+            Double secondLastKey = lookupTable.lowerKey(lastKey);
+            if (secondLastKey != null) {
+                ShootingParameters lastVal = lookupTable.get(lastKey);
+                ShootingParameters secondLastVal = lookupTable.get(secondLastKey);
+                double dx = lastKey - secondLastKey;
+                if (dx > 0.001) {
+                    double speedSlope = (lastVal.shooterSpeed - secondLastVal.shooterSpeed) / dx;
+                    double angleSlope = (lastVal.hoodPosition - secondLastVal.hoodPosition) / dx;
+                    double tofSlope = (lastVal.timeOfFlight - secondLastVal.timeOfFlight) / dx;
+                    
+                    double overDistance = distance - lastKey;
+                    double extrapolatedSpeed = lastVal.shooterSpeed + speedSlope * overDistance;
+                    double extrapolatedAngle = lastVal.hoodPosition + angleSlope * overDistance;
+                    double extrapolatedTof = Math.max(0.2, lastVal.timeOfFlight + tofSlope * overDistance);
+                    
+                    // Apply speed multiplier
+                    double multiplier = SmartDashboard.getNumber("Speed Adjuster:", 1.0);
+                    if (multiplier != 1.0) {
+                        extrapolatedSpeed = extrapolatedSpeed * multiplier;
+                    }
+                    return new ShootingParameters(extrapolatedSpeed, extrapolatedAngle, extrapolatedTof);
+                }
+            }
+            return lookupTable.get(lowerKey); // Fallback
         }
         
         // Perform linear interpolation
@@ -124,7 +131,7 @@ public class HubLookUpTable {
         
         double interpolatedSpeed = lerp(lower.shooterSpeed, upper.shooterSpeed, ratio);
         double interpolatedAngle = lerp(lower.hoodPosition, upper.hoodPosition, ratio);
-        double interpolatedTime = lerp(lower.timeOfFlight, upper.timeOfFlight, ratio);
+        double interpolatedTime = Math.max(0.2, lerp(lower.timeOfFlight, upper.timeOfFlight, ratio));
         
         //Speed Multiplier
         double multiplier = SmartDashboard.getNumber("Speed Adjuster:",1);

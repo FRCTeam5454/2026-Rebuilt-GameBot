@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.Constants.TurretStates;
@@ -39,16 +40,31 @@ public class TurretUtil {
         public final double shooterSpeedRPS;      // Flywheel speed from lookup table (RPS)
         public final double timeOfFlightSeconds;  // Ball time-of-flight from lookup table (s)
         public final boolean isValid;             // True if shot is within range & turret limits
+        public final double predictedTurretX;      // Field X used for lead compensation (m)
+        public final double predictedTurretY;      // Field Y used for lead compensation (m)
+        public final double leadDistanceMeters;    // How far the turret moves during flight (m)
 
         public ShotSolution(double distanceMeters, double turretAngleDegrees,
                             double trajectoryAngleDegrees, double shooterSpeedRPS,
                             double timeOfFlightSeconds, boolean isValid) {
+            this(distanceMeters, turretAngleDegrees, trajectoryAngleDegrees, shooterSpeedRPS,
+                    timeOfFlightSeconds, isValid, Double.NaN, Double.NaN, 0.0);
+        }
+
+        public ShotSolution(double distanceMeters, double turretAngleDegrees,
+                            double trajectoryAngleDegrees, double shooterSpeedRPS,
+                            double timeOfFlightSeconds, boolean isValid,
+                            double predictedTurretX, double predictedTurretY,
+                            double leadDistanceMeters) {
             this.distanceMeters = distanceMeters;
             this.turretAngleDegrees = turretAngleDegrees;
             this.trajectoryAngleDegrees = trajectoryAngleDegrees;
             this.shooterSpeedRPS = shooterSpeedRPS;
             this.timeOfFlightSeconds = timeOfFlightSeconds;
             this.isValid = isValid;
+            this.predictedTurretX = predictedTurretX;
+            this.predictedTurretY = predictedTurretY;
+            this.leadDistanceMeters = leadDistanceMeters;
         }
     }
 
@@ -74,6 +90,20 @@ public class TurretUtil {
         return robotPose.plus(new Transform2d(
                 new Translation2d(TURRET_OFFSET_X, TURRET_OFFSET_Y),
                 new Rotation2d()));
+    }
+
+    /**
+     * Returns the field-relative velocity of the turret, including robot translation
+     * and the extra tangential velocity caused by robot rotation around its center.
+     */
+    public static Translation2d getFieldRelativeTurretVelocity(Pose2d robotPose, ChassisSpeeds robotRelativeSpeeds) {
+        double omega = robotRelativeSpeeds.omegaRadiansPerSecond;
+        Translation2d robotRelativeTurretVelocity =
+                new Translation2d(
+                        robotRelativeSpeeds.vxMetersPerSecond - omega * TURRET_OFFSET_Y,
+                        robotRelativeSpeeds.vyMetersPerSecond + omega * TURRET_OFFSET_X);
+
+        return robotRelativeTurretVelocity.rotateBy(robotPose.getRotation());
     }
 
     // =========================
@@ -280,7 +310,10 @@ public class TurretUtil {
                 params.hoodPosition,
                 params.shooterSpeed,
                 params.timeOfFlight,
-                valid);
+                valid,
+                virtualX,
+                virtualY,
+                turretNow.getDistance(new Translation2d(virtualX, virtualY)));
     }
 
     // =========================
@@ -295,8 +328,9 @@ public class TurretUtil {
 
     /** True if the turret can physically reach the requested angle. */
     public static boolean isTurretAngleReachable(double angleDegrees) {
-        return angleDegrees >= Constants.TurretConstants.kMinAngleDegrees
-                && angleDegrees <= Constants.TurretConstants.kMaxAngleDegrees;
+        double robotTurretAngle = get5454TurretAngleFromAngle(angleDegrees);
+        return robotTurretAngle >= Constants.TurretConstants.kMinAngleDegrees
+                && robotTurretAngle <= Constants.TurretConstants.kMaxAngleDegrees;
     }
 
     // =========================
