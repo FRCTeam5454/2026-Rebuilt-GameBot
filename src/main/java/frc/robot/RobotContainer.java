@@ -122,14 +122,14 @@ public class RobotContainer {
   public void rightClimb() {
     Command extend = m_climb.climbUpCommand();
     Command retract = m_climb.climbDownCommand();
-    Command align = new AutoAlignPose(true, m_swerve);
+    Command align = AutoAlignPose.alignToClimb(true, m_swerve);
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
   public void leftClimb() {
     Command extend = m_climb.climbUpCommand();
     Command retract = m_climb.climbDownCommand();
-    Command align = new AutoAlignPose(false, m_swerve);
+    Command align = AutoAlignPose.alignToClimb(false, m_swerve);
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
@@ -205,11 +205,11 @@ public class RobotContainer {
   //
   public boolean hasHomed=false;
   public boolean m_hasResetGyro=false;
-  private String m_activeHub="Undefined";
+  private String m_activeHub="Unknown";
   private String m_startHub="";
   private double m_activeHubTime=99999;
   private boolean m_hubMatch=false;
-  private String m_activeHubPhase="Undefined";
+  private String m_activeHubPhase="Unknown";
   private ShotCalculator m_ShotCalculator = new ShotCalculator();
   
 
@@ -415,7 +415,7 @@ public class RobotContainer {
         }
   }
 
-  if((m_startHub.equals("B")) && (Shift==2 || Shift==4)){
+  if(((m_startHub.equals("B")) && (Shift==2 || Shift==4)) || (m_startHub.equals("R") && (Shift==1 || Shift==3))){
     //Blue Hub is Active
     m_activeHub="Blue";
     if(currentAlliance.equals("Blue")){
@@ -423,7 +423,7 @@ public class RobotContainer {
     }else {
         m_hubMatch=false;
     }
-  } else {
+  } else{ 
     //RED Hub is Active
     m_activeHub="Red";
     if(currentAlliance.equals("Red")){
@@ -483,7 +483,7 @@ public class RobotContainer {
 
   }
   private void updateUndefinedHub(){
-    m_activeHub="Undefined";
+    m_activeHub="Unknown";
     m_hubMatch=false;
     m_activeHubTime=99999;
 

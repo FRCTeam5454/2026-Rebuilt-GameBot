@@ -215,8 +215,6 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
 
   public void stopNewShooter(boolean idleMode){
     //System.out.println("stopping shooter");
-    //demo mode change 
-    idleMode=false;
     
     if(idleMode){
     
