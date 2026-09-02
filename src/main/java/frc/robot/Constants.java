@@ -200,7 +200,11 @@ public final class Constants {
     public static final double shooterVelocityLowDeadband=0.1;
     public static final double shooterVelocityHighDeadband=1;
     //6328 Transforms for Turret
-    public static Transform3d robotToTurret = new Transform3d(-0.19685, 0.0, 0.44, Rotation3d.kZero);
+    // X/Y now sourced from TurretConstants.kTurretOffsetX/Y (the team-measured turret position
+    // already used to aim the turret) instead of the leftover 6328 template value, which put the
+    // turret over 5in away from where the aiming code actually thinks it is.
+    public static Transform3d robotToTurret = new Transform3d(
+        TurretConstants.kTurretOffsetX, TurretConstants.kTurretOffsetY, 0.44, Rotation3d.kZero);
     public static Transform3d turretToCamera =
       new Transform3d(
           -0.1314196, 0.0, 0.2770674, new Rotation3d(0.0, Units.degreesToRadians(-22.5), 0.0));
