@@ -166,8 +166,9 @@ switch(m_state){
    
    
         if(m_shooter.atTargetSpeed(targetspeed) && checkTurretPos(targetPos)){
+            startShootTime=Timer.getFPGATimestamp();
             m_state=shooterStates.SHOOT;
-        } 
+        }
         break;
     case SHOOT:
         if(checkTurretPos(targetPos)==false){

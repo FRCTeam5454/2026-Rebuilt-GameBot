@@ -584,7 +584,8 @@ public class RobotContainer {
    LimelightHelpers.PoseEstimate mt2 = limelight.getBotPoseEstimate_wpiBlue_MegaTag2();  
    boolean doRejectUpdate=false; //default to accept vision update
   // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityXDevice().getValueAsDouble()) > 360)
+  // (Z = yaw axis on the Pigeon2; X was roll, which barely moves on a flat field)
+  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 360)
   {
     doRejectUpdate = true;
   }
