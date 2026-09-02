@@ -67,7 +67,6 @@ public class NewShooterSubsystem extends SubsystemBase {
     m_2shooterMotor = new TalonFX(shooter2CANID);
     configureShootermotor(m_2shooterMotor);
     m_2shooterMotor.setNeutralMode(NeutralModeValue.Coast);
-    //m_2shooterMotor.setControl(new Follower(m_1shooterMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     m_hoodMotor = new TalonFX(hoodCANID);
     
     m_kickerMotor = new ObsidianCANSparkMax(kickerCANID, MotorType.kBrushless,false,Constants.k70Amp);
@@ -198,8 +197,6 @@ m_2shooterMotor.setControl(new VelocityVoltage(-targetSpeed));
 
   public void stopNewShooter(boolean idleMode){
     //System.out.println("stopping shooter");
-    //demo mode change 
-    idleMode=false;
     
     if(idleMode){
     
