@@ -347,8 +347,9 @@ public final class Constants {
   }
 
   public static final PPHolonomicDriveController pathPlanDriveController = new PPHolonomicDriveController(
-    new PIDConstants(3.0, 0, 0.25), // Translation constants 
-    new PIDConstants(25.0, 0, 1) // Rotation constants
+    new PIDConstants(3.0, 0, 0.25), // Translation constants
+    new PIDConstants(3.0, 0, 1) // Rotation constants - was 25.0, which saturated angular velocity
+                                // (kAutoMaxAngularSpeed=5 rad/s) on an ~11.5deg heading error. Retune on the real robot.
   );
 
   //SUPPORT for 6328 functions - imported from 2026 project
