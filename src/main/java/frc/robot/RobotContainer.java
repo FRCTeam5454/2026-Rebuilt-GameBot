@@ -270,7 +270,6 @@ public class RobotContainer {
             new ShotOnTheMoveCommand(m_TurretSubsystem, m_swerve, m_newShooter, m_hopper, m_intake,
                 0)
                 .finallyDo((interrupted) -> setTracking(TurretTrackingMethod.HUB))));
-    NamedCommands.registerCommand("turretTrack", new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight));
   }
 
   private void configureButtonBindings(){
@@ -382,15 +381,7 @@ public class RobotContainer {
      m_xBoxOperator.povRight().whileTrue(intakeFoldOut);
      m_xBoxOperator.povRight().onFalse(new CompleteIntakeCommand(m_intake, m_hopper));
     m_xBoxOperator.povUp().whileTrue(new IntakePulseCommand(m_intake));
-//    Command turretTrack = new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight);
-  //  m_xBoxOperator.y().onTrue(turretTrack);
-    
-    
-    
-    
-   // Command turretTrackStop = new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.END, m_turretLimelight);
-   // m_xBoxOperator.x().onTrue(turretTrackStop);
- 
+
     m_xBoxOperator.y().onTrue(Commands.runOnce(()-> swapTarget()));
     m_xBoxOperator.x().onTrue(Commands.runOnce(()->setTracking(TurretTrackingMethod.NOTARGET)));
     
