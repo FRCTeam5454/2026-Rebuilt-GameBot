@@ -221,7 +221,6 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
       runShooterVelocity(Constants.ShooterConstants.IdleSpeed);
     }else {
       m_1shooterMotor.stopMotor();
-      m_2shooterMotor.stopMotor();
     }
     m_kickerMotor.stopMotor();
     hoodMoveToZero();
