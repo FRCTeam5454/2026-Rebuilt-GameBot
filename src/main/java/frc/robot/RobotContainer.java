@@ -146,11 +146,11 @@ public class RobotContainer {
   public Command ShootDepotShootNZ() {
     return new PathPlannerAuto("ShootDepotShootNZ");
   }
-  private void InitialAutonPathfind(){
+  private Command getAutonPathfindCommand(){
     //Magic Comment
     if (m_autoChooser == null) {
       SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
-     // Don't Run anything
+      return Commands.none();
     }
     else {
       try {
@@ -158,47 +158,23 @@ public class RobotContainer {
         Command selectedAuto = m_autoChooser.getSelected();
         if (selectedAuto != null) {
           SmartDashboard.putString("Asher's Cool Message:", "Returning selected Command from auto chooser");
-        //Command autoCommand =  ( new PathPlannerAuto(selectedAuto));
-      
         }
 
-        // Load the path group to obtain the initial pose of the first trajectory.
-        // Use suitable constraints here (these only affect loading; path-following will be handled by the PathPlannerAuto command).
         PathConstraints goToConstraints = new PathConstraints(3.0, 4.0,
           Units.degreesToRadians(540), Units.degreesToRadians(720));
         List<PathPlannerPath> group = PathPlannerAuto.getPathGroupFromAutoFile(selectedAuto.getName());
 
         if (group == null || group.isEmpty()) {
           SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
-          //Do Nothing
+          return Commands.none();
         }else {
-        
-          /*Pose2d startPose = group.get(0).getStartingHolonomicPose().orElse(group.get(0).getStartingDifferentialPose());
-          startPose=FieldConstants.flipIfRed(startPose);
-          Command goToStart = AutoBuilder.pathfindToPose(
-            startPose,
-            goToConstraints,
-            0.0
-          );*/
-          
           Command followAuto = new PathPlannerAuto(selectedAuto.getName());
-
-          // go to start pos then call auto
           SmartDashboard.putString("Asher's Cool Message:","should be running sequence");
-          //add auto to scheduler
-          Pose2d currentPose = m_swerve.getPose2d();
-          if(currentPose.getX()>1 || currentPose.getY()>1) {
-            //disable pathing
-            //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          
-          } else { //no starting pose
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          }
+          return followAuto;
         }
       } catch (Exception e) {
-        // if anything goes wrong (it probably will), fall back to whatever the original chooser provides
         SmartDashboard.putString("Asher's Cool Message:",e.getMessage());
+        return Commands.none();
       }
     }
   }
@@ -711,17 +687,19 @@ Command pathfindingCommand = AutoBuilder.pathfindToPose(
 return pathfindingCommand;
 }
   public void AutonMode(){
-    homeRobot();
     //used fused IMU Mode
     m_backLimelight.SetIMUMode(4);
-     setTracking(TurretTrackingMethod.HUB);
-     m_newShooter.primeMotors(Constants.ShooterConstants.AutoIdleSpeed);
-    InitialAutonPathfind();
+    setTracking(TurretTrackingMethod.HUB);
+    m_newShooter.primeMotors(Constants.ShooterConstants.AutoIdleSpeed);
     
+    Commands.sequence(
+        homeRobotCommand(),
+        getAutonPathfindCommand()
+    ).schedule();
   }
 
   public void TeleopMode(){
-    homeRobot();
+    homeRobotCommand().schedule();
     setTracking(TurretTrackingMethod.HUB);
     m_newShooter.primeMotors(Constants.ShooterConstants.IdleSpeed);
     //used fused IMU Mode
@@ -818,21 +796,25 @@ return pathfindingCommand;
   }
 
   
-  public void homeRobot(){
+  public Command homeRobotCommand(){
     if(!hasHomed){
-      //System.out.println("System is starting Homing- " + DriverStation.getMatchTime());
-     
-      m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
-      m_intake.homeIntake(Constants.homeTimeOut);
-      //System.out.println("Homing Hood");
-      m_newShooter.hoodHome();
-      //System.out.println("Homing Climb");
-      m_climb.homeClimb(Constants.homeTimeOut);
-      //System.out.println("Homing Turret");
-      m_TurretSubsystem.homeTurret();
-      hasHomed = true;
-      //System.out.println("System is completed Homing- " + DriverStation.getMatchTime());
+      return Commands.parallel(
+          Commands.run(m_swerve::brake, m_swerve), // Lock drivetrain during homing
+          Commands.sequence(
+              Commands.runOnce(() -> m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0)),
+              Commands.parallel(
+                  m_intake.homeIntakeCommand(Constants.homeTimeOut),
+                  m_climb.homeClimbCommand(Constants.homeTimeOut)
+              ),
+              Commands.runOnce(() -> {
+                  m_newShooter.hoodHome();
+                  m_TurretSubsystem.homeTurret();
+                  hasHomed = true;
+              })
+          )
+      ).until(() -> hasHomed);
     }
+    return Commands.none();
   }
  
   private void resetDefaultCommand(){
