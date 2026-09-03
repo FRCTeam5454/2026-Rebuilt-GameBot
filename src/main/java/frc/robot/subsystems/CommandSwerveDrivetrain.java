@@ -27,7 +27,6 @@ import frc.robot.RobotState.OdometryObservation;
 import frc.robot.TunerConstants;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -72,8 +71,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // estimate instead of tracking the commanded speed, hurting path-following accuracy.
     private SwerveRequest.ApplyRobotSpeeds autoDrive = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity);
-
-    private SwerveDrivePoseEstimator m_poseEstimator;
 
     private double m_targetGasPedalDriveMult = 1.0;
     private double m_targetGasPedalRotMult = 1.0;
@@ -163,7 +160,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
     }
 
@@ -191,7 +187,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
     }
 
@@ -226,15 +221,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
-    }
-
-    public void buildPoseEstimator(){
-        m_poseEstimator=new SwerveDrivePoseEstimator(getKinematics(),
-                        new Rotation2d(this.getPigeon2().getYaw().getValue()),
-                        this.getState().ModulePositions,getPose2d(), Constants.kPoseEstimatorStandardDeviations, 
-                        Constants.kVisionStandardDeviations);
     }
 
     public void configAutoBuilder(){
@@ -418,11 +405,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-     /*   m_poseEstimator.update(new Rotation2d(this.getPigeon2().getYaw().getValue()),
-                                this.getState().ModulePositions);  */
-         m_poseEstimator.update(this.getPigeon2().getRotation2d(), this.getState().ModulePositions);
-    
-
     // Update odometry
     RobotState.getInstance()
         .addOdometryObservation(
@@ -435,7 +417,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         //Add telemtry
         Logger.recordOutput("SwerveDriveTrain/Yaw", this.getPigeon2().getYaw().getValue());
-        Logger.recordOutput("SwerveDriveTrain/PoseEstimate",m_poseEstimator.getEstimatedPosition());
         Logger.recordOutput("SwerveDriveTrain/ModulePositions",this.getState().ModulePositions);
         Logger.recordOutput("SwerveDriveTrain/GasPedalDriveMult", m_currentGasPedalDriveMult);
         Logger.recordOutput("SwerveDriveTrain/GasPedalRotMult", m_currentGasPedalRotMult);

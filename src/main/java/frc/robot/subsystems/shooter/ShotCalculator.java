@@ -8,7 +8,6 @@ package frc.robot.subsystems.shooter;
 // the root directory of this project.
 
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -91,7 +90,7 @@ public class ShotCalculator {
     timeOfFlightMap.put(4.27071, 1.05);
   }
 
-  public ShootingParameters getParameters(CommandSwerveDrivetrain swerve) {
+  public ShootingParameters getParameters() {
     if (latestParameters != null) {
       return latestParameters;
     }
@@ -99,20 +98,13 @@ public class ShotCalculator {
     // Calculate distance from turret to target
     Translation2d target =
         AllianceFlipUtil.apply(FieldConstantsMA.Hub.topCenterPoint.toTranslation2d());
-       Pose2d turretPosition =
+    Pose2d turretPosition =
         RobotState.getInstance().getEstimatedPose().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
- 
-   // switched to using RobotState for consistency across methods and to reduce the dependency on swerve
-   //     Pose2d turretPosition =
-   //     swerve.getPose2d().transformBy(Constants.ShooterConstants.robotToTurret.toTransform2d());
-   ;
     double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
-    
+
     // Calculate field relative turret velocity
-    //ChassisSpeeds robotVelocity = RobotState.getInstance().getFieldVelocity();
-    //double robotAngle = RobotState.getInstance().getRotation().getRadians();
-    ChassisSpeeds robotVelocity=swerve.getChassisSpeeds();
-    double robotAngle = swerve.getPigeon2().getRotation2d().getRadians();
+    ChassisSpeeds robotVelocity = RobotState.getInstance().getFieldVelocity();
+    double robotAngle = RobotState.getInstance().getRotation().getRadians();
     double turretVelocityX =
         robotVelocity.vxMetersPerSecond
             + robotVelocity.omegaRadiansPerSecond
