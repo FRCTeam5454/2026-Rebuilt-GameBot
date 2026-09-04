@@ -367,7 +367,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // Combined magnitude deadband for translation (avoids stray strafe/drive
             // noise when pushing straight along one axis)
             double magnitude = Math.hypot(rawX, rawY);
-            double translationDeadband = 0.1;
+            double translationDeadband = Constants.swerveDeadband;
             if (magnitude < translationDeadband) {
                 rawX = 0.0;
                 rawY = 0.0;
@@ -381,7 +381,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
 
             // Separate deadband for rotation
-            double rotationDeadband = 0.1;
+            double rotationDeadband = Constants.swerveRotateDeadband;
             if (Math.abs(rawRot) < rotationDeadband) {
                 rawRot = 0.0;
             } else {
