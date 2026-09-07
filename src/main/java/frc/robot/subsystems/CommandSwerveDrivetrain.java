@@ -7,6 +7,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.PointWheelsAt;
@@ -23,7 +24,6 @@ import frc.robot.RobotState.OdometryObservation;
 import frc.robot.TunerConstants;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -63,9 +63,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    private SwerveRequest.ApplyRobotSpeeds autoDrive = new SwerveRequest.ApplyRobotSpeeds();
-
-    private SwerveDrivePoseEstimator m_poseEstimator;
+    // DriveRequestType.Velocity closes the loop on wheel velocity for PathPlanner-driven autos;
+    // without it this defaults to OpenLoopVoltage, so the drive motors just get a raw voltage
+    // estimate instead of tracking the commanded speed, hurting path-following accuracy.
+    private SwerveRequest.ApplyRobotSpeeds autoDrive = new SwerveRequest.ApplyRobotSpeeds()
+        .withDriveRequestType(DriveRequestType.Velocity);
 
     // Target = what the driver/gas pedal input requests right now.
     // Current = slew-rate-limited value actually applied, updated once per periodic().
@@ -157,7 +159,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
     }
 
@@ -185,7 +186,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
     }
 
@@ -220,15 +220,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        buildPoseEstimator();
         configAutoBuilder();
-    }
-
-    public void buildPoseEstimator(){
-        m_poseEstimator=new SwerveDrivePoseEstimator(getKinematics(),
-                        new Rotation2d(this.getPigeon2().getYaw().getValue()),
-                        this.getState().ModulePositions,getPose2d(), Constants.kPoseEstimatorStandardDeviations, 
-                        Constants.kVisionStandardDeviations);
     }
 
     public void configAutoBuilder(){
@@ -457,11 +449,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-     /*   m_poseEstimator.update(new Rotation2d(this.getPigeon2().getYaw().getValue()),
-                                this.getState().ModulePositions);  */
-         m_poseEstimator.update(this.getPigeon2().getRotation2d(), this.getState().ModulePositions);
-    
-
     // Update odometry
     RobotState.getInstance()
         .addOdometryObservation(
@@ -474,7 +461,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         //Add telemtry
         Logger.recordOutput("SwerveDriveTrain/Yaw", this.getPigeon2().getYaw().getValue());
-        Logger.recordOutput("SwerveDriveTrain/PoseEstimate",m_poseEstimator.getEstimatedPosition());
         Logger.recordOutput("SwerveDriveTrain/ModulePositions",this.getState().ModulePositions);
         Logger.recordOutput("SwerveDriveTrain/GasPedalDriveMult", m_currentGasPedalDriveMult);
         Logger.recordOutput("SwerveDriveTrain/GasPedalRotMult", m_currentGasPedalRotMult);

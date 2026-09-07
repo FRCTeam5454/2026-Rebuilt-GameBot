@@ -45,8 +45,10 @@ public final class Constants {
     public static final double kSOTMRampRate = 0.75;
 
     //Support    6328 DriveConstants Class
-    public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.5);
-    public static final double  trackWidthY= edu.wpi.first.math.util.Units.inchesToMeters(27.5);
+    // Must match TunerConstants' module X/Y positions (currently ±13.5in each) so RobotState's
+    // kinematics object agrees with the actual configured swerve geometry.
+    public static final double trackWidthX = edu.wpi.first.math.util.Units.inchesToMeters(27.0);
+    public static final double  trackWidthY= edu.wpi.first.math.util.Units.inchesToMeters(27.0);
   
     public static final Translation2d[] moduleTranslations = {
     new Translation2d(trackWidthX / 2, trackWidthY / 2),
@@ -205,7 +207,11 @@ public final class Constants {
     public static final double shooterVelocityLowDeadband=2.0;
     public static final double shooterVelocityHighDeadband=2.0;
     //6328 Transforms for Turret
-    public static Transform3d robotToTurret = new Transform3d(-0.19685, 0.0, 0.44, Rotation3d.kZero);
+    // X/Y now sourced from TurretConstants.kTurretOffsetX/Y (the team-measured turret position
+    // already used to aim the turret) instead of the leftover 6328 template value, which put the
+    // turret over 5in away from where the aiming code actually thinks it is.
+    public static Transform3d robotToTurret = new Transform3d(
+        TurretConstants.kTurretOffsetX, TurretConstants.kTurretOffsetY, 0.44, Rotation3d.kZero);
     public static Transform3d turretToCamera =
       new Transform3d(
           -0.1314196, 0.0, 0.2770674, new Rotation3d(0.0, Units.degreesToRadians(-22.5), 0.0));
@@ -341,8 +347,9 @@ public final class Constants {
   }
 
   public static final PPHolonomicDriveController pathPlanDriveController = new PPHolonomicDriveController(
-    new PIDConstants(3.0, 0, 0.25), // Translation constants 
-    new PIDConstants(25.0, 0, 1) // Rotation constants
+    new PIDConstants(3.0, 0, 0.25), // Translation constants
+    new PIDConstants(3.0, 0, 1) // Rotation constants - was 25.0, which saturated angular velocity
+                                // (kAutoMaxAngularSpeed=5 rad/s) on an ~11.5deg heading error. Retune on the real robot.
   );
 
   //SUPPORT for 6328 functions - imported from 2026 project

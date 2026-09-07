@@ -108,6 +108,7 @@ public class ShootMappingCommand extends Command {
     case WAIT:
         m_shooter.HoodSetPos(m_hoodPos);   
         if(m_shooter.atTargetSpeed(m_speed)){
+            startShootTime=Timer.getFPGATimestamp();
             m_state=shooterStates.SHOOT;
         }
       break;

@@ -122,14 +122,14 @@ public class RobotContainer {
   public void rightClimb() {
     Command extend = m_climb.climbUpCommand();
     Command retract = m_climb.climbDownCommand();
-    Command align = new AutoAlignPose(true, m_swerve);
+    Command align = AutoAlignPose.alignToClimb(true, m_swerve);
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
   public void leftClimb() {
     Command extend = m_climb.climbUpCommand();
     Command retract = m_climb.climbDownCommand();
-    Command align = new AutoAlignPose(false, m_swerve);
+    Command align = AutoAlignPose.alignToClimb(false, m_swerve);
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
@@ -205,11 +205,11 @@ public class RobotContainer {
   //
   public boolean hasHomed=false;
   public boolean m_hasResetGyro=false;
-  private String m_activeHub="Undefined";
+  private String m_activeHub="Unknown";
   private String m_startHub="";
   private double m_activeHubTime=99999;
   private boolean m_hubMatch=false;
-  private String m_activeHubPhase="Undefined";
+  private String m_activeHubPhase="Unknown";
   private ShotCalculator m_ShotCalculator = new ShotCalculator();
   
 
@@ -270,7 +270,6 @@ public class RobotContainer {
             new ShotOnTheMoveCommand(m_TurretSubsystem, m_swerve, m_newShooter, m_hopper, m_intake,
                 0)
                 .finallyDo((interrupted) -> setTracking(TurretTrackingMethod.HUB))));
-    NamedCommands.registerCommand("turretTrack", new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight));
   }
 
   private void configureButtonBindings(){
@@ -382,15 +381,7 @@ public class RobotContainer {
      m_xBoxOperator.povRight().whileTrue(intakeFoldOut);
      m_xBoxOperator.povRight().onFalse(new CompleteIntakeCommand(m_intake, m_hopper));
     m_xBoxOperator.povUp().whileTrue(new IntakePulseCommand(m_intake));
-//    Command turretTrack = new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.TRACK, m_turretLimelight);
-  //  m_xBoxOperator.y().onTrue(turretTrack);
-    
-    
-    
-    
-   // Command turretTrackStop = new TurretTrackCommand(m_TurretSubsystem, m_swerve, TurretStates.END, m_turretLimelight);
-   // m_xBoxOperator.x().onTrue(turretTrackStop);
- 
+
     m_xBoxOperator.y().onTrue(Commands.runOnce(()-> swapTarget()));
     m_xBoxOperator.x().onTrue(Commands.runOnce(()->setTracking(TurretTrackingMethod.NOTARGET)));
     
@@ -415,7 +406,7 @@ public class RobotContainer {
         }
   }
 
-  if((m_startHub.equals("B")) && (Shift==2 || Shift==4)){
+  if(((m_startHub.equals("B")) && (Shift==2 || Shift==4)) || (m_startHub.equals("R") && (Shift==1 || Shift==3))){
     //Blue Hub is Active
     m_activeHub="Blue";
     if(currentAlliance.equals("Blue")){
@@ -423,7 +414,7 @@ public class RobotContainer {
     }else {
         m_hubMatch=false;
     }
-  } else {
+  } else{ 
     //RED Hub is Active
     m_activeHub="Red";
     if(currentAlliance.equals("Red")){
@@ -483,7 +474,7 @@ public class RobotContainer {
 
   }
   private void updateUndefinedHub(){
-    m_activeHub="Undefined";
+    m_activeHub="Unknown";
     m_hubMatch=false;
     m_activeHubTime=99999;
 
@@ -599,7 +590,8 @@ public class RobotContainer {
    LimelightHelpers.PoseEstimate mt2 = limelight.getBotPoseEstimate_wpiBlue_MegaTag2();  
    boolean doRejectUpdate=false; //default to accept vision update
   // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityXDevice().getValueAsDouble()) > 360)
+  // (Z = yaw axis on the Pigeon2; X was roll, which barely moves on a flat field)
+  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 360)
   {
     doRejectUpdate = true;
   }
@@ -638,20 +630,19 @@ public class RobotContainer {
   
   }
   public void DisabledPeriodic(){
-     rumbleOff(); 
+     rumbleOff();
     // In disabledPeriodic or before match starts
     m_backLimelight.SetIMUMode(1);
-    AllPeriodic();
+    // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     //m_LEDS.setLedState(LEDStates.DISABLED,false);
     //m_LEDS.activateLEDS();
   }
-  
+
   public void AutoPeriodic(){
-   AllPeriodic();
-  
+   // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
    TargetTracking(m_tracking);
-   
-   
+
+
   }
 
   public void makefalsestartPose(){
@@ -746,7 +737,7 @@ return pathfindingCommand;
     }
   }
   public void TeleopPeriodic(){
-    AllPeriodic();
+    // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     TargetTracking(m_tracking);
 //    if (m_newShooter.getCurrentCommand() == null) {
       //Shooter is not being used so move hood back to zero
@@ -810,7 +801,7 @@ return pathfindingCommand;
   public void AllPeriodic(){
     updateOdomFromLimelights();
     m_Field2d.setRobotPose(m_swerve.getPose2d());
-    m_newShooter.setPose(m_swerve.getPose2d());
+    
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime()); //elastic
     SmartDashboard.putNumber("Voltage",RobotController.getBatteryVoltage()); //elastic
     refreshSmartDashboard();

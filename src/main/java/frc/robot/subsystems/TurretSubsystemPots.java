@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -34,6 +35,8 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTableInstance.NetworkMode;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -44,6 +47,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.configs.Slot0Configs;
+
 import edu.wpi.first.wpilibj.simulation.AnalogInputSim;
 import edu.wpi.first.wpilibj.RobotController;
 
@@ -78,8 +82,7 @@ public class TurretSubsystemPots extends SubsystemBase {
     m_POTS = new AnalogPotentiometer(potsPort,1,0); 
     m_turretMotor = new TalonFX(CanId1,"5454Canivore");
     TalonFXConfiguration motorConfig = new TalonFXConfiguration();
-    motorConfig.MotorOutput.NeutralMode=NeutralModeValue.Brake;
-   
+  
     m_turretMotor.getConfigurator().apply(motorConfig);
     configureMotionMagic();
 
@@ -183,6 +186,8 @@ slot0Configs.kP = 2.4;//;//4.8; // A position error of 2.5 rotations results in 
 slot0Configs.kI = 0.01; // no output for integrated error
 slot0Configs.kD = 0.1; // A velocity error of 1 rps results in 0.1 V output
 
+//have it coast since the turret is bascially always moving 
+talonFXConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 // set Motion Magic settings
 MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
 motionMagicConfigs.MotionMagicCruiseVelocity = 80;//80; 

@@ -180,9 +180,11 @@ switch(m_state){
    
    
         if(m_shooter.atTargetSpeed(targetspeed) && checkTurretPos(targetPos)){
+            startShootTime=Timer.getFPGATimestamp();
             m_state=shooterStates.SHOOT;
             stateStartTime=Timer.getFPGATimestamp();
         } 
+        
         break;
     case SHOOT:
           double currentKickerSpeed = (m_turret != null && m_turret.isWrappingAround()) ? 0 : Constants.ShooterConstants.KickerSpeed;

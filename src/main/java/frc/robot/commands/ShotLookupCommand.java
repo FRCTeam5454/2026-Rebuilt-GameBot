@@ -198,6 +198,7 @@ if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
         if(m_shooter.atTargetSpeed(targetspeed)){
             // Capture the turret angle right before we start shooting
        //     m_heldTurretAngle = m_turret.getCurrentAngle();
+            startShootTime=Timer.getFPGATimestamp();
             m_state=shooterStates.SHOOT;
         } else {
           //System.out.println("Not at Speed");
