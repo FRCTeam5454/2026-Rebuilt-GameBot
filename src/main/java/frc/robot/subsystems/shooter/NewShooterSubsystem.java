@@ -128,16 +128,7 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
   public double getShooterSpeed(){
     return m_1shooterMotor.getVelocity().getValueAsDouble();
   }
-  public void setPose(Pose2d pose){
-      m_pose=pose;
-   //   //System.out.println("Pose Set" + m_pose.getX());
-      
-    }
-    public Pose2d getRobotPose(){
-   //   //System.out.println("Reuurning Pose : " + m_pose.getX()); 
-      return m_pose;
-    }
-  
+ 
   
   public boolean checkHoodPos(double hoodTarget, double hoodSpeed,double deadband){
     double hoodDiff=Math.abs(getHoodPos()-hoodTarget);

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.RobotState;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.InputControllers;
 import frc.robot.Constants.PassConstants.PassTargets;
@@ -107,12 +108,12 @@ public class ShootPopcornCommand extends Command {
   double targetspeed=0;
   double hoodPos=0;  
   double distance;
-  Pose2d turretPose;
-  turretPose=m_shooter.getRobotPose();
+  Pose2d robotPose;
+  robotPose=RobotState.getInstance().getEstimatedPose();
   //System.out.println(turretPose.getX());
   if(m_isPass){
       PassLookUpTable.ShootingParameters passParams;
-       distance=TurretUtil.getDistance(m_shooter.getRobotPose(), TurretUtil.getNearestPassTargetType(m_shooter.getRobotPose()));
+       distance=TurretUtil.getDistance(robotPose, TurretUtil.getNearestPassTargetType(robotPose));
       passParams = m_PassLookUpTable.getParameters(distance);
       targetspeed=passParams.shooterSpeed;
       hoodPos=passParams.hoodAngle;
@@ -120,7 +121,7 @@ public class ShootPopcornCommand extends Command {
   
   } else { 
     HubLookUpTable.ShootingParameters shotParams;
-    distance=TurretUtil.getDistance(m_shooter.getRobotPose(),TurretUtil.TargetType.HUB);
+    distance=TurretUtil.getDistance(robotPose,TurretUtil.TargetType.HUB);
     shotParams=m_HubLookupTable.getParameters(distance);
     targetspeed=shotParams.shooterSpeed;
     hoodPos=shotParams.hoodPosition;
