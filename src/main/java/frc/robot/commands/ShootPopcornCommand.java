@@ -44,7 +44,6 @@ public class ShootPopcornCommand extends Command {
   private TurretSubsystemPots m_turret;
   
   private double m_lastDistance; // default distance
-  private double m_lastHoodPos=0; // default hood pos
   private enum shooterStates{
     SPINUP,WAIT,SHOOT,PASSING,END
   } 
@@ -68,7 +67,8 @@ public class ShootPopcornCommand extends Command {
     m_turret=turret;
     addRequirements(m_hopper);
     addRequirements(m_shooter);
-    addRequirements(m_intake);
+    //Allow Intake to be run seperately as well - More Chaos=More Fun
+    //addRequirements(m_intake);
     //DRIVE NOT added by design
   }
 
@@ -113,10 +113,12 @@ public class ShootPopcornCommand extends Command {
   //System.out.println(turretPose.getX());
   if(m_isPass){
       PassLookUpTable.ShootingParameters passParams;
-       distance=TurretUtil.getDistance(robotPose, TurretUtil.getNearestPassTargetType(robotPose));
+      distance=TurretUtil.getDistance(robotPose, TurretUtil.getNearestPassTargetType(robotPose));
       passParams = m_PassLookUpTable.getParameters(distance);
       targetspeed=passParams.shooterSpeed;
       hoodPos=passParams.hoodAngle;
+      System.out.println("Estimated Pass Distance" + distance + "Hood Pos:" + hoodPos + "  Pose:" + robotPose.toString());
+     
       Logger.recordOutput("Shooter/PopcornMode","Pass");
   
   } else { 
@@ -132,13 +134,14 @@ public class ShootPopcornCommand extends Command {
   SmartDashboard.putNumber("Shot Distance ",distance);
 SmartDashboard.putNumber("Shot Speed",targetspeed);
 SmartDashboard.putNumber("Shot Hood",hoodPos);
-  if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
+//Don't need hood Pos checks as this is no longer a blocker
+/*if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
     hoodPos=m_lastHoodPos;
   }else {
     //update last position we moved to only if we are moving the hood Pos
     m_lastHoodPos=hoodPos;
   }
-  
+  */
   Logger.recordOutput("Shooter/ShotLookupState",m_state.toString()); 
   Logger.recordOutput("Shooter/ShotLookupState",m_state.toString());
   Logger.recordOutput("Shooter/ShotDistance",distance);
@@ -190,7 +193,7 @@ SmartDashboard.putNumber("Shot Hood",hoodPos);
           double currentHopperSpeed = (m_turret != null && m_turret.isWrappingAround()) ? Constants.HopperConstants.agitateLowSpeed : Constants.HopperConstants.agitateSpeed;
           m_hopper.agitate(currentHopperSpeed);
           m_shooter.HoodSetPos(hoodPos);
-             if(m_intake.isinNoFlyZone()){
+        if(m_intake.isinNoFlyZone()){
           m_intake.stopIntake();
         } else {
           m_intake.runIntake(Constants.IntakeConstants.highSpeed);
@@ -204,7 +207,6 @@ SmartDashboard.putNumber("Shot Hood",hoodPos);
         //STAY IN THE LOOP FOREVER UNTIL USER STOPS
      break;
     case END:
-        m_shooter.hoodHome();
         returnValue=true;
     break;
   }
