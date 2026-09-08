@@ -14,6 +14,13 @@ public class GasPedalCommand extends Command{
     public GasPedalCommand(CommandSwerveDrivetrain swerve,DoubleSupplier speed){
         m_swerve=swerve;
         m_speed=speed;
+        addRequirements();
+    }
+
+    @Override
+    public void execute(){
+        double gasPedalValue=MathUtil.clamp(Math.abs(m_speed.getAsDouble()-1),0.1,0.5);
+        m_swerve.setGasPedalMult(gasPedalValue,1); //was 0.8 as of 10/3/2025
     }
 
     @Override
@@ -23,9 +30,6 @@ public class GasPedalCommand extends Command{
 
     @Override
     public boolean isFinished(){
-        double gasPedalValue=MathUtil.clamp(Math.abs(m_speed.getAsDouble()-1),0.1,0.5);
-        
-        m_swerve.setGasPedalMult(gasPedalValue,1); //was 0.8 as of 10/3/2025
         return false;
     }
 }
