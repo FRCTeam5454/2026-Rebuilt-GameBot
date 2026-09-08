@@ -98,6 +98,8 @@ public class ShootPopcornCommand extends Command {
     m_intake.stopFold();
     m_intake.SetIntakeOutMode();
     m_shooter.stopNewShooter(true);
+    m_hopper.stopAgitate();
+    m_intake.stopIntake();
   }
 
   // Returns true when the command should end.
