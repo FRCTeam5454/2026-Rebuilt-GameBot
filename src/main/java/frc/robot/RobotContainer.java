@@ -542,6 +542,7 @@ public class RobotContainer {
       SmartDashboard.putNumber("Active Phase Time",m_activeHubTime);
       SmartDashboard.putNumber("LimeLight Distance" , m_turretLimelight.getDistanceInverted());   
       SmartDashboard.putNumber("Hood Position is ", m_newShooter.getHoodPos());
+      SmartDashboard.putNumber("POTS Position is ", m_TurretSubsystem.getTurretPOTS());
       
     SmartDashboard.putBoolean("Is Climb Up ???",m_climb.isClimbUpLimit());
       SmartDashboard.putBoolean("Is Climb Down ???",m_climb.isClimbDownLimit());

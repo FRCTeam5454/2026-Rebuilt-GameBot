@@ -64,7 +64,7 @@ public class TurretSubsystemPots extends SubsystemBase {
   private boolean m_isWrappingAround = false;
   private GenericEntry m_wrapWidgetEntry;
 
-    private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
+  private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
   private final double kPotsHighLimit=Constants.TurretConstants.TurretRightLimitPOTS;
   private double kLowerLimit=-39;
   private double kUpperLimit=5.5;
