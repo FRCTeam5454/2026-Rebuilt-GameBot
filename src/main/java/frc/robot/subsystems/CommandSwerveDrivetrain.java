@@ -380,17 +380,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 rawRot = Math.signum(rawRot) * (Math.abs(rawRot) - rotationDeadband) / (1 - rotationDeadband);
             }
 
-            // Input shaping: square while preserving sign for finer low-speed control
+            // Input shaping: square while preserving sign for finer low-speed control (translation only)
             double shapedX = Math.copySign(rawX * rawX, rawX);
             double shapedY = Math.copySign(rawY * rawY, rawY);
-            double shapedRot = Math.copySign(rawRot * rawRot, rawRot);
 
             // Use the slew-rate-limited "current" mults (updated in periodic()),
             // not the raw target, so gas pedal changes ramp smoothly rather than stepping.
             return drive
                 .withVelocityX(shapedX * TunerConstants.kMaxSpeed * m_currentGasPedalDriveMult)
                 .withVelocityY(shapedY * TunerConstants.kMaxSpeed * m_currentGasPedalDriveMult)
-                .withRotationalRate(shapedRot * TunerConstants.kMaxAngularSpeed * m_currentGasPedalRotMult);
+                .withRotationalRate(rawRot * TunerConstants.kMaxAngularSpeed * m_currentGasPedalRotMult);
         });
     }
 
