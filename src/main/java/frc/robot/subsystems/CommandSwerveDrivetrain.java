@@ -343,7 +343,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @return Command to run
      */
     public Command applyRequestDrive(CommandXboxController driveController, int translationAxis, int strafeAxis, int rotationAxis) {
-        SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
+        SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDriveRequestType(DriveRequestType.Velocity);
         // Deadband handled manually below on raw stick input (before gas pedal
         // multiplier is applied), so it stays correct at any throttle level.
         // Do NOT use withDeadband/withRotationalDeadband here — that deadband is a
