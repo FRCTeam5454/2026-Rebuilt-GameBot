@@ -101,7 +101,8 @@ private static final Slot0Configs steerGains = new Slot0Configs()
 
     public static final double kAutoMaxSpeed=7;
     public static final double kAutoMaxAngularSpeed=5; //was 6.5 changed to hopefully fix the auto
-    public static final double kMaxSpeed=6;
+    // Matches the drivetrain's real top speed so the full stick range is usable under closed-loop velocity
+    public static final double kMaxSpeed=kSpeedAt12Volts.in(MetersPerSecond);
     public static final double kMaxAngularSpeed=7.5;
 
     // These are only used for simulation
