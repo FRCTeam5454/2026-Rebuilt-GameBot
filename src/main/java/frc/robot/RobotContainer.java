@@ -530,8 +530,14 @@ public class RobotContainer {
         case HUB:
           targetString="Hub";
           break;
+        case PASS:
+          targetString="Pass";
+          break;
         case TURRET:
           targetString="Turret";
+          break;
+        case NOTARGET:
+          targetString="None";
           break;
         default:
           targetString="";
