@@ -70,7 +70,7 @@ public class TurretSubsystemPots extends SubsystemBase {
   private double kUpperLimit=5.5;
   private final double kGearReduction=8;  //80t to 10tooth
   private final double kMotorRotationsToAngle=7.87499;//7.80;
-  private final double kDegreesPerRotation=0;
+  private final double kDegreesPerRotation=kMotorRotationsToAngle; // turret degrees per motor rotation
   private DutyCycleOut m_TurretDutyCycleOut = new DutyCycleOut(0.0);
   private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
   
