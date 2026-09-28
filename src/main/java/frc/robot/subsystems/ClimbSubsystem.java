@@ -44,17 +44,23 @@ public class ClimbSubsystem extends SubsystemBase {
     return !m_climbDownSwitch.get();
   }
 
-  public void homeClimb(double maxHomeTime){
-    //pull climb down until we hit limit switch and then reset position
-    double startTime = Timer.getFPGATimestamp();
-    double endTime = startTime + maxHomeTime;
-    //System.out.println("Climb is starting homing");
-    while(!isClimbDownLimit() && Timer.getFPGATimestamp()<endTime){
-     m_climbMotor.set(ClimbConstants.climbBackSpeed);
-    }
-    m_climbMotor.stopMotor();
-    //System.out.println("Climb has homed");
-    m_homed=true;
+  /**
+   * Pulls the climb down until the limit switch trips (or maxHomeTime passes).
+   * Runs as a command so it doesn't block the main robot loop.
+   */
+  public Command homeCommand(double maxHomeTime){
+    return Commands.startEnd(()->climbGo(ClimbConstants.climbBackSpeed), ()->stopClimb(), this)
+        .until(this::isClimbDownLimit)
+        .withTimeout(maxHomeTime)
+        .finallyDo((interrupted)->{
+          if(!interrupted){
+            m_homed=true;
+          }
+        });
+  }
+
+  public boolean hasHomed(){
+    return m_homed;
   }
 
   public void climbGo(double speed) {

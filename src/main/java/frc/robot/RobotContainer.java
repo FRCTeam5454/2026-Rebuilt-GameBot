@@ -190,10 +190,10 @@ public class RobotContainer {
           if(currentPose.getX()>1 || currentPose.getY()>1) {
             //disable pathing
             //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          
+            CommandScheduler.getInstance().schedule(Commands.sequence(homeIntakeCommand(), followAuto));
+
           } else { //no starting pose
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
+            CommandScheduler.getInstance().schedule(Commands.sequence(homeIntakeCommand(), followAuto));
           }
         }
       } catch (Exception e) {
@@ -710,16 +710,19 @@ return pathfindingCommand;
 }
   public void AutonMode(){
     homeRobot();
+    // Climb homes alongside the auto; the auto itself waits for intake homing (see InitialAutonPathfind)
+    CommandScheduler.getInstance().schedule(homeClimbCommand());
     //used fused IMU Mode
     m_backLimelight.SetIMUMode(4);
      setTracking(TurretTrackingMethod.HUB);
      m_newShooter.primeMotors(Constants.ShooterConstants.AutoIdleSpeed);
     InitialAutonPathfind();
-    
+
   }
 
   public void TeleopMode(){
     homeRobot();
+    CommandScheduler.getInstance().schedule(homeIntakeCommand(), homeClimbCommand());
     setTracking(TurretTrackingMethod.HUB);
     m_newShooter.primeMotors(Constants.ShooterConstants.IdleSpeed);
     //used fused IMU Mode
@@ -821,16 +824,23 @@ return pathfindingCommand;
       //System.out.println("System is starting Homing- " + DriverStation.getMatchTime());
      
       m_backLimelight.SetRobotOrientation(m_swerve.getPose2d().getRotation().getDegrees(),0);
-      m_intake.homeIntake(Constants.homeTimeOut);
       //System.out.println("Homing Hood");
       m_newShooter.hoodHome();
-      //System.out.println("Homing Climb");
-      m_climb.homeClimb(Constants.homeTimeOut);
       //System.out.println("Homing Turret");
       m_TurretSubsystem.homeTurret();
       hasHomed = true;
       //System.out.println("System is completed Homing- " + DriverStation.getMatchTime());
     }
+  }
+
+  // Intake and climb homing run as commands so they don't block the main loop.
+  // Each only runs until it has completed once.
+  private Command homeIntakeCommand(){
+    return Commands.either(Commands.none(), m_intake.homeCommand(Constants.homeTimeOut), m_intake::hasHomed);
+  }
+
+  private Command homeClimbCommand(){
+    return Commands.either(Commands.none(), m_climb.homeCommand(Constants.homeTimeOut), m_climb::hasHomed);
   }
  
   private void resetDefaultCommand(){

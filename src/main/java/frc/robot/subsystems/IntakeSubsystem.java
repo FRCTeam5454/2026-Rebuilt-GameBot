@@ -64,24 +64,28 @@ public class IntakeSubsystem extends SubsystemBase {
     return !m_intakeSwitch.get();
   }
 
-  public void homeIntake(double maxHomeTime){
+  /**
+   * Pulls the intake in until the limit switch trips (or maxHomeTime passes) and then zeroes the
+   * fold encoder. Runs as a command so it doesn't block the main robot loop.
+   */
+  public Command homeCommand(double maxHomeTime){
     if (RobotBase.isSimulation()) {
-      m_fold.stopMotor();
-      m_fold.getEncoder().setPosition(0.0);
-      SetIntakeInMode();
-      m_homed = true;
-      return;
+      return Commands.runOnce(()->finishHoming(), this);
     }
-    //pull intake until we hit limit switch and then reset position
-     double startTime = Timer.getFPGATimestamp();
-     double endTime = startTime + maxHomeTime;
-    //System.out.println("Intake is starting homing");
-    while(!isIntakeSwitched() && Timer.getFPGATimestamp()<endTime){
-     m_fold.set(-Constants.IntakeConstants.foldHomeSpeed);
-    }
+    return Commands.run(()->m_fold.set(-Constants.IntakeConstants.foldHomeSpeed), this)
+        .until(this::isIntakeSwitched)
+        .withTimeout(maxHomeTime)
+        .finallyDo((interrupted)->{
+          m_fold.stopMotor();
+          if(!interrupted){
+            finishHoming();
+          }
+        });
+  }
+
+  private void finishHoming(){
     m_fold.stopMotor(); // stop intake
     m_fold.getEncoder().setPosition(0.0); // reset encoder to zero at home in
-    //System.out.println("Intake has homed");
     SetIntakeInMode();
     m_homed=true;
   }
