@@ -258,8 +258,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
+    /**
+     * Makes the robot's current facing "forward" for the driver (0 deg on blue, 180 deg on red),
+     * like CTRE's seedFieldCentric(). Zeroing the Pigeon directly left the heading equal to
+     * whatever offset the last resetPose() created, not forward.
+     */
     public void gyroReset(){
-        this.getPigeon2().reset();
+        Rotation2d forward = getOperatorForwardDirection();
+        resetRotation(forward);
+        RobotState robotState = RobotState.getInstance();
+        robotState.resetPose(new Pose2d(robotState.getEstimatedPose().getTranslation(), forward));
     }
 
   /**
