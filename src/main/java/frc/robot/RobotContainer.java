@@ -257,7 +257,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("shotLookUpW3", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(3));
     NamedCommands.registerCommand("shotLookUpW8", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(8));
     NamedCommands.registerCommand("shotLookUpW5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake,  m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem).withTimeout(5));
-    NamedCommands.registerCommand("shotLookUp128W5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, 128, m_TurretSubsystem).withTimeout(5));
+    // Distance is in meters (128 in = 3.25 m); the old value of 128 extrapolated the lookup table out to 128 m
+    NamedCommands.registerCommand("shotLookUp128W5", new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, 3.25, m_TurretSubsystem).withTimeout(5));
     NamedCommands.registerCommand("shotOnTheMove",
         Commands.sequence(
             Commands.runOnce(() -> setTracking(TurretTrackingMethod.NOTARGET)),

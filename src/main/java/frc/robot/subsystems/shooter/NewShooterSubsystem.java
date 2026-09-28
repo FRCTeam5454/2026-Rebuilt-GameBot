@@ -39,6 +39,7 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.utilities.ObsidianCANSparkMax;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance.NetworkMode;
 import edu.wpi.first.wpilibj.CAN;
@@ -138,6 +139,8 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
   
 
   public void HoodSetPos(double hoodTarget) {
+    // Never command the hood past its mechanical range
+    hoodTarget = MathUtil.clamp(hoodTarget, HoodConstants.hoodMinPos, HoodConstants.hoodMaxPos);
     m_simTargetHood = hoodTarget;
     System.out.println("Hood Target is " + hoodTarget);
     m_hoodMotor.setControl(m_request.withPosition(hoodTarget));

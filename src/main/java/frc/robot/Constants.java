@@ -230,6 +230,9 @@ public final class Constants {
     public static final double hoodUpSpeed=-0.09;
     public static final double hoodDownSpeed=0.09;
     public static final double hoodDeadband=0.02;
+    // Hood travel limits in hood CANcoder rotations - verify on robot (pass table uses 0.59)
+    public static final double hoodMinPos=0.0;
+    public static final double hoodMaxPos=0.6;
   }
   public enum TurretStates {MANUAL,TRACK,SEARCH,FIXEDLEFT,FIXEDRIGHT,ODOM,END};
   public enum TurretTrackingMethod {HUB,PASS,TURRET,NOTARGET};
