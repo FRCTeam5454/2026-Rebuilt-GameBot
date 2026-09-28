@@ -81,6 +81,19 @@ public class HubLookUpTable {
      * @return Interpolated shooting parameters
      */
     public ShootingParameters getParameters(double distance) {
+        ShootingParameters raw = getRawParameters(distance);
+
+        // Speed multiplier from the dashboard - applied here so every case (exact match,
+        // below range, interpolated, extrapolated) gets it
+        double multiplier = SmartDashboard.getNumber("Speed Adjuster:", 1.0);
+        if (multiplier == 1.0) {
+            return raw;
+        }
+        return new ShootingParameters(raw.shooterSpeed * multiplier, raw.hoodPosition, raw.timeOfFlight);
+    }
+
+    /** Table lookup without the dashboard speed multiplier */
+    private ShootingParameters getRawParameters(double distance) {
         // Check if exact match exists
         if (lookupTable.containsKey(distance)) {
             return lookupTable.get(distance);
@@ -111,12 +124,7 @@ public class HubLookUpTable {
                     double extrapolatedSpeed = lastVal.shooterSpeed + speedSlope * overDistance;
                     double extrapolatedAngle = lastVal.hoodPosition + angleSlope * overDistance;
                     double extrapolatedTof = Math.max(0.2, lastVal.timeOfFlight + tofSlope * overDistance);
-                    
-                    // Apply speed multiplier
-                    double multiplier = SmartDashboard.getNumber("Speed Adjuster:", 1.0);
-                    if (multiplier != 1.0) {
-                        extrapolatedSpeed = extrapolatedSpeed * multiplier;
-                    }
+
                     return new ShootingParameters(extrapolatedSpeed, extrapolatedAngle, extrapolatedTof);
                 }
             }
@@ -132,16 +140,7 @@ public class HubLookUpTable {
         double interpolatedSpeed = lerp(lower.shooterSpeed, upper.shooterSpeed, ratio);
         double interpolatedAngle = lerp(lower.hoodPosition, upper.hoodPosition, ratio);
         double interpolatedTime = Math.max(0.2, lerp(lower.timeOfFlight, upper.timeOfFlight, ratio));
-        
-        //Speed Multiplier
-        double multiplier = SmartDashboard.getNumber("Speed Adjuster:",1);
-        if(!(multiplier==1)){
-            //System.out.println("Changing Speed due to Multiplier-" + multiplier);
-                //increase by multiplier percent
-                interpolatedSpeed=interpolatedSpeed*(multiplier);
-            
 
-        }
         return new ShootingParameters(interpolatedSpeed, interpolatedAngle, interpolatedTime);
     }
 
