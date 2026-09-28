@@ -237,8 +237,9 @@ public class RobotContainer {
   public void configureNamedCommands() {
     NamedCommands.registerCommand("climbAlignR", Commands.runOnce(() -> rightClimb()));
     NamedCommands.registerCommand("climbAlignL", Commands.runOnce(() -> leftClimb()));
-    NamedCommands.registerCommand("expandIntake", Commands.sequence(new InstantCommand(m_intake::SetIntakeOutMode), new IntakeFoldCommand(m_intake))); //this shoulcd fix the intake not folding during autos
-    NamedCommands.registerCommand("shrinkIntake", Commands.sequence(new InstantCommand(m_intake::SetIntakeInMode), new IntakeFoldCommand(m_intake)));
+    // Timeouts keep an auto from stalling if the fold never reaches its encoder limit
+    NamedCommands.registerCommand("expandIntake", Commands.sequence(new InstantCommand(m_intake::SetIntakeOutMode), new IntakeFoldCommand(m_intake).withTimeout(IntakeConstants.foldTimeout))); //this shoulcd fix the intake not folding during autos
+    NamedCommands.registerCommand("shrinkIntake", Commands.sequence(new InstantCommand(m_intake::SetIntakeInMode), new IntakeFoldCommand(m_intake).withTimeout(IntakeConstants.foldTimeout)));
     NamedCommands.registerCommand("agitateon", m_hopper.agitateonCommand());
     NamedCommands.registerCommand("agitateoff", m_hopper.agitateoffCommand());
     NamedCommands.registerCommand("intakeon", m_intake.intakeonCommand());

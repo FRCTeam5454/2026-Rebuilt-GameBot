@@ -174,7 +174,9 @@ public final class Constants {
     public static final double ampOutStop=80;//20;
     public static final double intakeinPos=0.05;
     public static final double intakeRollStop=9;
-    public static final double intakeEndStop=14.2; 
+    public static final double intakeEndStop=14.2;
+    // Failsafe for auto fold commands - verify it's longer than a normal full fold
+    public static final double foldTimeout=3.0;
 
   }
 
