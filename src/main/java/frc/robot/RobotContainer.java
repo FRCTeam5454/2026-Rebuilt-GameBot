@@ -619,8 +619,9 @@ public class RobotContainer {
       //        + " Pose:" + mt2.pose.getX() + "/"+ mt2.pose.getY());
       double timestamp=Utils.fpgaToCurrentTime(mt2.timestampSeconds); // CONVERT Time Units
       m_swerve.addVisionMeasurement(mt2.pose,timestamp);
+      // RobotState's pose buffer is keyed by FPGA time, so give it the unconverted timestamp
       RobotState.getInstance().addVisionObservation(
-        new RobotState.VisionObservation(timestamp, new Pose3d(mt2.pose), VecBuilder.fill(0.1,0.1,9999999)) 
+        new RobotState.VisionObservation(mt2.timestampSeconds, new Pose3d(mt2.pose), VecBuilder.fill(0.1,0.1,9999999))
      );
    
     } else {

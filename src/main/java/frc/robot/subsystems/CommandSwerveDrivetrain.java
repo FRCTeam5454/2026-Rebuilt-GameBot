@@ -454,7 +454,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .addOdometryObservation(
             new OdometryObservation(
                 Timer.getTimestamp(),
-                this.getState().ModulePositions,
+                // clone: CTRE reuses this array on every getState() call, so RobotState would
+                // otherwise compare the array with itself and never see the wheels move
+                this.getState().ModulePositions.clone(),
                 Optional.ofNullable(this.getPigeon2().isConnected() ?
                                 Rotation2d.fromDegrees(this.getPigeon2().getYaw().getValueAsDouble()): null)));
     RobotState.getInstance().setRobotVelocity(getChassisSpeeds());
