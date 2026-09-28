@@ -1,6 +1,7 @@
 package frc.robot.commands;
 import javax.lang.model.util.ElementScanner14;
 import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -70,6 +71,7 @@ public class ShotLookupCommand extends Command {
     m_swerve=swerve;
     m_limelight=limelight;
     m_turret=turret;
+    m_timeLimit=timeLimit;
     overrideDistanceFlag=false;
     
     m_emptyHopper=emptyHopper;
@@ -92,6 +94,7 @@ public class ShotLookupCommand extends Command {
     m_swerve=swerve;
     m_limelight=limelight;
     m_turret=turret;
+    m_timeLimit=timeLimit;
     m_emptyHopper=emptyHopper;
     overrideDistance=distance;
     overrideDistanceFlag=true;
@@ -315,8 +318,12 @@ if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
       break;
     case SHOOTMORE:
             m_shooter.HoodSetPos(hoodPos);
-           
-        //STAY IN THE LOOP FOREVER UNTIL USER STOPS
+
+        //In auto, finish so the rest of the routine can run.
+        //In teleop, STAY IN THE LOOP FOREVER UNTIL USER STOPS
+        if(DriverStation.isAutonomous()){
+          m_state=shooterStates.END;
+        }
      break;
     case NOFUEL2NDCHECK:
         currentTime=Timer.getFPGATimestamp();
