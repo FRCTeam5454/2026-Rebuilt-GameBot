@@ -127,7 +127,7 @@ public class ShotOnTheMoveCommand extends Command {
     SmartDashboard.putString("SOTM/State",m_state.toString());
     Logger.recordOutput("Shooter/SOTM/State",m_state.toString());
     if (m_swerve != null) {
-      m_swerve.setGasPedalMult(Constants.DriveConstants.kSOTMDriveMultiplier, Constants.DriveConstants.kSOTMTurnMultiplier);
+      m_swerve.setSOTMMult(Constants.DriveConstants.kSOTMDriveMultiplier, Constants.DriveConstants.kSOTMTurnMultiplier);
     }
   }
 
@@ -333,7 +333,7 @@ switch(m_state){
       m_intake.stopIntake();
     }
     if (m_swerve != null) {
-      m_swerve.setGasPedalMult(1.0, 1.0);
+      m_swerve.setSOTMMult(1.0, 1.0);
     }
     SmartDashboard.putBoolean("SOTM/Interrupted",interrupted);
     Logger.recordOutput("Shooter/SOTM/Interrupted",interrupted);

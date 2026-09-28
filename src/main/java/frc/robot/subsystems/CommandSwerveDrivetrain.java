@@ -73,6 +73,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Current = slew-rate-limited value actually applied, updated once per periodic().
     private double m_targetGasPedalDriveMult = 1.0;
     private double m_targetGasPedalRotMult = 1.0;
+    // Separate from the gas pedal so releasing the pedal doesn't cancel the SOTM slowdown;
+    // the slower of the two is applied.
+    private double m_targetSOTMDriveMult = 1.0;
+    private double m_targetSOTMRotMult = 1.0;
     private double m_currentGasPedalDriveMult = 1.0;
     private double m_currentGasPedalRotMult = 1.0;
     private final SlewRateLimiter m_driveMultFilter = new SlewRateLimiter(Constants.DriveConstants.kSOTMRampRate, -Constants.DriveConstants.kSOTMRampRate, 1.0);
@@ -413,6 +417,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     /**
+     * Sets the shoot-on-the-move speed multipliers. Combined with the gas pedal by taking the
+     * smaller of the two, so either one can slow the robot without overriding the other.
+     */
+    public void setSOTMMult(double driveMult, double rotMult){
+        m_targetSOTMDriveMult = driveMult;
+        m_targetSOTMRotMult = rotMult;
+    }
+
+    /**
      * Runs the SysId Quasistatic test in the given direction for the routine
      * specified by {@link #m_sysIdRoutineToApply}.
      *
@@ -436,8 +449,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        m_currentGasPedalDriveMult = m_driveMultFilter.calculate(m_targetGasPedalDriveMult);
-        m_currentGasPedalRotMult = m_rotMultFilter.calculate(m_targetGasPedalRotMult);
+        m_currentGasPedalDriveMult = m_driveMultFilter.calculate(Math.min(m_targetGasPedalDriveMult, m_targetSOTMDriveMult));
+        m_currentGasPedalRotMult = m_rotMultFilter.calculate(Math.min(m_targetGasPedalRotMult, m_targetSOTMRotMult));
 
         /** Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
