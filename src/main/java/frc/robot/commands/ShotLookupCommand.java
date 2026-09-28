@@ -185,8 +185,8 @@ if(Math.abs(hoodPos-m_lastHoodPos)<Constants.HoodConstants.hoodDeadband) {
   }
   Logger.recordOutput("Shooter/ShotLookupState",m_state.toString());
   Logger.recordOutput("Shooter/ShotDistance",distance);
-  System.out.println("Shooting Lookup :" + distance + " Actual LL Dist:" + m_limelight.getDistanceInverted() + " Speed:" + targetspeed  + " - State:" + m_state +
-   "Override Flag:" + overrideDistanceFlag);
+  Logger.recordOutput("Shooter/LimelightDistance", m_limelight.getDistanceInverted());
+  Logger.recordOutput("Shooter/ShotOverrideDistance", overrideDistanceFlag);
     switch(m_state){
     case SPINUP:
          m_shooter.HoodSetPos(hoodPos);         

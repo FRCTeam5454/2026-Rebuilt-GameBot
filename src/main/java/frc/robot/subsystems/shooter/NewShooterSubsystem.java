@@ -142,7 +142,7 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
     // Never command the hood past its mechanical range
     hoodTarget = MathUtil.clamp(hoodTarget, HoodConstants.hoodMinPos, HoodConstants.hoodMaxPos);
     m_simTargetHood = hoodTarget;
-    System.out.println("Hood Target is " + hoodTarget);
+    Logger.recordOutput("Shooter/HoodTarget", hoodTarget);
     m_hoodMotor.setControl(m_request.withPosition(hoodTarget));
   }
 

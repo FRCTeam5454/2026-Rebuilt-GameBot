@@ -119,7 +119,7 @@ public class ShootPopcornCommand extends Command {
       passParams = m_PassLookUpTable.getParameters(distance);
       targetspeed=passParams.shooterSpeed;
       hoodPos=passParams.hoodAngle;
-      System.out.println("Estimated Pass Distance" + distance + "Hood Pos:" + hoodPos + "  Pose:" + robotPose.toString());
+      Logger.recordOutput("Shooter/PopcornPose", robotPose);
      
       Logger.recordOutput("Shooter/PopcornMode","Pass");
   
@@ -147,7 +147,7 @@ SmartDashboard.putNumber("Shot Hood",hoodPos);
   Logger.recordOutput("Shooter/ShotLookupState",m_state.toString()); 
   Logger.recordOutput("Shooter/ShotLookupState",m_state.toString());
   Logger.recordOutput("Shooter/ShotDistance",distance);
-  System.out.println("Shooting Lookup :" + distance + " Speed:" + targetspeed  + " - State:" + m_state);
+  Logger.recordOutput("Shooter/ShotTargetSpeed", targetspeed);
   
     switch(m_state){
     case SPINUP:

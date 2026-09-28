@@ -47,7 +47,6 @@ public class IntakeIntakeCommand extends Command {
   boolean returnValue=false;
 
       
-  System.out.println("Shooting - State:" + m_state);
     switch(m_state){
     case ROTATE:
         m_intake.outFold(-Constants.IntakeConstants.foldSpeed);
