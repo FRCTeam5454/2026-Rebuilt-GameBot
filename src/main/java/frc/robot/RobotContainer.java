@@ -71,10 +71,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import frc.robot.subsystems.shooter.ShotCalculator;
 import frc.robot.subsystems.shooter.TurretUtil;
 import frc.robot.subsystems.shooter.TurretUtil.TargetType;
-import frc.robot.subsystems.shooter.PassCalculator.ShootingParameters;
 import frc.robot.RobotState;
 
 public class RobotContainer {
@@ -210,7 +208,6 @@ public class RobotContainer {
   private double m_activeHubTime=99999;
   private boolean m_hubMatch=false;
   private String m_activeHubPhase="Unknown";
-  private ShotCalculator m_ShotCalculator = new ShotCalculator();
   
 
   //
