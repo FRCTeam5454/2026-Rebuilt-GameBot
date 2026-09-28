@@ -65,37 +65,23 @@ public class ClimbSubsystem extends SubsystemBase {
     m_climbMotor.stopMotor();
   }
 
-  public void extendClimb() {
-    
-    m_climbMotor.set(ClimbConstants.climbForwardSpeed);
-    while (!isClimbUpLimit()){
-      //just chill out and wait for robbot
-    }
-    if (isClimbUpLimit()) {
-      m_climbMotor.stopMotor();
-    }
-  }
   public void setClimbSpeed(double speed){
      m_climbMotor.set(speed);
-   
-  }
-  
-  public void retractClimb() {
-    m_climbMotor.set(ClimbConstants.climbBackSpeed);
-    while (!isClimbDownLimit()){
-      //just chill out and wait for robbot
-    }
-    if (isClimbDownLimit()) {
-      m_climbMotor.stopMotor();
-    }
+
   }
 
+  // Runs until the limit switch trips (or the timeout, in case the sensor fails)
+  // without blocking the main robot loop.
   public Command climbUpCommand() {
-    return Commands.runOnce(    ()->extendClimb(),this);
+    return Commands.startEnd(()->climbGo(ClimbConstants.climbForwardSpeed), ()->stopClimb(), this)
+        .until(this::isClimbUpLimit)
+        .withTimeout(ClimbConstants.climbMoveTimeout);
   }
 
   public Command climbDownCommand() {
-    return Commands.runOnce(    ()->retractClimb(),this);
+    return Commands.startEnd(()->climbGo(ClimbConstants.climbBackSpeed), ()->stopClimb(), this)
+        .until(this::isClimbDownLimit)
+        .withTimeout(ClimbConstants.climbMoveTimeout);
   }
 
   @Override
