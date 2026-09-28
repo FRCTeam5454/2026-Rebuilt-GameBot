@@ -586,8 +586,12 @@ public class RobotContainer {
    updatefromLimeLight(m_leftLimelight);
   }  
   public void updatefromLimeLight(Limelight limelight){
-   double yaw =m_swerve.getPigeon2().getRotation2d().getDegrees();
-   limelight.SetRobotOrientation(yaw,0);
+   // MegaTag2 needs the field (blue-origin) heading, not the raw Pigeon yaw -
+   // they differ after a pose reset and on red alliance
+   var swerveState = m_swerve.getState();
+   double yaw = swerveState.Pose.getRotation().getDegrees();
+   double yawRate = Math.toDegrees(swerveState.Speeds.omegaRadiansPerSecond);
+   limelight.SetRobotOrientation(yaw,yawRate);
    
    LimelightHelpers.PoseEstimate mt2 = limelight.getBotPoseEstimate_wpiBlue_MegaTag2();  
    boolean doRejectUpdate=false; //default to accept vision update
@@ -815,7 +819,7 @@ return pathfindingCommand;
     if(!hasHomed){
       //System.out.println("System is starting Homing- " + DriverStation.getMatchTime());
      
-      m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
+      m_backLimelight.SetRobotOrientation(m_swerve.getPose2d().getRotation().getDegrees(),0);
       m_intake.homeIntake(Constants.homeTimeOut);
       //System.out.println("Homing Hood");
       m_newShooter.hoodHome();
