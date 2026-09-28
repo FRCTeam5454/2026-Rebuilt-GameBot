@@ -6,12 +6,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.shooter.FieldConstants;
 import frc.robot.Constants;
-import frc.robot.RobotState;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /**
@@ -37,22 +38,26 @@ public final class AutoAlignPose {
 
     /**
      * @param isAlignRight which side of the climb to align to
-     * @param drivebase    the swerve drivetrain (only used here as the deferred command's
-     *                     requirement; the actual pose comes from {@link RobotState}, which stays
-     *                     vision-corrected, instead of the drivetrain's own pose)
+     * @param drivebase    the swerve drivetrain (the deferred command's requirement, and the
+     *                     source of the vision-corrected pose)
      */
     public static Command alignToClimb(boolean isAlignRight, CommandSwerveDrivetrain drivebase) {
         return Commands.defer(() -> {
             PathConstraints constraints = new PathConstraints(3.0, 4.0,
                 Units.degreesToRadians(540), Units.degreesToRadians(720));
 
-            Pose2d startPose = FieldConstants.flipIfRed(RobotState.getInstance().getEstimatedPose());
-
-            Pose2d climbPose = new Pose2d(
-                isAlignRight ? flipLR(Constants.ClimbConstants.AutoAlign.ySetpoint) : Constants.ClimbConstants.AutoAlign.ySetpoint,
+            // Setpoints are blue-alliance field coordinates: xSetpoint is distance from the
+            // alliance wall, ySetpoint is distance across the field (flipLR mirrors it).
+            Translation2d climbBlue = new Translation2d(
                 Constants.ClimbConstants.AutoAlign.xSetpoint,
-                startPose.getRotation()
+                isAlignRight ? flipLR(Constants.ClimbConstants.AutoAlign.ySetpoint) : Constants.ClimbConstants.AutoAlign.ySetpoint
             );
+            // pathfindToPose doesn't flip for red, so flip the target ourselves
+            Translation2d climbTranslation =
+                FieldConstants.flipIfRed(new Pose2d(climbBlue, Rotation2d.kZero)).getTranslation();
+
+            // Keep the robot's current heading - verify the heading you want at the climb
+            Pose2d climbPose = new Pose2d(climbTranslation, drivebase.getPose2d().getRotation());
 
             return AutoBuilder.pathfindToPose(climbPose, constraints, 0.0);
         }, Set.of(drivebase));
