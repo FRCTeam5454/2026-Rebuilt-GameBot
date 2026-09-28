@@ -123,7 +123,9 @@ public class HubLookUpTable {
                     double overDistance = distance - lastKey;
                     double extrapolatedSpeed = lastVal.shooterSpeed + speedSlope * overDistance;
                     double extrapolatedAngle = lastVal.hoodPosition + angleSlope * overDistance;
-                    double extrapolatedTof = Math.max(0.2, lastVal.timeOfFlight + tofSlope * overDistance);
+                    // A farther shot can't land sooner; don't let a downward-sloping last pair of
+                    // measurements shrink flight time (re-measure time of flight at 3-5 m)
+                    double extrapolatedTof = Math.max(lastVal.timeOfFlight, lastVal.timeOfFlight + tofSlope * overDistance);
 
                     return new ShootingParameters(extrapolatedSpeed, extrapolatedAngle, extrapolatedTof);
                 }
