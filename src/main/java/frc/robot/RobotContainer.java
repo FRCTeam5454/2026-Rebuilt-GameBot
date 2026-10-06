@@ -341,11 +341,14 @@ public class RobotContainer {
     //m_xBoxDriver.start().whileTrue(shootOne);
     //m_xBoxOperator.leftTrigger().whileTrue(shootOne);
     
-    Command pass = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true, m_TurretSubsystem);
-    Command targetPass = Commands.runOnce(()->setTracking(TurretTrackingMethod.PASS));
-    SequentialCommandGroup passIt = new SequentialCommandGroup(targetPass,pass);
-    m_xBoxDriver.x().whileTrue(passIt);
-    m_xBoxOperator.rightTrigger().whileTrue(passIt);
+    m_xBoxDriver.x().whileTrue(Commands.sequence(
+      Commands.runOnce(()->setTracking(TurretTrackingMethod.PASS)),
+      new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true, m_TurretSubsystem))
+      .finallyDo((interrupted)->setTracking(TurretTrackingMethod.HUB)));
+    m_xBoxOperator.rightTrigger().whileTrue(Commands.sequence(
+      Commands.runOnce(()->setTracking(TurretTrackingMethod.PASS)),
+      new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, true, m_TurretSubsystem))
+      .finallyDo((interrupted)->setTracking(TurretTrackingMethod.HUB)));
     
     Command shoot = new ShootPopcornCommand(m_newShooter,m_hopper,m_intake, false, m_TurretSubsystem);
     Command targetHubPopcorn = Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
