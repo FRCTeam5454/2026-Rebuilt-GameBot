@@ -45,7 +45,7 @@ public class HubLookUpTable {
         addEntry(2.3,  47, 0.0, 1.11); 
         addEntry(2.5,  51, 0.1, 1.12);  
         addEntry(3.01,  53, 0.15, 1.07);  
-        addEntry(3.5,  54.54, 0.20, 1.09);  
+        addEntry(3.5,  54.54, 0.18, 1.09);  
  
         
        
