@@ -124,11 +124,12 @@ public class ShotOnTheMoveCommand extends Command {
     m_finished=false;
     startShootTime=Timer.getFPGATimestamp();
     stateStartTime=startShootTime;
-    SmartDashboard.putString("SOTM/State",m_state.toString());
-    Logger.recordOutput("Shooter/SOTM/State",m_state.toString());
     if (m_swerve != null) {
       m_swerve.setGasPedalMult(Constants.DriveConstants.kSOTMDriveMultiplier, Constants.DriveConstants.kSOTMTurnMultiplier);
-    }
+    } 
+    SmartDashboard.putString("SOTM/State",m_state.toString());
+    Logger.recordOutput("Shooter/SOTM/State",m_state.toString());
+
   }
 
 
@@ -137,7 +138,7 @@ public class ShotOnTheMoveCommand extends Command {
   public void execute() {
   double currentTime;
   boolean returnValue=false;
-
+      
 var pose = m_swerve.getPose2d();
 ChassisSpeeds robotRelativeSpeeds = m_swerve.getChassisSpeeds();
 ChassisSpeeds fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, pose.getRotation());
@@ -151,7 +152,9 @@ ShotSolution staticShot = TurretUtil.computeShotSolution(pose, TurretUtil.Target
 double targetspeed=targetShot.shooterSpeedRPS;
 double hoodPos=targetShot.trajectoryAngleDegrees;
 double turretSourceAngle=targetShot.turretAngleDegrees;
-
+ if (m_swerve != null) {
+      m_swerve.setGasPedalMult(Constants.DriveConstants.kSOTMDriveMultiplier, Constants.DriveConstants.kSOTMTurnMultiplier);
+    } 
 //REFERENCE ONLY - DO NOT USE TARGETING
  double StaticTurretAngleTarget=TurretUtil.get5454TurretAngle(pose,TurretUtil.TargetType.HUB);
   //always adjust the angle
