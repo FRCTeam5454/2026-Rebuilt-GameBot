@@ -1,0 +1,147 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.303616974645994,
+        "y": 0.45102382713360845
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.593605843569221,
+        "y": 0.47775532444273383
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.05167469880006,
+        "y": 1.1500843373505996
+      },
+      "prevControl": {
+        "x": 5.910151145758942,
+        "y": 0.4645898714208353
+      },
+      "nextControl": {
+        "x": 6.132187253130958,
+        "y": 1.540061194529032
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.270228915662651,
+        "y": 2.7455301204819285
+      },
+      "prevControl": {
+        "x": 5.822234128259351,
+        "y": 2.374936806355754
+      },
+      "nextControl": {
+        "x": 6.495559048536178,
+        "y": 2.9319292551640834
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.9742180149001936,
+        "y": 2.8536134869341185
+      },
+      "prevControl": {
+        "x": 6.839811246260682,
+        "y": 3.064409171291945
+      },
+      "nextControl": {
+        "x": 7.334201765662849,
+        "y": 2.2890361083704316
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.283477028971927,
+        "y": 1.3469297902540427
+      },
+      "prevControl": {
+        "x": 7.365089500427863,
+        "y": 1.942652225648493
+      },
+      "nextControl": {
+        "x": 7.134024211970937,
+        "y": 0.256013236299901
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.301019369756739,
+        "y": 0.4482579921010381
+      },
+      "prevControl": {
+        "x": 5.762039799262598,
+        "y": 0.8036002867346883
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.1742738589211377,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 1.589211618257267,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 2.526970954356856,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 3.3651452282157606,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 3.8464730290456184,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 4.261410788381701,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.5968094512292309
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
