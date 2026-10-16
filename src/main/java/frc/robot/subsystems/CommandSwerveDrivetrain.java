@@ -18,6 +18,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.OdometryObservation;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -68,6 +70,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // estimate instead of tracking the commanded speed, hurting path-following accuracy.
     private SwerveRequest.ApplyRobotSpeeds autoDrive = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity);
+
+    // Latest pose PathPlanner's path follower is driving toward; null until a recovery path starts.
+    // followPathWithRecovery compares it to our pose to tell when we've been knocked off the path.
+    private Pose2d m_ppTargetPose = null;
 
     // Target = what the driver/gas pedal input requests right now.
     // Current = slew-rate-limited value actually applied, updated once per periodic().
@@ -256,6 +262,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             },
             this // Reference to this subsystem to set requirements
         );
+        PathPlannerLogging.setLogTargetPoseCallback(pose -> m_ppTargetPose = pose);
     }
 
     public void gyroReset(){
@@ -288,6 +295,34 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command createPathCommand(PathPlannerPath path){
         return AutoBuilder.followPath(path);
+    }
+
+    /** Meters between where PathPlanner wants the robot right now and where it actually is. */
+    private double pathError() {
+        Pose2d target = m_ppTargetPose;
+        return target == null ? 0.0 : getPose2d().getTranslation().getDistance(target.getTranslation());
+    }
+
+    /**
+     * Like AutoBuilder.followPath, but if the robot gets knocked more than kRecoveryMaxPathError off
+     * the path (mid-path, or still off when the path's time runs out) it stops following the path and
+     * pathfinds around navgrid.json obstacles to the path's end pose instead.
+     * Event markers in the skipped part of the path won't fire.
+     */
+    public Command followPathWithRecovery(PathPlannerPath path) {
+        double maxError = Constants.AutoConstants.kRecoveryMaxPathError;
+        Pose2d endPose = new Pose2d(
+            path.getPoint(path.numPoints() - 1).position,
+            path.getGoalEndState().rotation());
+
+        return Commands.sequence(
+            Commands.runOnce(() -> m_ppTargetPose = null), // don't compare against the last path's target
+            AutoBuilder.followPath(path).until(() -> pathError() > maxError),
+            Commands.either(
+                AutoBuilder.pathfindToPoseFlipped(endPose, path.getGlobalConstraints(),
+                    path.getGoalEndState().velocityMPS()),
+                Commands.none(),
+                () -> pathError() > maxError));
     }
 
     public boolean checkCANConnections(){
