@@ -37,6 +37,7 @@ import frc.robot.subsystems.shooter.NewShooterSubsystem;
 // import frc.robot.subsystems.shooter.ShooterSubsystem; // unused
 import frc.robot.utilities.Limelight;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.RecoveryAuto;
 import frc.robot.utilities.CANdleLib.LEDColor;
 import frc.robot.utilities.CANdleLib.LEDStrip;
 import frc.robot.utilities.CANdleLib;
@@ -181,7 +182,10 @@ public class RobotContainer {
             0.0
           );*/
           
-          Command followAuto = new PathPlannerAuto(selectedAuto.getName());
+          // "... Recovery" autos pathfind back on course if the robot gets knocked off a path
+          Command followAuto = RecoveryAuto.isRecoveryAuto(selectedAuto.getName())
+            ? RecoveryAuto.build(selectedAuto.getName(), m_swerve)
+            : new PathPlannerAuto(selectedAuto.getName());
 
           // go to start pos then call auto
           SmartDashboard.putString("Asher's Cool Message:","should be running sequence");

@@ -60,7 +60,9 @@ public final class Constants {
   }
 
   public static final class AutoConstants{
-   
+    // followPathWithRecovery: if the robot ends up farther than this (meters) from where the path
+    // says it should be, stop following the path and pathfind to the path's end pose instead.
+    public static final double kRecoveryMaxPathError = 0.75;
   }
 
   
