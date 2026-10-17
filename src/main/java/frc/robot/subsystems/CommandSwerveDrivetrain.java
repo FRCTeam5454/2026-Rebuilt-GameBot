@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
-import java.util.Optional;
 import java.util.function.Supplier;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
@@ -21,7 +20,6 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.Constants;
 import frc.robot.RobotState;
-import frc.robot.RobotState.OdometryObservation;
 import frc.robot.TunerConstants;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.Matrix;
@@ -484,14 +482,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-    // Update odometry
-    RobotState.getInstance()
-        .addOdometryObservation(
-            new OdometryObservation(
-                Timer.getTimestamp(),
-                this.getState().ModulePositions,
-                Optional.ofNullable(this.getPigeon2().isConnected() ?
-                                Rotation2d.fromDegrees(this.getPigeon2().getYaw().getValueAsDouble()): null)));
+    // Share our fused pose (odometry + vision) with RobotState so the shooter aims from the same pose we drive with
+    RobotState.getInstance().setEstimatedPose(getPose2d());
     RobotState.getInstance().setRobotVelocity(getChassisSpeeds());
 
         //Add telemtry

@@ -90,6 +90,23 @@ public final class Constants {
     public static final String leftLimelightName="limelight-two";
     public static final String backLimelightName="limelight-one";
 
+    // Reject MegaTag2 updates while spinning faster than this (deg/s); faster spins blur frames
+    public static final double maxVisionYawRate=270;
+    // Reject MegaTag2 updates while pitch or roll is over this (deg), e.g. on the bump
+    public static final double maxVisionTiltDeg=5;
+    // Vision X/Y std dev (meters) = visionStdDevPerMeterSq * avgTagDist^2 / tagCount, never below visionMinStdDev.
+    // Lower = trust vision more. 0.02 gives ~0.12 for one tag at 2.5m (close to the old fixed 0.1).
+    public static final double visionStdDevPerMeterSq=0.02;
+    public static final double visionMinStdDev=0.05;
+    // Reject single-tag poses farther than this (meters) from the tag
+    public static final double maxSingleTagDist=4.5;
+    // Reject poses more than this (meters) outside the field
+    public static final double fieldBoundsMargin=0.25;
+    // For this long (sec) after the robot is level again, multiply the std dev by postLandingStdDevFactor
+    // so vision corrects bump slip faster
+    public static final double postLandingTrustSec=1.0;
+    public static final double postLandingStdDevFactor=0.5;
+
     //Confidence Max and Min Deadband Values
     public static final double confidenceDeadbandMin=60;
     public static final double confidenceDeadbandMax=140;
