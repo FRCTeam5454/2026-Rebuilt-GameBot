@@ -584,19 +584,31 @@ public class RobotContainer {
 
   }
 
+  // FPGA time we were last tilted (e.g. on the bump); used to reject tilted frames and trust vision more after landing
+  private double m_lastTiltedTime=Double.NEGATIVE_INFINITY;
+  // Capture time of the last frame fused from each Limelight, so the same frame isn't fused twice
+  private final java.util.Map<String, Double> m_lastVisionTimestamps=new java.util.HashMap<>();
+
   public void updateOdomFromLimelights(){
+   // MegaTag2 assumes the robot is flat, so frames taken while pitched/rolled give bad poses
+   double tilt=Math.max(Math.abs(m_swerve.getPigeon2().getPitch().getValueAsDouble()),
+                        Math.abs(m_swerve.getPigeon2().getRoll().getValueAsDouble()));
+   if(tilt > Constants.LimeLightValues.maxVisionTiltDeg){
+     m_lastTiltedTime=Timer.getFPGATimestamp();
+   }
+   SmartDashboard.putNumber("Vision Tilt Deg", tilt);
    updatefromLimeLight(m_backLimelight);
    updatefromLimeLight(m_leftLimelight);
-  }  
+  }
   public void updatefromLimeLight(Limelight limelight){
    double yaw =m_swerve.getPigeon2().getRotation2d().getDegrees();
    limelight.SetRobotOrientation(yaw,0);
    
    LimelightHelpers.PoseEstimate mt2 = limelight.getBotPoseEstimate_wpiBlue_MegaTag2();  
    boolean doRejectUpdate=false; //default to accept vision update
-  // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-  // (Z = yaw axis on the Pigeon2; X was roll, which barely moves on a flat field)
-  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 360)
+  // if we're spinning faster than maxVisionYawRate (deg/s), ignore vision updates - frames get motion blurred
+  // (ZWorld = yaw rate about the field's vertical axis, correct even if the Pigeon2 isn't mounted flat)
+  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble()) > Constants.LimeLightValues.maxVisionYawRate)
   {
     doRejectUpdate = true;
   }
@@ -610,18 +622,48 @@ public class RobotContainer {
   {
     doRejectUpdate = true;
   }
+  // reject frames captured while we were tilted - the camera frame lags the gyro, so compare against
+  // the frame's own capture time (both are FPGA time) instead of just whether we're tilted right now
+  if(mt2.timestampSeconds <= m_lastTiltedTime)
+  {
+    doRejectUpdate = true;
+  }
+  // single tags far away are too noisy to trust
+  if(mt2.tagCount == 1 && mt2.avgTagDist > Constants.LimeLightValues.maxSingleTagDist)
+  {
+    doRejectUpdate = true;
+  }
+  // the robot can't be off the field
+  double margin=Constants.LimeLightValues.fieldBoundsMargin;
+  if(mt2.pose.getX() < -margin || mt2.pose.getX() > FieldConstantsMA.fieldLength + margin
+     || mt2.pose.getY() < -margin || mt2.pose.getY() > FieldConstantsMA.fieldWidth + margin)
+  {
+    doRejectUpdate = true;
+  }
+  // only fuse each camera frame once - this runs every 20ms loop, but a frame can stay on NT for longer
+  Double lastTimestamp=m_lastVisionTimestamps.get(limelight.getLimelightName());
+  if(lastTimestamp != null && mt2.timestampSeconds == lastTimestamp)
+  {
+    doRejectUpdate = true;
+  }
   if(!doRejectUpdate)
     {
-      m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1,9999999));
+      m_lastVisionTimestamps.put(limelight.getLimelightName(), mt2.timestampSeconds);
+      // trust drops with distance squared and improves with more tags
+      double xyStdDev=Math.max(Constants.LimeLightValues.visionMinStdDev,
+          Constants.LimeLightValues.visionStdDevPerMeterSq * mt2.avgTagDist * mt2.avgTagDist / mt2.tagCount);
+      // right after landing, wheel odometry has slip error from the bump, so let vision pull the pose back harder
+      boolean justLanded=mt2.timestampSeconds - m_lastTiltedTime < Constants.LimeLightValues.postLandingTrustSec;
+      if(justLanded){
+        xyStdDev*=Constants.LimeLightValues.postLandingStdDevFactor;
+      }
+      SmartDashboard.putBoolean("Vision Post-Landing Trust", justLanded);
+      SmartDashboard.putNumber("Vision StdDev " + limelight.getLimelightName(), xyStdDev);
       SmartDashboard.putBoolean("Vision Updating from Limelight " + limelight.getLimelightName(),true );
-      ////System.out.println("update vision back - Tag Count: " + mt2.tagCount 
-      //        + " Pose:" + mt2.pose.getX() + "/"+ mt2.pose.getY());
       double timestamp=Utils.fpgaToCurrentTime(mt2.timestampSeconds); // CONVERT Time Units
-      m_swerve.addVisionMeasurement(mt2.pose,timestamp);
-      RobotState.getInstance().addVisionObservation(
-        new RobotState.VisionObservation(timestamp, new Pose3d(mt2.pose), VecBuilder.fill(0.1,0.1,9999999)) 
-     );
-   
+      // RobotState mirrors this pose (see CommandSwerveDrivetrain.periodic), so vision only goes in here
+      m_swerve.addVisionMeasurement(mt2.pose,timestamp,VecBuilder.fill(xyStdDev,xyStdDev,9999999));
+
     } else {
         SmartDashboard.putBoolean("Vision Updating from Limelight " + limelight.getLimelightName(),false );
       }
