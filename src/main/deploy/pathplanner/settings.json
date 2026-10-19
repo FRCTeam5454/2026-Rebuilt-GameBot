@@ -11,7 +11,7 @@
   "autoFolders": [
     "Seth"
   ],
-  "defaultMaxVel": 5.212,
+  "defaultMaxVel": 4.75,
   "defaultMaxAccel": 7.7,
   "defaultMaxAngVel": 720.0,
   "defaultMaxAngAccel": 596.0,
@@ -22,8 +22,8 @@
   "driveWheelRadius": 0.051,
   "driveGearing": 5.9,
   "maxDriveSpeed": 5.23,
-  "driveMotorType": "krakenX60",
-  "driveCurrentLimit": 90.0,
+  "driveMotorType": "krakenX60FOC",
+  "driveCurrentLimit": 60.0,
   "wheelCOF": 1.43,
   "flModuleX": 0.3429,
   "flModuleY": 0.3429,

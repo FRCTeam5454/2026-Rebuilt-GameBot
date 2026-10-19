@@ -32,16 +32,16 @@
     },
     {
       "anchor": {
-        "x": 7.837113636363636,
-        "y": 3.272295454545455
+        "x": 7.899795918369707,
+        "y": 3.451526175694831
       },
       "prevControl": {
-        "x": 7.831403263524735,
-        "y": 2.5876919783505925
+        "x": 7.894085545530806,
+        "y": 2.7669226994999687
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Centerline End"
+      "linkedName": "Double Swipe out end"
     }
   ],
   "rotationTargets": [],
@@ -49,7 +49,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 5.212,
+    "maxVelocity": 4.75,
     "maxAcceleration": 7.7,
     "maxAngularVelocity": 720.0,
     "maxAngularAcceleration": 596.0,
@@ -58,7 +58,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 89.3338000298168
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": "Seth Paths",
