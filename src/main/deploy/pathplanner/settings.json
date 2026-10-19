@@ -11,8 +11,8 @@
   "autoFolders": [
     "Seth"
   ],
-  "defaultMaxVel": 4.5,
-  "defaultMaxAccel": 4.0,
+  "defaultMaxVel": 5.212,
+  "defaultMaxAccel": 7.7,
   "defaultMaxAngVel": 720.0,
   "defaultMaxAngAccel": 596.0,
   "defaultNominalVoltage": 12.0,
