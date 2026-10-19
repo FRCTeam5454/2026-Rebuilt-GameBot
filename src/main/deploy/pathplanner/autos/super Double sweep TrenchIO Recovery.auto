@@ -13,13 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Double sweep out"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Double sweep Back"
+            "pathName": "Super Double sweep out"
           }
         },
         {

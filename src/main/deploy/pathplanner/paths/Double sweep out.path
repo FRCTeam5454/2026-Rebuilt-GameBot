@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.35787951807229,
-        "y": 0.505349397590362
+        "x": 4.368869318181818,
+        "y": 0.4791477272727275
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.122076501337577,
-        "y": 0.7196786363288514
+        "x": 6.9094999999999995,
+        "y": 0.7625852272727274
       },
       "isLocked": false,
       "linkedName": "Trench Start"
     },
     {
       "anchor": {
-        "x": 7.665844444444444,
-        "y": 1.2091111111111104
+        "x": 7.770119318181818,
+        "y": 1.9014886363636365
       },
       "prevControl": {
-        "x": 7.314792299844993,
-        "y": 0.790654639556513
+        "x": 7.679186689356938,
+        "y": 1.5122969849931516
       },
       "nextControl": {
-        "x": 8.08676643457535,
-        "y": 1.7108528993314631
+        "x": 7.898954545454545,
+        "y": 2.452903409090909
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Centerline"
     },
     {
       "anchor": {
-        "x": 7.889966666666666,
-        "y": 3.3333999999999993
+        "x": 7.837113636363636,
+        "y": 3.272295454545455
       },
       "prevControl": {
-        "x": 7.860759333850331,
-        "y": 2.461828917278709
+        "x": 7.831403263524735,
+        "y": 2.5876919783505925
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Double Swipe out end"
+      "linkedName": "Centerline End"
     }
   ],
   "rotationTargets": [],
@@ -58,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 89.3338000298168
   },
   "reversed": false,
   "folder": "Seth Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.0050860052542672
+    "rotation": -0.5641016891324094
   },
   "useDefaultConstraints": true
 }
