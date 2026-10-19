@@ -324,6 +324,8 @@ public final class Constants {
     public static final double climbLimitHigh=0.49;
     public static final double climbForwardSpeed=-1.0;
     public static final double climbBackSpeed=1.0;
+    // longest a climb up/down can run before giving up, in case a limit switch fails
+    public static final double climbTimeout=5.0;
   }
 
   public static final class CoolPanelConstants{

@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -64,25 +66,32 @@ public class IntakeSubsystem extends SubsystemBase {
     return !m_intakeSwitch.get();
   }
 
-  public void homeIntake(double maxHomeTime){
+  /**
+   * Pulls the intake in until the limit switch trips (or maxHomeTime seconds pass), then zeros the
+   * fold encoder. Runs through the scheduler instead of a while loop, so the rest of the robot keeps running.
+   */
+  public Command homeCommand(double maxHomeTime){
     if (RobotBase.isSimulation()) {
-      m_fold.stopMotor();
-      m_fold.getEncoder().setPosition(0.0);
-      SetIntakeInMode();
-      m_homed = true;
-      return;
+      return Commands.runOnce(()->finishHoming(false), this).withName("IntakeHome");
     }
-    //pull intake until we hit limit switch and then reset position
-     double startTime = Timer.getFPGATimestamp();
-     double endTime = startTime + maxHomeTime;
-    //System.out.println("Intake is starting homing");
-    while(!isIntakeSwitched() && Timer.getFPGATimestamp()<endTime){
-     m_fold.set(-Constants.IntakeConstants.foldHomeSpeed);
-    }
-    m_fold.stopMotor(); // stop intake
+    return Commands.startEnd(()->m_fold.set(-Constants.IntakeConstants.foldHomeSpeed), ()->m_fold.stopMotor(), this)
+        .until(this::isIntakeSwitched)
+        .withTimeout(maxHomeTime)
+        .finallyDo((interrupted)->{
+          m_fold.stopMotor();
+          // if interrupted we stopped at an unknown spot, so don't zero the encoder there
+          if(!interrupted){
+            finishHoming(!isIntakeSwitched());
+          }
+        })
+        .withName("IntakeHome");
+  }
+
+  private void finishHoming(boolean timedOut){
+    m_fold.stopMotor();
     m_fold.getEncoder().setPosition(0.0); // reset encoder to zero at home in
-    //System.out.println("Intake has homed");
     SetIntakeInMode();
+    Logger.recordOutput("Intake/HomeTimedOut", timedOut);
     m_homed=true;
   }
   public void SetIntakeInMode(){

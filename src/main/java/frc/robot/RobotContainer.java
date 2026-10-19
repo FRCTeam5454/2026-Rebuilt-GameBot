@@ -147,7 +147,8 @@ public class RobotContainer {
   public Command ShootDepotShootNZ() {
     return new PathPlannerAuto("ShootDepotShootNZ");
   }
-  private void InitialAutonPathfind(){
+  /** Builds the auto picked in the chooser, or returns null if there isn't one. */
+  private Command InitialAutonPathfind(){
     //Magic Comment
     if (m_autoChooser == null) {
       SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
@@ -189,22 +190,16 @@ public class RobotContainer {
 
           // go to start pos then call auto
           SmartDashboard.putString("Asher's Cool Message:","should be running sequence");
-          //add auto to scheduler
-          Pose2d currentPose = m_swerve.getPose2d();
-          if(currentPose.getX()>1 || currentPose.getY()>1) {
-            //disable pathing
-            //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          
-          } else { //no starting pose
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          }
+          //disabled pathing to the start pose: Commands.sequence(goToStart, followAuto)
+          // AutonMode schedules this after homing
+          return followAuto;
         }
       } catch (Exception e) {
         // if anything goes wrong (it probably will), fall back to whatever the original chooser provides
         SmartDashboard.putString("Asher's Cool Message:",e.getMessage());
       }
     }
+    return null;
   }
   //
   public boolean hasHomed=false;
@@ -749,17 +744,19 @@ Command pathfindingCommand = AutoBuilder.pathfindToPose(
 return pathfindingCommand;
 }
   public void AutonMode(){
-    homeRobot();
+    Command homing = homeRobot();
     //used fused IMU Mode
     m_backLimelight.SetIMUMode(4);
      setTracking(TurretTrackingMethod.HUB);
      m_newShooter.primeMotors(Constants.ShooterConstants.AutoIdleSpeed);
-    InitialAutonPathfind();
-    
+    Command auto = InitialAutonPathfind();
+    // home the intake and climb before the auto starts, so autos that fold the intake have a zeroed encoder
+    CommandScheduler.getInstance().schedule(auto == null ? homing : Commands.sequence(homing, auto));
+
   }
 
   public void TeleopMode(){
-    homeRobot();
+    CommandScheduler.getInstance().schedule(homeRobot());
     setTracking(TurretTrackingMethod.HUB);
     m_newShooter.primeMotors(Constants.ShooterConstants.IdleSpeed);
     //used fused IMU Mode
@@ -857,21 +854,22 @@ return pathfindingCommand;
   }
 
   
-  public void homeRobot(){
-    if(!hasHomed){
-      //System.out.println("System is starting Homing- " + DriverStation.getMatchTime());
-     
-      m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
-      m_intake.homeIntake(Constants.homeTimeOut);
-      //System.out.println("Homing Hood");
-      m_newShooter.hoodHome();
-      //System.out.println("Homing Climb");
-      m_climb.homeClimb(Constants.homeTimeOut);
-      //System.out.println("Homing Turret");
-      m_TurretSubsystem.homeTurret();
-      hasHomed = true;
-      //System.out.println("System is completed Homing- " + DriverStation.getMatchTime());
+  /**
+   * Homes the hood and turret right away, and returns a command that homes the intake and climb
+   * (both wait on limit switches, side by side). The caller schedules it - it used to block the loop.
+   */
+  public Command homeRobot(){
+    if(hasHomed){
+      return Commands.none();
     }
+    m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
+    m_newShooter.hoodHome();
+    m_TurretSubsystem.homeTurret();
+    return Commands.parallel(m_intake.homeCommand(Constants.homeTimeOut),
+                             m_climb.homeCommand(Constants.homeTimeOut))
+        // if interrupted (e.g. disabled mid-home), leave hasHomed false so the next mode homes again
+        .finallyDo((interrupted)->{ if(!interrupted){ hasHomed=true; } })
+        .withName("HomeRobot");
   }
  
   private void resetDefaultCommand(){
