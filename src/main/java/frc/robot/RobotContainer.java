@@ -863,7 +863,9 @@ return pathfindingCommand;
       double targetPos=m_TurretSubsystem.getTargetMotorPosition(angle);
       Logger.recordOutput("Turret/UtilTargetPos",targetPos); 
       double yawRateDegPerSec = m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
-      m_TurretSubsystem.moveMotor(targetPos, yawRateDegPerSec);
+      var speeds = m_swerve.getChassisSpeeds();
+      double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+      m_TurretSubsystem.trackTarget(targetPos, yawRateDegPerSec, speedMps);
 
 }
 
