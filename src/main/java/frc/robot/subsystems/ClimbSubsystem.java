@@ -7,6 +7,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,17 +46,22 @@ public class ClimbSubsystem extends SubsystemBase {
     return !m_climbDownSwitch.get();
   }
 
-  public void homeClimb(double maxHomeTime){
-    //pull climb down until we hit limit switch and then reset position
-    double startTime = Timer.getFPGATimestamp();
-    double endTime = startTime + maxHomeTime;
-    //System.out.println("Climb is starting homing");
-    while(!isClimbDownLimit() && Timer.getFPGATimestamp()<endTime){
-     m_climbMotor.set(ClimbConstants.climbBackSpeed);
-    }
-    m_climbMotor.stopMotor();
-    //System.out.println("Climb has homed");
-    m_homed=true;
+  /**
+   * Drives the climb down until the down limit switch trips, giving up after maxHomeTime seconds.
+   * Runs through the scheduler instead of a while loop, so the rest of the robot keeps running.
+   */
+  public Command homeCommand(double maxHomeTime){
+    return Commands.startEnd(()->m_climbMotor.set(ClimbConstants.climbBackSpeed), ()->m_climbMotor.stopMotor(), this)
+        .until(this::isClimbDownLimit)
+        .withTimeout(maxHomeTime)
+        .finallyDo((interrupted)->{
+          m_climbMotor.stopMotor();
+          if(!interrupted){
+            Logger.recordOutput("Climb/HomeTimedOut", !isClimbDownLimit());
+            m_homed=true;
+          }
+        })
+        .withName("ClimbHome");
   }
 
   public void climbGo(double speed) {
@@ -65,43 +72,36 @@ public class ClimbSubsystem extends SubsystemBase {
     m_climbMotor.stopMotor();
   }
 
-  public void extendClimb() {
-    
-    m_climbMotor.set(ClimbConstants.climbForwardSpeed);
-    while (!isClimbUpLimit()){
-      //just chill out and wait for robbot
-    }
-    if (isClimbUpLimit()) {
-      m_climbMotor.stopMotor();
-    }
-  }
   public void setClimbSpeed(double speed){
      m_climbMotor.set(speed);
    
   }
-  
-  public void retractClimb() {
-    m_climbMotor.set(ClimbConstants.climbBackSpeed);
-    while (!isClimbDownLimit()){
-      //just chill out and wait for robbot
-    }
-    if (isClimbDownLimit()) {
-      m_climbMotor.stopMotor();
-    }
-  }
 
+  // Timeouts stop the climb if a limit switch fails, instead of running forever
   public Command climbUpCommand() {
-    return Commands.runOnce(    ()->extendClimb(),this);
+    return Commands.startEnd(()->setClimbSpeed(ClimbConstants.climbForwardSpeed), ()->stopClimb(), this)
+        .until(this::isClimbUpLimit)
+        .withTimeout(ClimbConstants.climbTimeout)
+        .withName("ClimbUp");
   }
 
   public Command climbDownCommand() {
-    return Commands.runOnce(    ()->retractClimb(),this);
+    return Commands.startEnd(()->setClimbSpeed(ClimbConstants.climbBackSpeed), ()->stopClimb(), this)
+        .until(this::isClimbDownLimit)
+        .withTimeout(ClimbConstants.climbTimeout)
+        .withName("ClimbDown");
   }
 
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("Climb At High Limit",m_climbUpProx.get());
     SmartDashboard.putBoolean("Climb At Low Limit",m_climbDownSwitch.get());
+    Logger.recordOutput("Climb/UpLimit", isClimbUpLimit());
+    Logger.recordOutput("Climb/DownLimit", isClimbDownLimit());
+    Logger.recordOutput("Climb/Homed", m_homed);
+    Logger.recordOutput("Climb/Output", m_climbMotor.get());
+    Logger.recordOutput("Climb/Current", m_climbMotor.getOutputCurrent());
+    Logger.recordOutput("Climb/Position", m_climbMotor.getEncoder().getPosition());
   
   }
 }

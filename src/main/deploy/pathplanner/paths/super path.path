@@ -1,0 +1,147 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.030048192771085,
+        "y": 0.4616385542168677
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.320037061694312,
+        "y": 0.4883700515259931
+      },
+      "isLocked": false,
+      "linkedName": "Shoottrench"
+    },
+    {
+      "anchor": {
+        "x": 6.05167469880006,
+        "y": 1.1500843373505996
+      },
+      "prevControl": {
+        "x": 5.910151145758942,
+        "y": 0.4645898714208354
+      },
+      "nextControl": {
+        "x": 6.132187253130958,
+        "y": 1.540061194529032
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.335795180722892,
+        "y": 2.887590361445783
+      },
+      "prevControl": {
+        "x": 5.8878003933195915,
+        "y": 2.5169970473196086
+      },
+      "nextControl": {
+        "x": 6.561125313596419,
+        "y": 3.073989496127938
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.231867469879518,
+        "y": 2.90944578313253
+      },
+      "prevControl": {
+        "x": 7.097460701240006,
+        "y": 3.1202414674903576
+      },
+      "nextControl": {
+        "x": 7.591851220642173,
+        "y": 2.3448684045688433
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.046096385542168,
+        "y": 1.324927710843374
+      },
+      "prevControl": {
+        "x": 7.52992959200745,
+        "y": 1.681930853477951
+      },
+      "nextControl": {
+        "x": 5.920542168674699,
+        "y": 0.49442168674698883
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.030048192771085,
+        "y": 0.4616385542168677
+      },
+      "prevControl": {
+        "x": 5.491068622276944,
+        "y": 0.8169808488505179
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Shoottrench"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.1742738589211377,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 1.589211618257267,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 2.526970954356856,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 3.323651452282137,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 3.954356846473024,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 4.369294605809129,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.75,
+    "maxAcceleration": 7.7,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 1.0050860052542672
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 1.0050860052542672
+  },
+  "useDefaultConstraints": true
+}

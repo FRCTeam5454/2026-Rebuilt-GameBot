@@ -1,0 +1,111 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.368869318181818,
+        "y": 0.4791477272727275
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.780049637332383,
+        "y": 1.1251550926996523
+      },
+      "isLocked": false,
+      "linkedName": "Trench Start"
+    },
+    {
+      "anchor": {
+        "x": 7.7288920454585135,
+        "y": 1.5922840909070963
+      },
+      "prevControl": {
+        "x": 7.445454545458513,
+        "y": 1.0666363636343692
+      },
+      "nextControl": {
+        "x": 8.03246406841997,
+        "y": 2.1552722062174294
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.899795918369707,
+        "y": 3.451526175694831
+      },
+      "prevControl": {
+        "x": 7.79443595586579,
+        "y": 3.060342880260902
+      },
+      "nextControl": {
+        "x": 7.988660449929367,
+        "y": 3.7814647925713114
+      },
+      "isLocked": false,
+      "linkedName": "Double Swipe out end"
+    },
+    {
+      "anchor": {
+        "x": 6.512687500003967,
+        "y": 1.1233238636343696
+      },
+      "prevControl": {
+        "x": 7.154621761114324,
+        "y": 1.5272255797200969
+      },
+      "nextControl": {
+        "x": 6.297697452273998,
+        "y": 0.9880532378396223
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.030048192771085,
+        "y": 0.4616385542168677
+      },
+      "prevControl": {
+        "x": 5.740980010952903,
+        "y": 0.6832351451259593
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Shoottrench"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.4602122015915118,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 2.0291777188328908,
+      "rotationDegrees": 90.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.75,
+    "maxAcceleration": 7.7,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 596.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 1.0050860052542672
+  },
+  "reversed": false,
+  "folder": "Seth Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -0.5641016891324094
+  },
+  "useDefaultConstraints": true
+}

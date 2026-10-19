@@ -1,15 +1,17 @@
 package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
-import java.util.Optional;
 import java.util.function.Supplier;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest.PointWheelsAt;
 import com.ctre.phoenix6.swerve.SwerveRequest.SwerveDriveBrake;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -18,15 +20,16 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.Constants;
 import frc.robot.RobotState;
-import frc.robot.RobotState.OdometryObservation;
 import frc.robot.TunerConstants;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,6 +38,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -68,6 +72,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // estimate instead of tracking the commanded speed, hurting path-following accuracy.
     private SwerveRequest.ApplyRobotSpeeds autoDrive = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity);
+
+    // Latest pose PathPlanner's path follower is driving toward; null until a recovery path starts.
+    // followPathWithRecovery compares it to our pose to tell when we've been knocked off the path.
+    private Pose2d m_ppTargetPose = null;
+    // times a recovery auto gave up on a path and pathfound instead (logged as Auto/RecoveryCount)
+    private int m_recoveryCount = 0;
 
     // Target = what the driver/gas pedal input requests right now.
     // Current = slew-rate-limited value actually applied, updated once per periodic().
@@ -160,6 +170,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         configAutoBuilder();
+        setUpMotorLogging();
     }
 
     /**
@@ -187,6 +198,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         configAutoBuilder();
+        setUpMotorLogging();
     }
 
     /**
@@ -221,6 +233,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         configAutoBuilder();
+        setUpMotorLogging();
     }
 
     public void configAutoBuilder(){
@@ -256,6 +269,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             },
             this // Reference to this subsystem to set requirements
         );
+        PathPlannerLogging.setLogTargetPoseCallback(pose -> m_ppTargetPose = pose);
+        PathPlannerLogging.setLogActivePathCallback(poses -> Logger.recordOutput("Auto/ActivePath", poses.toArray(new Pose2d[0])));
     }
 
     public void gyroReset(){
@@ -278,8 +293,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withWheelForceFeedforwardsY(driveFF.robotRelativeForcesYNewtons()));
     }
 
+    /** Robot-relative speeds. CTRE already computes these from the module states each odometry update. */
     public ChassisSpeeds getChassisSpeeds(){
-        return this.getKinematics().toChassisSpeeds(this.getState().ModuleStates);
+        return this.getState().Speeds;
     }
 
     public Pose2d getPose2d(){
@@ -288,6 +304,41 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command createPathCommand(PathPlannerPath path){
         return AutoBuilder.followPath(path);
+    }
+
+    /** Meters between where PathPlanner wants the robot right now and where it actually is. */
+    private double pathError() {
+        Pose2d target = m_ppTargetPose;
+        return target == null ? 0.0 : getPose2d().getTranslation().getDistance(target.getTranslation());
+    }
+
+    /**
+     * Like AutoBuilder.followPath, but if the robot gets knocked more than kRecoveryMaxPathError off
+     * the path (mid-path, or still off when the path's time runs out) it stops following the path and
+     * pathfinds around navgrid.json obstacles to the path's end pose instead.
+     * Event markers in the skipped part of the path won't fire.
+     */
+    public Command followPathWithRecovery(PathPlannerPath path) {
+        double maxError = Constants.AutoConstants.kRecoveryMaxPathError;
+        Pose2d endPose = new Pose2d(
+            path.getPoint(path.numPoints() - 1).position,
+            path.getGoalEndState().rotation());
+
+        return Commands.sequence(
+            Commands.runOnce(() -> m_ppTargetPose = null), // don't compare against the last path's target
+            AutoBuilder.followPath(path).until(() -> pathError() > maxError),
+            Commands.either(
+                Commands.sequence(
+                    Commands.runOnce(() -> {
+                        m_recoveryCount++;
+                        Logger.recordOutput("Auto/RecoveryCount", m_recoveryCount);
+                        Logger.recordOutput("Auto/RecoveryPath", path.name);
+                        Logger.recordOutput("Auto/RecoveryErrorMeters", pathError());
+                    }),
+                    AutoBuilder.pathfindToPoseFlipped(endPose, path.getGlobalConstraints(),
+                        path.getGoalEndState().velocityMPS())),
+                Commands.none(),
+                () -> pathError() > maxError));
     }
 
     public boolean checkCANConnections(){
@@ -449,21 +500,122 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-    // Update odometry
-    RobotState.getInstance()
-        .addOdometryObservation(
-            new OdometryObservation(
-                Timer.getTimestamp(),
-                this.getState().ModulePositions,
-                Optional.ofNullable(this.getPigeon2().isConnected() ?
-                                Rotation2d.fromDegrees(this.getPigeon2().getYaw().getValueAsDouble()): null)));
-    RobotState.getInstance().setRobotVelocity(getChassisSpeeds());
+    // getState() copies the whole drivetrain state, so read it once per loop
+    SwerveDriveState state = getState();
+    // Share our fused pose (odometry + vision) with RobotState so the shooter aims from the same pose we drive with
+    RobotState.getInstance().setEstimatedPose(state.Pose);
+    RobotState.getInstance().setRobotVelocity(state.Speeds);
 
         //Add telemtry
-        Logger.recordOutput("SwerveDriveTrain/Yaw", this.getPigeon2().getYaw().getValue());
-        Logger.recordOutput("SwerveDriveTrain/ModulePositions",this.getState().ModulePositions);
+        Logger.recordOutput("SwerveDriveTrain/Yaw", state.RawHeading.getDegrees());
+        Logger.recordOutput("SwerveDriveTrain/ModulePositions", state.ModulePositions);
         Logger.recordOutput("SwerveDriveTrain/GasPedalDriveMult", m_currentGasPedalDriveMult);
         Logger.recordOutput("SwerveDriveTrain/GasPedalRotMult", m_currentGasPedalRotMult);
+        Logger.recordOutput("SwerveDriveTrain/Pose", state.Pose);
+        Logger.recordOutput("SwerveDriveTrain/Speeds", state.Speeds);
+        Logger.recordOutput("SwerveDriveTrain/ModuleStates", state.ModuleStates);
+        Logger.recordOutput("SwerveDriveTrain/ModuleTargets", state.ModuleTargets);
+        // odometry health: the period should sit near 4 ms (250 Hz); failed DAQs going up means CAN or CPU trouble
+        Logger.recordOutput("SwerveDriveTrain/OdometryPeriod", state.OdometryPeriod);
+        Logger.recordOutput("SwerveDriveTrain/FailedDaqs", state.FailedDaqs);
+        Logger.recordOutput("SwerveDriveTrain/SuccessfulDaqs", state.SuccessfulDaqs);
+
+        // PathPlanner target and how far off it we are (recovery autos switch to pathfinding past kRecoveryMaxPathError)
+        Pose2d ppTarget = m_ppTargetPose;
+        if (ppTarget != null) {
+            Logger.recordOutput("Auto/TargetPose", ppTarget);
+            Logger.recordOutput("Auto/PathError", state.Pose.getTranslation().getDistance(ppTarget.getTranslation()));
+        }
+
+        logMotors(state);
+    }
+
+    // ---- Per-motor logs: the same set for every drive and steer motor, plus goal vs measured per module ----
+    private static final String[] kModuleNames = {"FL", "FR", "BL", "BR"}; // TunerConstants module order
+    private static final String[] kSignalNames = {"Position", "Velocity", "Voltage", "SupplyCurrent", "StatorCurrent", "TempC"};
+    private static final int kVoltage = 2, kSupply = 3, kStator = 4;
+    private static final String[] kGoalNames = {
+        "Drive/GoalMps", "Drive/MeasuredMps", "Drive/ErrorMps", "Drive/AtGoal",
+        "Steer/GoalDeg", "Steer/MeasuredDeg", "Steer/ErrorDeg", "Steer/AtGoal", "AtGoal"};
+    // a module counts as at its goal within these
+    private static final double kDriveAtGoalMps = 0.2;
+    private static final double kSteerAtGoalDeg = 5.0;
+
+    // motor index = module * 2 for drive, module * 2 + 1 for steer
+    private final BaseStatusSignal[][] m_motorSignals = new BaseStatusSignal[8][];
+    private final BaseStatusSignal[] m_allMotorSignals = new BaseStatusSignal[8 * kSignalNames.length];
+    // keys are built once here so the loop doesn't build strings every 20 ms
+    private final String[][] m_motorKeys = new String[8][kSignalNames.length];
+    private final String[] m_connectedKeys = new String[8];
+    private final String[][] m_goalKeys = new String[4][kGoalNames.length];
+
+    private void setUpMotorLogging() {
+        for (int module = 0; module < 4; module++) {
+            String prefix = "SwerveDriveTrain/Modules/" + kModuleNames[module] + "/";
+            setUpMotor(module * 2, getModule(module).getDriveMotor(), prefix + "Drive/");
+            setUpMotor(module * 2 + 1, getModule(module).getSteerMotor(), prefix + "Steer/");
+            for (int j = 0; j < kGoalNames.length; j++) {
+                m_goalKeys[module][j] = prefix + kGoalNames[j];
+            }
+        }
+    }
+
+    private void setUpMotor(int index, TalonFX motor, String prefix) {
+        BaseStatusSignal[] signals = {
+            // clones: CTRE's 250 Hz odometry thread refreshes the original position/velocity signals,
+            // and StatusSignals aren't thread-safe
+            motor.getPosition(false).clone(),
+            motor.getVelocity(false).clone(),
+            motor.getMotorVoltage(false),
+            motor.getSupplyCurrent(false),
+            motor.getStatorCurrent(false),
+            motor.getDeviceTemp(false)};
+        // voltage and currents default to a slow rate; 50 Hz lines them up with brownouts. Temps stay slow.
+        BaseStatusSignal.setUpdateFrequencyForAll(50, signals[kVoltage], signals[kSupply], signals[kStator]);
+        m_motorSignals[index] = signals;
+        System.arraycopy(signals, 0, m_allMotorSignals, index * signals.length, signals.length);
+        m_connectedKeys[index] = prefix + "Connected";
+        for (int k = 0; k < signals.length; k++) {
+            m_motorKeys[index][k] = prefix + kSignalNames[k];
+        }
+    }
+
+    private void logMotors(SwerveDriveState state) {
+        BaseStatusSignal.refreshAll(m_allMotorSignals); // one CAN call for all 8 motors
+        for (int index = 0; index < 8; index++) {
+            BaseStatusSignal[] signals = m_motorSignals[index];
+            Logger.recordOutput(m_connectedKeys[index], BaseStatusSignal.isAllGood(signals));
+            for (int k = 0; k < signals.length; k++) {
+                Logger.recordOutput(m_motorKeys[index][k], signals[k].getValueAsDouble());
+            }
+        }
+        for (int module = 0; module < 4; module++) {
+            logModuleGoal(m_goalKeys[module], state.ModuleStates[module], state.ModuleTargets[module]);
+        }
+    }
+
+    /** Goal vs measured wheel speed and angle for one module. */
+    private void logModuleGoal(String[] keys, SwerveModuleState measured, SwerveModuleState goal) {
+        double angleErrorDeg = goal.angle.minus(measured.angle).getDegrees(); // -180..180
+        double goalMps = goal.speedMetersPerSecond;
+        // pointing 180 deg the other way and driving backwards is the same goal, so compare against that
+        if (Math.abs(angleErrorDeg) > 90) {
+            angleErrorDeg -= Math.copySign(180, angleErrorDeg);
+            goalMps = -goalMps;
+        }
+        double measuredDeg = measured.angle.getDegrees();
+        double speedErrorMps = goalMps - measured.speedMetersPerSecond;
+        boolean driveAtGoal = Math.abs(speedErrorMps) < kDriveAtGoalMps;
+        boolean steerAtGoal = Math.abs(angleErrorDeg) < kSteerAtGoalDeg;
+        Logger.recordOutput(keys[0], goalMps);
+        Logger.recordOutput(keys[1], measured.speedMetersPerSecond);
+        Logger.recordOutput(keys[2], speedErrorMps);
+        Logger.recordOutput(keys[3], driveAtGoal);
+        Logger.recordOutput(keys[4], measuredDeg + angleErrorDeg);
+        Logger.recordOutput(keys[5], measuredDeg);
+        Logger.recordOutput(keys[6], angleErrorDeg);
+        Logger.recordOutput(keys[7], steerAtGoal);
+        Logger.recordOutput(keys[8], driveAtGoal && steerAtGoal);
     }
 
     private void startSimThread() {
