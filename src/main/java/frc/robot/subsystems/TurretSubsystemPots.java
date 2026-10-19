@@ -71,6 +71,19 @@ public class TurretSubsystemPots extends SubsystemBase {
   private final double kGearReduction=8;  //80t to 10tooth
   private final double kMotorRotationsToAngle=7.87499;//7.80;
   private final double kDegreesPerRotation=0;
+  // Tracking noise rejection: ignore target changes smaller than the deadband and smooth small
+  // changes so pose/vision jitter doesn't keep the turret constantly re-moving (and drawing current).
+  private final double kTargetDeadbandDegrees=1.5;
+  private final double kTargetSmoothing=0.3;       // fraction of the remaining change applied per loop
+  private final double kTargetJumpDegrees=10;      // larger changes skip smoothing (real target moves)
+  private double m_filteredTargetPos = Double.NaN;
+  private double m_lastSentPos = Double.NaN;
+  // Gyro counter-rotation: when the robot spins, drive the turret the opposite way with a velocity
+  // feedforward and lead the target, instead of waiting to fall behind and correcting hard.
+  private final double kYawFeedforwardKV=0.12;       // volts per motor rps (matches slot0 kV)
+  private final double kYawLeadSeconds=0.08;         // how far ahead to aim the target while rotating
+  private final double kYawActiveDegPerSec=5;        // below this the robot counts as not rotating
+  private double m_lastFeedforward = 0;
   private DutyCycleOut m_TurretDutyCycleOut = new DutyCycleOut(0.0);
   private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
   
@@ -155,14 +168,45 @@ public class TurretSubsystemPots extends SubsystemBase {
   }
  
   public void moveMotor(double targetmotorPosition){
-    m_targetPos = targetmotorPosition;
-    if((targetmotorPosition>kLowerLimit) && (targetmotorPosition<kUpperLimit)){ 
-         m_turretMotor.setControl(mmRequest.withPosition(targetmotorPosition)); 
- 
+    moveMotor(targetmotorPosition, 0);
+  }
+
+  /**
+   * Moves the turret to a motor position, counter-rotating against the robot's yaw rate.
+   * @param robotYawRateDegPerSec robot angular velocity from the gyro, CCW positive
+   */
+  public void moveMotor(double targetmotorPosition, double robotYawRateDegPerSec){
+    if((targetmotorPosition>kLowerLimit) && (targetmotorPosition<kUpperLimit)){
+      // Robot CCW rotation increases our (CW-positive) turret angle, and motor position follows it.
+      boolean rotating = Math.abs(robotYawRateDegPerSec) > kYawActiveDegPerSec;
+      double motorRps = rotating ? robotYawRateDegPerSec / kMotorRotationsToAngle : 0;
+      double feedforward = kYawFeedforwardKV * motorRps;
+
+      double jumpDegrees = Math.abs(targetmotorPosition - m_filteredTargetPos) * kMotorRotationsToAngle;
+      if (Double.isNaN(m_filteredTargetPos) || rotating || jumpDegrees > kTargetJumpDegrees) {
+        m_filteredTargetPos = targetmotorPosition; // no smoothing lag while the robot is turning
+      } else {
+        m_filteredTargetPos += kTargetSmoothing * (targetmotorPosition - m_filteredTargetPos);
+      }
+
+      double commandPos = m_filteredTargetPos + motorRps * kYawLeadSeconds;
+      if (commandPos <= kLowerLimit || commandPos >= kUpperLimit) {
+        commandPos = m_filteredTargetPos; // don't lead past the travel limits
+        feedforward = 0;
+      }
+
+      double changeDegrees = Math.abs(commandPos - m_lastSentPos) * kMotorRotationsToAngle;
+      boolean feedforwardChanged = feedforward != m_lastFeedforward;
+      if (Double.isNaN(m_lastSentPos) || changeDegrees >= kTargetDeadbandDegrees || feedforwardChanged) {
+        m_lastSentPos = commandPos;
+        m_lastFeedforward = feedforward;
+        m_targetPos = commandPos;
+        m_turretMotor.setControl(mmRequest.withPosition(commandPos).withFeedForward(feedforward));
+      }
     } else {
       //System.out.println("Move Target out of Range");
     }
-  } 
+  }
       
     
     private void trackTurretToAngle(double angle){
@@ -289,6 +333,8 @@ private double POTStoRotations(double POTSValue ){
   }
   //System.out.println("Homing Position: " + calcHomePos );
   m_turretMotor.setPosition(calcHomePos,1);
+  m_filteredTargetPos = Double.NaN; // position frame changed, so resend the next target
+  m_lastSentPos = Double.NaN;
   SmartDashboard.putNumber("Target Pos for 0", getTargetMotorPosition(0));
   SmartDashboard.putNumber("Target Pos for 90", getTargetMotorPosition(90));
   SmartDashboard.putNumber("Target Pos for 180",+ getTargetMotorPosition(180));
@@ -310,6 +356,7 @@ private double POTStoRotations(double POTSValue ){
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
     Logger.recordOutput("Turret/POTS Position", m_POTS.get());
+    Logger.recordOutput("Turret/TargetPosition", m_targetPos);
    
   /*   double angle=SmartDashboard.getNumber("Target Turret Angle",0);
  

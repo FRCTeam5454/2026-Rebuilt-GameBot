@@ -834,8 +834,9 @@ return pathfindingCommand;
       SmartDashboard.putNumber("Turret Util Target Angle",angle);
       double targetPos=m_TurretSubsystem.getTargetMotorPosition(angle);
       SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
-      m_TurretSubsystem.moveMotor(targetPos);
- 
+      double yawRateDegPerSec = m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
+      m_TurretSubsystem.moveMotor(targetPos, yawRateDegPerSec);
+
 }
 
 
