@@ -294,6 +294,9 @@ public Command shutdownCommand(){
     Logger.recordOutput("Shooter/ShooterMotor2Velocity",  m_2shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor1Current", m_1shooterMotor.getSupplyCurrent().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor2Current",  m_2shooterMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput("Shooter/TargetVelocity", m_simTargetVelocity); // last commanded setpoint (rps)
+    Logger.recordOutput("Shooter/ClosedLoopError", m_1shooterMotor.getClosedLoopError().getValueAsDouble());
+    Logger.recordOutput("Shooter/MotorVoltage", m_1shooterMotor.getMotorVoltage().getValueAsDouble());
     Logger.recordOutput("Shooter/Hood CanCoder Value", m_hoodCoder.getAbsolutePosition().getValueAsDouble());
     Logger.recordOutput("Shooter/Hood 'Pos'",getHoodPos());
    
