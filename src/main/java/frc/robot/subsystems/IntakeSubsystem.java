@@ -79,7 +79,8 @@ public class IntakeSubsystem extends SubsystemBase {
         .withTimeout(maxHomeTime)
         .finallyDo((interrupted)->{
           m_fold.stopMotor();
-          // if interrupted we stopped at an unknown spot, so don't zero the encoder there
+          // switch tripped OR timed out -> zero the encoder (a timeout counts as finishing, not interrupted).
+          // Only skip it if another command or a disable cut homing off at an unknown spot.
           if(!interrupted){
             finishHoming(!isIntakeSwitched());
           }
@@ -197,12 +198,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Intake Fold Current", m_fold.getOutputCurrent());
-    SmartDashboard.putNumber("Intake Position", m_fold.getEncoder().getPosition());
-    SmartDashboard.putBoolean("Intake Switch",isIntakeSwitched());
-    SmartDashboard.putNumber("Intake Supply Current",m_intakeMotor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake Temperature",m_intakeMotor.getDeviceTemp().getValueAsDouble());
-    SmartDashboard.putNumber("Intake Torque Current",m_intakeMotor.getTorqueCurrent().getValueAsDouble());
+    // debug values go to Logger only; SmartDashboard is for what the drive team watches
+    boolean switched = isIntakeSwitched();
+    SmartDashboard.putBoolean("Intake Switch", switched);
+    Logger.recordOutput("Intake/Switch", switched);
+    Logger.recordOutput("Intake/OutMode", m_IntakeOutMode);
+    Logger.recordOutput("Intake/Homed", m_homed);
+    Logger.recordOutput("Intake/FoldPosition", m_fold.getEncoder().getPosition());
+    Logger.recordOutput("Intake/FoldCurrent", m_fold.getOutputCurrent());
+    Logger.recordOutput("Intake/FoldOutput", m_fold.get());
+    Logger.recordOutput("Intake/RollerOutput", m_intakeMotor.get());
+    Logger.recordOutput("Intake/RollerSupplyCurrent", m_intakeMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput("Intake/RollerTorqueCurrent", m_intakeMotor.getTorqueCurrent().getValueAsDouble());
+    Logger.recordOutput("Intake/RollerTempC", m_intakeMotor.getDeviceTemp().getValueAsDouble());
 
     // //System.out.println("Amp " + m_fold.getOutputCurrent());
     // This method will be called once per scheduler run

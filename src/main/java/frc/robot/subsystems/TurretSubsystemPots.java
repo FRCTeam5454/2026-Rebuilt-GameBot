@@ -62,7 +62,6 @@ public class TurretSubsystemPots extends SubsystemBase {
   private int m_potsPort;
   private double m_targetPos = 0;
   private boolean m_isWrappingAround = false;
-  private GenericEntry m_wrapWidgetEntry;
 
   private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
   private final double kPotsHighLimit=Constants.TurretConstants.TurretRightLimitPOTS;
@@ -99,10 +98,6 @@ public class TurretSubsystemPots extends SubsystemBase {
     m_turretMotor.getConfigurator().apply(motorConfig);
     configureMotionMagic();
 
-    m_wrapWidgetEntry = Shuffleboard.getTab("Turret")
-                           .add("Wrapping Around", false)
-                           .getEntry();
-   
    /* m_encoder1 = new CANcoder(encoder1ID);
     
 
@@ -210,9 +205,9 @@ public class TurretSubsystemPots extends SubsystemBase {
       
     
     private void trackTurretToAngle(double angle){
-      SmartDashboard.putNumber("Turret Util Target Angle",angle);
+      Logger.recordOutput("Turret/UtilTargetAngle",angle);
       double targetPos=getTargetMotorPosition(angle);
-      SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
+      Logger.recordOutput("Turret/UtilTargetPos",targetPos); 
       moveMotor(targetPos);
  
 }
@@ -344,19 +339,21 @@ private double POTStoRotations(double POTSValue ){
   @Override
   public void periodic(){
 
-    SmartDashboard.putNumber("Motor Rotations",m_turretMotor.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("POTS",m_POTS.get());
-    SmartDashboard.putNumber("POTS Angle",m_POTS.get()*3600/kGearReduction);
-    SmartDashboard.putNumber("POTS Offset Angle",(m_POTS.get()*3600/kGearReduction)-225);
-    SmartDashboard.putNumber("Motor Rotation Angle",getTurretAngleFromMotor());
-    SmartDashboard.putBoolean("Turret Wrapping Around", isWrappingAround());
-    if (m_wrapWidgetEntry != null) {
-      m_wrapWidgetEntry.setBoolean(isWrappingAround());
-    }
+    // read each sensor once; debug values go to Logger only, SmartDashboard is for what the drive team watches
+    double pots = m_POTS.get();
+    boolean wrapping = isWrappingAround();
+    SmartDashboard.putBoolean("Turret Wrapping Around", wrapping);
+    Logger.recordOutput("Turret/WrappingAround", wrapping);
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
-    Logger.recordOutput("Turret/POTS Position", m_POTS.get());
+    Logger.recordOutput("Turret/POTS Position", pots);
+    Logger.recordOutput("Turret/POTS Offset Angle", (pots*3600/kGearReduction)-225);
     Logger.recordOutput("Turret/TargetPosition", m_targetPos);
+    Logger.recordOutput("Turret/ClosedLoopError", m_turretMotor.getClosedLoopError().getValueAsDouble());
+    Logger.recordOutput("Turret/SupplyCurrent", m_turretMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput("Turret/StatorCurrent", m_turretMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Turret/MotorVoltage", m_turretMotor.getMotorVoltage().getValueAsDouble());
+    Logger.recordOutput("Turret/YawFeedforwardVolts", m_lastFeedforward);
    
   /*   double angle=SmartDashboard.getNumber("Target Turret Angle",0);
  

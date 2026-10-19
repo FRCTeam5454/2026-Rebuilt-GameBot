@@ -1,4 +1,5 @@
 package frc.robot.commands;
+import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -94,6 +95,7 @@ public class ShootMappingCommand extends Command {
   boolean returnValue=false;  
   double distance=TurretUtil.getDistance(m_swerve.getPose2d(), TurretUtil.TargetType.HUB);
   SmartDashboard.putNumber("Odom Distance",distance);
+  Logger.recordOutput("Shooter/Mapping/OdomDistance",distance);
    
   //System.out.println("Shot Mapping - State:" + m_state  + " " + Timer.getFPGATimestamp());
     switch(m_state){
@@ -134,6 +136,10 @@ public class ShootMappingCommand extends Command {
       m_idleSpeed=idleSpeed;
       m_speed=targetSpeed;
       m_hoodPos=hoodPos;
+      // log the hand-tuned values with the shot so mapping sessions can be read back from the USB log
+      Logger.recordOutput("Shooter/Mapping/IdleSpeed",idleSpeed);
+      Logger.recordOutput("Shooter/Mapping/TargetSpeed",targetSpeed);
+      Logger.recordOutput("Shooter/Mapping/HoodTarget",hoodPos);
 
   }
 

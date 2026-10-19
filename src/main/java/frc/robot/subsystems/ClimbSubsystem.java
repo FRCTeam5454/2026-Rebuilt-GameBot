@@ -96,6 +96,12 @@ public class ClimbSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putBoolean("Climb At High Limit",m_climbUpProx.get());
     SmartDashboard.putBoolean("Climb At Low Limit",m_climbDownSwitch.get());
+    Logger.recordOutput("Climb/UpLimit", isClimbUpLimit());
+    Logger.recordOutput("Climb/DownLimit", isClimbDownLimit());
+    Logger.recordOutput("Climb/Homed", m_homed);
+    Logger.recordOutput("Climb/Output", m_climbMotor.get());
+    Logger.recordOutput("Climb/Current", m_climbMotor.getOutputCurrent());
+    Logger.recordOutput("Climb/Position", m_climbMotor.getEncoder().getPosition());
   
   }
 }
