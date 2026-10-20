@@ -40,6 +40,7 @@ import frc.robot.subsystems.shooter.NewShooterSubsystem;
 import frc.robot.utilities.Limelight;
 import frc.robot.utilities.LimelightHelpers;
 import frc.robot.utilities.RecoveryAuto;
+import frc.robot.autos.BLineAuto_DoubleSweepTrenchIO;
 import frc.robot.utilities.CANdleLib.LEDColor;
 import frc.robot.utilities.CANdleLib.LEDStrip;
 import frc.robot.utilities.CANdleLib;
@@ -168,6 +169,11 @@ public class RobotContainer {
       
         }
 
+        //bline autos arent .auto files so build them here
+        if (selectedAuto != null && BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
+          return buildBLineDoubleSweepTrenchIO();
+        }
+
         // Load the path group to obtain the initial pose of the first trajectory.
         // Use suitable constraints here (these only affect loading; path-following will be handled by the PathPlannerAuto command).
         PathConstraints goToConstraints = new PathConstraints(3.0, 4.0,
@@ -208,6 +214,17 @@ public class RobotContainer {
     }
     return null;
   }
+  //bline version of Double sweep TrenchIO, uses the same named commands
+  private Command buildBLineDoubleSweepTrenchIO(){
+    return BLineAuto_DoubleSweepTrenchIO.build(
+        m_swerve,
+        m_swerve::getPose2d,
+        m_swerve::getChassisSpeeds,
+        m_swerve::driveRobotRelative,
+        m_swerve::resetPose,
+        () -> NamedCommands.getCommand("expandIntake"),
+        () -> NamedCommands.getCommand("shotLookUpW5"));
+  }
   //
   public boolean hasHomed=false;
   public boolean m_hasResetGyro=false;
@@ -227,6 +244,9 @@ public class RobotContainer {
     SmartDashboard.putNumber("Speed Adjuster:", 1);
     configureNamedCommands();
     m_autoChooser=AutoBuilder.buildAutoChooser();
+    // This is a placeholder for the BLine auto
+    m_autoChooser.addOption(BLineAuto_DoubleSweepTrenchIO.kName,
+        Commands.none().withName(BLineAuto_DoubleSweepTrenchIO.kName));
     createAutonomousCommandList(); 
     configureButtonBindings();
     resetDefaultCommand();

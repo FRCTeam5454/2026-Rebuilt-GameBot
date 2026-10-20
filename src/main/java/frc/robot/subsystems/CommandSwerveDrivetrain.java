@@ -293,6 +293,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withWheelForceFeedforwardsY(driveFF.robotRelativeForcesYNewtons()));
     }
 
+    private static final double[] kNoWheelForces = new double[4];
+
+    // robot relative drive for bline paths, bline doesnt give wheel force feedforwards so theyre zeroed. I really don't think doing this will break everything, but this is what I would investigate first as an error.
+    public void driveRobotRelative(ChassisSpeeds chassisSpeeds){
+        this.setControl(autoDrive.withSpeeds(chassisSpeeds)
+        .withWheelForceFeedforwardsX(kNoWheelForces)
+        .withWheelForceFeedforwardsY(kNoWheelForces));
+    }
+
     /** Robot-relative speeds. CTRE already computes these from the module states each odometry update. */
     public ChassisSpeeds getChassisSpeeds(){
         return this.getState().Speeds;

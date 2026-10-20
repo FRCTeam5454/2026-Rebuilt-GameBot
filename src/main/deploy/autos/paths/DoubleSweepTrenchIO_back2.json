@@ -1,0 +1,274 @@
+{
+  "path_elements": [
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 6.0568,
+        "y_meters": 3.3871,
+        "intermediate_handoff_radius_meters": 0.12
+      },
+      "rotation_target": {
+        "rotation_radians": 1.5708,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.9899,
+      "y_meters": 3.1422,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.9801,
+      "y_meters": 2.8881,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.0075,
+      "y_meters": 2.635,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.0565,
+      "y_meters": 2.3852,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.1162,
+      "y_meters": 2.1376,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.1779,
+      "y_meters": 1.8905,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.2322,
+      "y_meters": 1.6417,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.2661,
+      "y_meters": 1.3895,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.2562,
+      "y_meters": 1.1356,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 6.1648,
+      "y_meters": 0.9,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.9786,
+      "y_meters": 0.7294,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.743,
+      "y_meters": 0.6348,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.5008,
+      "y_meters": 0.592,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.2568,
+      "y_meters": 0.561,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 5.0123,
+      "y_meters": 0.534,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 4.7676,
+      "y_meters": 0.5092,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 4.5227,
+      "y_meters": 0.4861,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 4.2777,
+      "y_meters": 0.4643,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "translation",
+      "x_meters": 4.0326,
+      "y_meters": 0.4438,
+      "intermediate_handoff_radius_meters": 0.12
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 3.7873,
+        "y_meters": 0.4255,
+        "intermediate_handoff_radius_meters": 0.45
+      },
+      "rotation_target": {
+        "rotation_radians": 0.01754,
+        "profiled_rotation": true
+      }
+    }
+  ],
+  "constraints": {
+    "end_translation_tolerance_meters": 0.03,
+    "end_rotation_tolerance_deg": 2.0,
+    "max_velocity_meters_per_sec": [
+      {
+        "value": 2.52,
+        "start_ordinal": 0,
+        "end_ordinal": 0
+      },
+      {
+        "value": 2.52,
+        "start_ordinal": 1,
+        "end_ordinal": 1
+      },
+      {
+        "value": 2.933,
+        "start_ordinal": 2,
+        "end_ordinal": 2
+      },
+      {
+        "value": 3.69,
+        "start_ordinal": 3,
+        "end_ordinal": 3
+      },
+      {
+        "value": 4.651,
+        "start_ordinal": 4,
+        "end_ordinal": 4
+      },
+      {
+        "value": 4.208,
+        "start_ordinal": 5,
+        "end_ordinal": 5
+      },
+      {
+        "value": 3.713,
+        "start_ordinal": 6,
+        "end_ordinal": 6
+      },
+      {
+        "value": 3.141,
+        "start_ordinal": 7,
+        "end_ordinal": 7
+      },
+      {
+        "value": 2.438,
+        "start_ordinal": 8,
+        "end_ordinal": 8
+      },
+      {
+        "value": 2.005,
+        "start_ordinal": 9,
+        "end_ordinal": 9
+      },
+      {
+        "value": 2.004,
+        "start_ordinal": 10,
+        "end_ordinal": 10
+      },
+      {
+        "value": 1.989,
+        "start_ordinal": 11,
+        "end_ordinal": 11
+      },
+      {
+        "value": 2.269,
+        "start_ordinal": 12,
+        "end_ordinal": 12
+      },
+      {
+        "value": 1.989,
+        "start_ordinal": 13,
+        "end_ordinal": 13
+      },
+      {
+        "value": 4.75,
+        "start_ordinal": 14,
+        "end_ordinal": 14
+      },
+      {
+        "value": 4.75,
+        "start_ordinal": 15,
+        "end_ordinal": 15
+      },
+      {
+        "value": 4.75,
+        "start_ordinal": 16,
+        "end_ordinal": 16
+      },
+      {
+        "value": 4.75,
+        "start_ordinal": 17,
+        "end_ordinal": 17
+      },
+      {
+        "value": 4.75,
+        "start_ordinal": 18,
+        "end_ordinal": 18
+      },
+      {
+        "value": 4.731,
+        "start_ordinal": 19,
+        "end_ordinal": 19
+      },
+      {
+        "value": 4.731,
+        "start_ordinal": 20,
+        "end_ordinal": 20
+      }
+    ],
+    "max_acceleration_meters_per_sec2": [
+      {
+        "value": 7.7,
+        "start_ordinal": 0,
+        "end_ordinal": 20
+      }
+    ],
+    "max_velocity_deg_per_sec": [
+      {
+        "value": 720.0,
+        "start_ordinal": 0,
+        "end_ordinal": 1
+      }
+    ],
+    "max_acceleration_deg_per_sec2": [
+      {
+        "value": 596.0,
+        "start_ordinal": 0,
+        "end_ordinal": 1
+      }
+    ]
+  }
+}
