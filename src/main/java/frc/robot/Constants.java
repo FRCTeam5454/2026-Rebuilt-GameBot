@@ -216,7 +216,7 @@ public final class Constants {
     public static final double kDefaultPassDistance=200;
     //speeds
     public static final double shooterRPM=5000;
-    public static final double IdleSpeed=45;// 0.7;
+    public static final double IdleSpeed=35;// was 45; ~55-75% of our 45-66 rps shots, like 1678 idling near half shot speed. Raise if spin-up feels slow
     public static final double IdlePassSpeed=70;
     public static final double AutoIdleSpeed=55;// 0.7;
     public static final double IdleSpeedThreshold=54;

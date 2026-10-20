@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -43,6 +44,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance.NetworkMode;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -65,6 +67,10 @@ public class NewShooterSubsystem extends SubsystemBase {
     private ObsidianCANSparkMax m_kickerMotor;
     private double m_simTargetVelocity = 0;
     private double m_simTargetHood = 0.05;
+    // Idle like 1678: cut power and coast down to idle instead of braking, then hold idle
+    private final CoastOut m_coastRequest = new CoastOut();
+    private final double kCoastDownRatio = 1.25; // only coast when spinning faster than this times idle
+    private double m_coastToIdleSpeed = Double.NaN; // idle speed we're coasting down to, NaN when not coasting
   public NewShooterSubsystem(int shooter1CANID, int shooter2CANID, int kickerCANID,int hoodCANID) {
     m_hoodCoder = new CANcoder(Constants.HoodConstants.hoodCoderCANID);
     m_1shooterMotor = new TalonFX(shooter1CANID);
@@ -182,6 +188,7 @@ public boolean atTargetSpeed(double targetSpeed){
 }
 public void runShooterVelocity(double targetSpeed){
 m_simTargetVelocity = targetSpeed;
+m_coastToIdleSpeed = Double.NaN; // a new speed command cancels any coast-down
 // Torque-current bang-bang
 //m_1shooterMotor.setControl(new MotionMagicVelocityVoltage(targetSpeed));
 //m_1shooterMotor.setControl(new MotionMagicVelocityVoltage(-targetSpeed));
@@ -204,13 +211,29 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
     return (currentSpeed<Constants.ShooterConstants.IdleSpeedThreshold);
   }
 
+  /**
+   * Goes to idle the way 1678 does: if the flywheel is well above idle, cut power and let it
+   * coast down (no braking), then hold idle once it gets there. Spinning up to idle drives normally.
+   */
+  public void idleShooter(double idleSpeed){
+    if (getShooterSpeed() > idleSpeed * kCoastDownRatio) {
+      m_simTargetVelocity = idleSpeed;
+      m_coastToIdleSpeed = idleSpeed;
+      m_1shooterMotor.setControl(m_coastRequest);
+    } else {
+      runShooterVelocity(idleSpeed);
+    }
+  }
+
   public void stopNewShooter(boolean idleMode){
     //System.out.println("stopping shooter");
-    
+
     if(idleMode){
-    
-      runShooterVelocity(Constants.ShooterConstants.IdleSpeed);
+      // stay closer to shot speed in auto so the next auto shot doesn't wait on spin-up
+      idleShooter(DriverStation.isAutonomous() ? Constants.ShooterConstants.AutoIdleSpeed
+                                               : Constants.ShooterConstants.IdleSpeed);
     }else {
+      m_coastToIdleSpeed = Double.NaN;
       m_1shooterMotor.stopMotor();
     }
     m_kickerMotor.stopMotor();
@@ -238,6 +261,9 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
     config.TorqueCurrent.PeakReverseTorqueCurrent = -800.0;
     config.MotorOutput.PeakForwardDutyCycle = 1.0;
     config.MotorOutput.PeakReverseDutyCycle = -1.0;
+    // Never drive the flywheel backwards to slow it down (like 1678): reverse voltage burns battery
+    // current, so lower setpoints coast/regen down instead. The shooter only ever spins forward.
+    config.Voltage.PeakReverseVoltage = 0.0;
     configurator.apply(config);
     
     // Apply and enable current limits
@@ -290,7 +316,12 @@ public Command shutdownCommand(){
     }
     Logger.recordOutput("Shooter/KickerRunning", kickerRunning);
     Logger.recordOutput("Shooter/KickerSpeed", m_kickerMotor.get());
-    Logger.recordOutput("Shooter/ShooterMotor1Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
+    double shooterSpeed = m_1shooterMotor.getVelocity().getValueAsDouble();
+    if (!Double.isNaN(m_coastToIdleSpeed) && shooterSpeed <= m_coastToIdleSpeed) {
+      runShooterVelocity(m_coastToIdleSpeed); // coasted down to idle, now hold it
+    }
+    Logger.recordOutput("Shooter/CoastingToIdle", !Double.isNaN(m_coastToIdleSpeed));
+    Logger.recordOutput("Shooter/ShooterMotor1Velocity", shooterSpeed);
     Logger.recordOutput("Shooter/ShooterMotor2Velocity",  m_2shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor1Current", m_1shooterMotor.getSupplyCurrent().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor2Current",  m_2shooterMotor.getSupplyCurrent().getValueAsDouble());

@@ -758,7 +758,7 @@ return pathfindingCommand;
   public void TeleopMode(){
     homeRobot();
     setTracking(TurretTrackingMethod.HUB);
-    m_newShooter.primeMotors(Constants.ShooterConstants.IdleSpeed);
+    m_newShooter.idleShooter(Constants.ShooterConstants.IdleSpeed);
     //used fused IMU Mode
     m_backLimelight.SetIMUMode(4);
    
@@ -798,7 +798,7 @@ return pathfindingCommand;
         m_tracking=TurretTrackingMethod.PASS;
     }else {
         m_tracking=TurretTrackingMethod.HUB;
-        m_newShooter.primeMotors(Constants.ShooterConstants.IdleSpeed);
+        m_newShooter.idleShooter(Constants.ShooterConstants.IdleSpeed);
   
       }
    }
