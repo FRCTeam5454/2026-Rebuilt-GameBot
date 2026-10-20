@@ -85,15 +85,6 @@ public class RobotState {
     poseBuffer.clear();
   }
 
-  /**
-   * Mirror the drivetrain's (CTRE) fused pose so driving/PathPlanner and shooter aim use the same
-   * pose. CTRE fuses 250 Hz odometry with vision; running a second estimator here let the two drift
-   * apart.
-   */
-  public void setEstimatedPose(Pose2d pose) {
-    estimatedPose = pose;
-  }
-
   /** Get the rotation of the estimated pose. */
   public Rotation2d getRotation() {
     return estimatedPose.getRotation();

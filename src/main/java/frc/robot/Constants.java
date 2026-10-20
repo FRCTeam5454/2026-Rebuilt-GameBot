@@ -60,9 +60,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants{
-    // followPathWithRecovery: if the robot ends up farther than this (meters) from where the path
-    // says it should be, stop following the path and pathfind to the path's end pose instead.
-    public static final double kRecoveryMaxPathError = 0.75;
+   
   }
 
   
@@ -89,23 +87,6 @@ public final class Constants {
     
     public static final String leftLimelightName="limelight-two";
     public static final String backLimelightName="limelight-one";
-
-    // Reject MegaTag2 updates while spinning faster than this (deg/s); faster spins blur frames
-    public static final double maxVisionYawRate=270;
-    // Reject MegaTag2 updates while pitch or roll is over this (deg), e.g. on the bump
-    public static final double maxVisionTiltDeg=5;
-    // Vision X/Y std dev (meters) = visionStdDevPerMeterSq * avgTagDist^2 / tagCount, never below visionMinStdDev.
-    // Lower = trust vision more. 0.02 gives ~0.12 for one tag at 2.5m (close to the old fixed 0.1).
-    public static final double visionStdDevPerMeterSq=0.02;
-    public static final double visionMinStdDev=0.05;
-    // Reject single-tag poses farther than this (meters) from the tag
-    public static final double maxSingleTagDist=4.5;
-    // Reject poses more than this (meters) outside the field
-    public static final double fieldBoundsMargin=0.25;
-    // For this long (sec) after the robot is level again, multiply the std dev by postLandingStdDevFactor
-    // so vision corrects bump slip faster
-    public static final double postLandingTrustSec=1.0;
-    public static final double postLandingStdDevFactor=0.5;
 
     //Confidence Max and Min Deadband Values
     public static final double confidenceDeadbandMin=60;
@@ -216,7 +197,7 @@ public final class Constants {
     public static final double kDefaultPassDistance=200;
     //speeds
     public static final double shooterRPM=5000;
-    public static final double IdleSpeed=35;// was 45; ~55-75% of our 45-66 rps shots, like 1678 idling near half shot speed. Raise if spin-up feels slow
+    public static final double IdleSpeed=45;// 0.7;
     public static final double IdlePassSpeed=70;
     public static final double AutoIdleSpeed=55;// 0.7;
     public static final double IdleSpeedThreshold=54;
@@ -324,8 +305,6 @@ public final class Constants {
     public static final double climbLimitHigh=0.49;
     public static final double climbForwardSpeed=-1.0;
     public static final double climbBackSpeed=1.0;
-    // longest a climb up/down can run before giving up, in case a limit switch fails
-    public static final double climbTimeout=3.0;
   }
 
   public static final class CoolPanelConstants{

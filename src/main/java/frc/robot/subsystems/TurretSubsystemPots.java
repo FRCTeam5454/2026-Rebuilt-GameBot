@@ -50,7 +50,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 
 import edu.wpi.first.wpilibj.simulation.AnalogInputSim;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 
 
 public class TurretSubsystemPots extends SubsystemBase {
@@ -63,6 +62,7 @@ public class TurretSubsystemPots extends SubsystemBase {
   private int m_potsPort;
   private double m_targetPos = 0;
   private boolean m_isWrappingAround = false;
+  private GenericEntry m_wrapWidgetEntry;
 
   private final double kPotsLowLimit=Constants.TurretConstants.TurretLeftLimitPOTS;
   private final double kPotsHighLimit=Constants.TurretConstants.TurretRightLimitPOTS;
@@ -71,20 +71,6 @@ public class TurretSubsystemPots extends SubsystemBase {
   private final double kGearReduction=8;  //80t to 10tooth
   private final double kMotorRotationsToAngle=7.87499;//7.80;
   private final double kDegreesPerRotation=0;
-  // Background tracking noise rejection: only while the robot is sitting still, ignore target changes
-  // smaller than this so pose/vision jitter doesn't keep the turret twitching (and drawing current).
-  // While the robot moves, every target update goes straight through so the aim never lags.
-  private final double kStillDeadbandDegrees=1.0;
-  private final double kStillSpeedMps=0.1;          // below this (and not turning) the robot counts as still
-  // Gyro counter-rotation: when the robot spins, add a velocity feedforward so the turret turns the
-  // opposite way at the same rate instead of waiting to fall behind.
-  private final double kYawFeedforwardKV=0.12;       // volts per motor rps (matches slot0 kV)
-  private final double kYawActiveDegPerSec=5;        // below this the robot counts as not turning
-  // Commands that aim the turret themselves (shot on the move) win over background tracking
-  private final double kDirectAimHoldSeconds=0.1;
-  private double m_lastSentPos = Double.NaN;
-  private double m_lastFeedforward = 0;
-  private double m_lastDirectAimTime = Double.NEGATIVE_INFINITY;
   private DutyCycleOut m_TurretDutyCycleOut = new DutyCycleOut(0.0);
   private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
   
@@ -100,6 +86,10 @@ public class TurretSubsystemPots extends SubsystemBase {
     m_turretMotor.getConfigurator().apply(motorConfig);
     configureMotionMagic();
 
+    m_wrapWidgetEntry = Shuffleboard.getTab("Turret")
+                           .add("Wrapping Around", false)
+                           .getEntry();
+   
    /* m_encoder1 = new CANcoder(encoder1ID);
     
 
@@ -164,56 +154,21 @@ public class TurretSubsystemPots extends SubsystemBase {
      m_turretMotor.stopMotor();
   }
  
-  /**
-   * Aims the turret straight at a motor position, e.g. from shot on the move. No filtering, and it
-   * takes priority over background tracking for a moment so the two never blend.
-   */
   public void moveMotor(double targetmotorPosition){
-    m_lastDirectAimTime = Timer.getFPGATimestamp();
     m_targetPos = targetmotorPosition;
-    sendTarget(targetmotorPosition, 0);
-  }
-
-  /**
-   * Background hub/pass tracking. Skipped while a command is aiming the turret directly.
-   * @param robotYawRateDegPerSec robot angular velocity from the gyro, CCW positive
-   * @param robotSpeedMps robot translational speed
-   */
-  public void trackTarget(double targetmotorPosition, double robotYawRateDegPerSec, double robotSpeedMps){
-    if (isDirectlyAimed()) {
-      return; // shot on the move (or another command) is aiming the turret
-    }
-    m_targetPos = targetmotorPosition;
-    boolean turning = Math.abs(robotYawRateDegPerSec) > kYawActiveDegPerSec;
-    boolean still = !turning && robotSpeedMps < kStillSpeedMps;
-    // Robot CCW rotation increases our (CW-positive) turret angle, and motor position follows it.
-    double feedforward = turning ? kYawFeedforwardKV * robotYawRateDegPerSec / kMotorRotationsToAngle : 0;
-    double changeDegrees = Math.abs(targetmotorPosition - m_lastSentPos) * kMotorRotationsToAngle;
-    if (!still || Double.isNaN(m_lastSentPos) || changeDegrees >= kStillDeadbandDegrees
-        || feedforward != m_lastFeedforward) {
-      sendTarget(targetmotorPosition, feedforward);
-    }
-  }
-
-  private boolean isDirectlyAimed(){
-    return Timer.getFPGATimestamp() - m_lastDirectAimTime < kDirectAimHoldSeconds;
-  }
-
-  private void sendTarget(double targetmotorPosition, double feedforward){
-    if((targetmotorPosition>kLowerLimit) && (targetmotorPosition<kUpperLimit)){
-      m_lastSentPos = targetmotorPosition;
-      m_lastFeedforward = feedforward;
-      m_turretMotor.setControl(mmRequest.withPosition(targetmotorPosition).withFeedForward(feedforward));
+    if((targetmotorPosition>kLowerLimit) && (targetmotorPosition<kUpperLimit)){ 
+         m_turretMotor.setControl(mmRequest.withPosition(targetmotorPosition)); 
+ 
     } else {
       //System.out.println("Move Target out of Range");
     }
-  }
+  } 
       
     
     private void trackTurretToAngle(double angle){
-      Logger.recordOutput("Turret/UtilTargetAngle",angle);
+      SmartDashboard.putNumber("Turret Util Target Angle",angle);
       double targetPos=getTargetMotorPosition(angle);
-      Logger.recordOutput("Turret/UtilTargetPos",targetPos); 
+      SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
       moveMotor(targetPos);
  
 }
@@ -334,7 +289,6 @@ private double POTStoRotations(double POTSValue ){
   }
   //System.out.println("Homing Position: " + calcHomePos );
   m_turretMotor.setPosition(calcHomePos,1);
-  m_lastSentPos = Double.NaN; // position frame changed, so resend the next target
   SmartDashboard.putNumber("Target Pos for 0", getTargetMotorPosition(0));
   SmartDashboard.putNumber("Target Pos for 90", getTargetMotorPosition(90));
   SmartDashboard.putNumber("Target Pos for 180",+ getTargetMotorPosition(180));
@@ -344,22 +298,18 @@ private double POTStoRotations(double POTSValue ){
   @Override
   public void periodic(){
 
-    // read each sensor once; debug values go to Logger only, SmartDashboard is for what the drive team watches
-    double pots = m_POTS.get();
-    boolean wrapping = isWrappingAround();
-    SmartDashboard.putBoolean("Turret Wrapping Around", wrapping);
-    Logger.recordOutput("Turret/WrappingAround", wrapping);
+    SmartDashboard.putNumber("Motor Rotations",m_turretMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("POTS",m_POTS.get());
+    SmartDashboard.putNumber("POTS Angle",m_POTS.get()*3600/kGearReduction);
+    SmartDashboard.putNumber("POTS Offset Angle",(m_POTS.get()*3600/kGearReduction)-225);
+    SmartDashboard.putNumber("Motor Rotation Angle",getTurretAngleFromMotor());
+    SmartDashboard.putBoolean("Turret Wrapping Around", isWrappingAround());
+    if (m_wrapWidgetEntry != null) {
+      m_wrapWidgetEntry.setBoolean(isWrappingAround());
+    }
     Logger.recordOutput("Turret/RotateSpeed", m_turretMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Turret/RotatePosition", m_turretMotor.getPosition().getValueAsDouble());
-    Logger.recordOutput("Turret/POTS Position", pots);
-    Logger.recordOutput("Turret/POTS Offset Angle", (pots*3600/kGearReduction)-225);
-    Logger.recordOutput("Turret/TargetPosition", m_targetPos);
-    Logger.recordOutput("Turret/ClosedLoopError", m_turretMotor.getClosedLoopError().getValueAsDouble());
-    Logger.recordOutput("Turret/SupplyCurrent", m_turretMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput("Turret/StatorCurrent", m_turretMotor.getStatorCurrent().getValueAsDouble());
-    Logger.recordOutput("Turret/MotorVoltage", m_turretMotor.getMotorVoltage().getValueAsDouble());
-    Logger.recordOutput("Turret/YawFeedforwardVolts", m_lastFeedforward);
-    Logger.recordOutput("Turret/DirectAim", isDirectlyAimed());
+    Logger.recordOutput("Turret/POTS Position", m_POTS.get());
    
   /*   double angle=SmartDashboard.getNumber("Target Turret Angle",0);
  

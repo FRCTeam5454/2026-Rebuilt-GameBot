@@ -42,12 +42,14 @@ public class ShootManualCommand extends Command {
     boolean returnValue=false;
     double currentTime;
         if(m_hopper.getNoFuel()) {
+          System.out.println("No Fuel Detected...");
           returnValue=true;
         }
         //check time limit if the value is greater than zero
         //acts a failsafe if FuelSensor is not working
         currentTime = Timer.getFPGATimestamp();
         if(m_timeLimit>0 && (currentTime>=startShootTime+m_timeLimit)){
+          System.out.println("Shoot Time Limit Reached... Ending Shoot Command");
           returnValue=true;
         }
         return returnValue;
@@ -81,6 +83,7 @@ public class ShootManualCommand extends Command {
 
     
   
+  System.out.println("Shooting Manual - State:" + m_state);
     switch(m_state){
     case SPINUP:
         stateStartTime=Timer.getFPGATimestamp();

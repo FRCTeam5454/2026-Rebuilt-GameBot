@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.368869318181818,
-        "y": 0.4791477272727275
+        "x": 4.3884022824536375,
+        "y": 0.4057061340941527
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.9094999999999995,
-        "y": 0.7625852272727274
+        "x": 7.152599265718925,
+        "y": 0.6200353728326421
       },
       "isLocked": false,
       "linkedName": "Trench Start"
     },
     {
       "anchor": {
-        "x": 7.770119318181818,
-        "y": 1.9014886363636365
+        "x": 7.665844444444444,
+        "y": 1.2091111111111104
       },
       "prevControl": {
-        "x": 7.679186689356938,
-        "y": 1.5122969849931516
+        "x": 7.314792299844993,
+        "y": 0.790654639556513
       },
       "nextControl": {
-        "x": 7.898954545454545,
-        "y": 2.452903409090909
+        "x": 8.08676643457535,
+        "y": 1.7108528993314631
       },
       "isLocked": false,
-      "linkedName": "Centerline"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.899795918369707,
-        "y": 3.451526175694831
+        "x": 7.889966666666666,
+        "y": 3.3333999999999993
       },
       "prevControl": {
-        "x": 7.894085545530806,
-        "y": 2.7669226994999687
+        "x": 7.860759333850331,
+        "y": 2.461828917278709
       },
       "nextControl": null,
       "isLocked": false,
@@ -49,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.75,
-    "maxAcceleration": 7.7,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 720.0,
     "maxAngularAcceleration": 596.0,
     "nominalVoltage": 12.0,
@@ -64,7 +64,7 @@
   "folder": "Seth Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -0.5641016891324094
+    "rotation": 1.0050860052542672
   },
   "useDefaultConstraints": true
 }
