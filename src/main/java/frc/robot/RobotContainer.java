@@ -526,7 +526,7 @@ public class RobotContainer {
 
 
     try{
-      updateHubStatus();
+     /*  updateHubStatus();
       String targetString="";
       switch(m_tracking){
         case HUB:
@@ -544,6 +544,7 @@ public class RobotContainer {
       SmartDashboard.putString("ActiveHub",m_activeHub);
       SmartDashboard.putString("Active Phase",m_activeHubPhase);
       SmartDashboard.putNumber("Active Phase Time",m_activeHubTime);
+      */
       SmartDashboard.putNumber("LimeLight Distance" , m_turretLimelight.getDistanceInverted());   
       SmartDashboard.putNumber("Hood Position is ", m_newShooter.getHoodPos());
       SmartDashboard.putNumber("POTS Position is ", m_TurretSubsystem.getTurretPOTS());
@@ -676,7 +677,10 @@ public class RobotContainer {
   public void DisabledPeriodic(){
      rumbleOff();
     // In disabledPeriodic or before match starts
-    m_backLimelight.SetIMUMode(1);
+   // m_backLimelight.SetIMUMode(1);
+   //update limelight distance
+    double distance=TurretUtil.getDistance(m_swerve.getPose2d(), TurretUtil.TargetType.HUB);
+   SmartDashboard.putNumber("Odom Distance-D",distance);
     // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     //m_LEDS.setLedState(LEDStates.DISABLED,false);
     //m_LEDS.activateLEDS();
