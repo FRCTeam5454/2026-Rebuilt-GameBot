@@ -334,7 +334,8 @@ public class RobotContainer {
     //Command intakeOutMode = new InstantCommand(m_intake::SetIntakeOutMode);
     //Command intakeOutSL= new IntakeFoldCommand(m_intake);
     //SequentialCommandGroup shootOne=new SequentialCommandGroup(targetHub,shootLookup,intakeOutMode,intakeOutSL);
-    m_xBoxDriver.start().whileTrue(shotMove.get());
+    Command driverShoot = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit, true, m_TurretSubsystem);
+    m_xBoxDriver.start().whileTrue(driverShoot);
     m_xBoxOperator.leftTrigger().whileTrue(shotMove.get());
     SmartDashboard.putData("Run ShotOnTheMove", shotMove.get());
     SmartDashboard.putData("Reset Pose to Field", Commands.runOnce(() -> m_swerve.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()))));
@@ -351,7 +352,7 @@ public class RobotContainer {
     Command targetHubPopcorn = Commands.runOnce(()->setTracking(TurretTrackingMethod.HUB));
     SequentialCommandGroup PopcornShotIt = new SequentialCommandGroup(targetHubPopcorn,shoot);
 
-    m_xBoxDriver.leftTrigger().whileTrue(PopcornShotIt);
+    m_xBoxDriver.leftTrigger().whileTrue(shotMove.get());
     
     Command fixedshot1 = new ShotLookupCommand(m_swerve,m_newShooter, m_hopper, m_intake, m_turretLimelight, Constants.ShooterConstants.kAgitateTimeLimit,true, ShooterConstants.fixedShotDistance1, m_TurretSubsystem);
     m_xBoxDriver.povLeft().whileTrue(fixedshot1);
@@ -633,7 +634,10 @@ public class RobotContainer {
   public void DisabledPeriodic(){
      rumbleOff();
     // In disabledPeriodic or before match starts
-    m_backLimelight.SetIMUMode(1);
+    //m_backLimelight.SetIMUMode(1);
+     double distance=TurretUtil.getDistance(m_swerve.getPose2d(), TurretUtil.TargetType.HUB);
+     SmartDashboard.putNumber("Odom Distance-D",distance);
+ 
     // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     //m_LEDS.setLedState(LEDStates.DISABLED,false);
     //m_LEDS.activateLEDS();

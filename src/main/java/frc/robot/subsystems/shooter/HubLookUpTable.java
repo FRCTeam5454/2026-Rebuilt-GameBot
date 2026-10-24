@@ -39,14 +39,27 @@ public class HubLookUpTable {
     private void initializeLookupTable() {
         // Distance (m), Shooter Speed (RPS), Hood Angle (°), Time of Flight (s)
         // KrakenX60 shooting 226g ball - optimized for constant RPS ~75
-        
+        addEntry(1.00, 45.5, 0, 1);        
+        addEntry(2.05, 45.5, 0, 1);
+        addEntry(2.49, 53.5, 0, 1.05);
+        addEntry(2.999, 57.5, 0, 1.3);
+        addEntry(3.368, 58.5, 0.05, 1.2);
+        addEntry(3.762, 60.5, 0.1, 1.54);
+        addEntry(4.272, 62.5, 0.12, 1.11);
+        addEntry(4.57, 63.5, 0.15, 1.6);
+        addEntry(4.945, 65.5, 0.15, 1.6);
+        addEntry(5.23, 66.5, 0.2, 1.22);
+        addEntry(5.45, 68.5, 0.2, 1.25);
+        addEntry(5.861, 69.5, 0.245, 1.12);
+
+        /* 
         addEntry(1.8,  45, 0.0, 1); 
         addEntry(2.05,  47, 0.0, 1.05); 
         addEntry(2.3,  47, 0.0, 1.11); 
         addEntry(2.5,  51, 0.1, 1.12);  
         addEntry(3.01,  53, 0.15, 1.07);  
         addEntry(3.5,  54.54, 0.18, 1.09);  
- 
+        */
         
        
      /*       addEntry(2,  50, 0.0, 1); 

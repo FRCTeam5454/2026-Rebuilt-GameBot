@@ -281,7 +281,7 @@ private double POTStoRotations(double POTSValue ){
   //set position of encoder to offset for POTS
   double currentPOTPosition = m_POTS.get(); 
   double calcHomePos;
-  double kHomeTurretPOTS=0.861; // this is the POTS value when the turret is at 0 degrees
+  double kHomeTurretPOTS=0.867; // this is the POTS value when the turret is at 0 degrees
   double potsGap=Math.abs(kHomeTurretPOTS-currentPOTPosition);
   calcHomePos=potsGap*56.25;
   if(currentPOTPosition<kHomeTurretPOTS){
