@@ -640,7 +640,7 @@ public class RobotContainer {
   public void DisabledPeriodic(){
      rumbleOff();
     // In disabledPeriodic or before match starts
-    //m_backLimelight.SetIMUMode(1);
+    m_backLimelight.SetIMUMode(1);
      double distance=TurretUtil.getDistance(m_swerve.getPose2d(), TurretUtil.TargetType.HUB);
      SmartDashboard.putNumber("Odom Distance-D",distance);
  
