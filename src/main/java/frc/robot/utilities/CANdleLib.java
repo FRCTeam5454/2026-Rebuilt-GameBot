@@ -43,9 +43,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
  */
 public class CANdleLib{
     private int busId;
-    private LEDConfigs m_rgbOrder;
+    private LEDConfigs m_ledConfigs;
     public int ledCount;
-    private LEDConfigs globalBrightness;
 
     /**
      * Constructs a new CANdleLib with the specified CAN ID and LED strip type.
@@ -57,9 +56,11 @@ public class CANdleLib{
      */
     public CANdleLib(int id, double rgbOrder, int ledCount, double globalBrightness) {
         busId = id;
-        this.m_rgbOrder = new LEDConfigs().withStripType(StripTypeValue.valueOf((int)rgbOrder));
+        // withLED() replaces the whole LEDConfigs, so strip type and brightness must live in one object
+        this.m_ledConfigs = new LEDConfigs()
+            .withStripType(StripTypeValue.valueOf((int)rgbOrder))
+            .withBrightnessScalar(globalBrightness);
         this.ledCount = ledCount;
-        this.globalBrightness = new LEDConfigs().withBrightnessScalar(globalBrightness);
     }
     
     /**
@@ -75,8 +76,7 @@ public class CANdleLib{
         CANdle candle;
         candle = new CANdle(busId,"5454Canivore");
         CANdleConfiguration config = new CANdleConfiguration();
-        config.withLED(m_rgbOrder);
-        config.withLED(globalBrightness);
+        config.withLED(m_ledConfigs);
         candle.getConfigurator().apply(config);
         
         return candle;

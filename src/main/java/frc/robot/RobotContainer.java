@@ -112,6 +112,13 @@ public class RobotContainer {
   public final CANdleLib m_CANdleLib = new CANdleLib(Constants.CANdleID, 1, 200, 1);
   public final CANdle m_CANdle = m_CANdleLib.createCANdle();
   public final LEDStrip m_LEDStrip = m_CANdleLib.createLEDStrip(0, 200);
+  public final LEDSubsystem m_LEDs = new LEDSubsystem(m_CANdle, m_LEDStrip,
+      () -> m_climb.getCurrentCommand() != null,
+      () -> m_newShooter.getCurrentCommand() != null,
+      m_newShooter::isKickerRunning,
+      m_intake::isIntaking,
+      () -> this.m_hubMatch,
+      () -> this.m_activeHubTime);
 
  
   private final SendableChooser<Command> m_autoChooser;
@@ -576,8 +583,7 @@ public class RobotContainer {
       m_hasResetGyro=true;
       m_swerve.getPigeon2().reset();
     }
-    
-    m_CANdleLib.setStripColor(m_CANdle, m_LEDStrip, 200,200,200);
+    // LEDs are driven by m_LEDs.periodic(), which shows the disabled pattern on its own
 
   }
 

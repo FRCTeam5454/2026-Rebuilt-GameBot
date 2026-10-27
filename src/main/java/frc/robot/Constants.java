@@ -316,6 +316,19 @@ public final class Constants {
     public static final int LedCanID = 14;
     public static final int LedCount = 115;
     public static final int larsonSize=1;
+
+    //animation speeds (frames per second on the CANdle) - tune on the robot
+    public static final double fadeFrameRate=40;
+    public static final double rainbowFrameRate=60;
+    public static final double flowFrameRate=80;
+    public static final double larsonFrameRate=80;
+    public static final int larsonSizeShooting=12;
+    public static final double strobeFastFrameRate=20;
+    public static final double strobeSlowFrameRate=6;
+    //seconds before our hub turns active that we start flashing a warning
+    public static final double hubWarningTime=5;
+    //brightness scale for idle color when our hub is NOT active
+    public static final double inactiveHubDim=0.15;
   }
 
   public static enum LEDStates{
