@@ -198,6 +198,11 @@ m_1shooterMotor.setControl(new VelocityVoltage(targetSpeed));
    */
   }
   
+  public boolean isKickerRunning(){
+    //kicker only spins when we are actually feeding fuel into the shooter
+    return Math.abs(m_kickerMotor.get()) > 0.05;
+  }
+
   public boolean isShooterAtIdle(){
     //if shoter is below idle threshold, we can consider it at idle, which means it's not spinning enough to shoot, and we can stop it without worrying about cutting power to a spinning flywheel
     double currentSpeed=m_1shooterMotor.getVelocity().getValueAsDouble();

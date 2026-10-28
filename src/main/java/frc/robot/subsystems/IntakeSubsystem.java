@@ -146,6 +146,11 @@ public class IntakeSubsystem extends SubsystemBase {
     return m_fold.getOutputCurrent();
   }
 
+  public boolean isIntaking(){
+    //highSpeed is negative, so pulling fuel in is a negative duty cycle
+    return m_intakeMotor.get() < -0.05;
+  }
+
   public boolean hasHomed(){
     return m_homed;
   }
