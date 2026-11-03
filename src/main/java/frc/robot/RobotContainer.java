@@ -135,83 +135,8 @@ public class RobotContainer {
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
-  // Auto Setup
-  public Command Left2Neutral() {
-    // This method loads the auto when it is called, however, it is recommended
-    // to first load your paths/autos when code starts, then return the
-    // pre-loaded auto/path
-    return new PathPlannerAuto("Left2Neutral");
-  }
-  public Command Right2Left() {
-    return new PathPlannerAuto("Right2Left");
-  }
-  public Command ShootDepotShootNZ() {
-    return new PathPlannerAuto("ShootDepotShootNZ");
-  }
-  private void InitialAutonPathfind(){
-    //Magic Comment
-    if (m_autoChooser == null) {
-      SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
-     // Don't Run anything
-    }
-    else {
-      try {
-        // Prefer the pre-built Command selected in the auto chooser
-        Command selectedAuto = m_autoChooser.getSelected();
-        if (selectedAuto != null) {
-          SmartDashboard.putString("Asher's Cool Message:", "Returning selected Command from auto chooser");
-        //Command autoCommand =  ( new PathPlannerAuto(selectedAuto));
-      
-        }
+              // Auto Setup
 
-        //bline autos arent .auto files so build them here
-        if (selectedAuto != null && BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
-          return buildBLineDoubleSweepTrenchIO();
-        }
-
-        // Load the path group to obtain the initial pose of the first trajectory.
-        // Use suitable constraints here (these only affect loading; path-following will be handled by the PathPlannerAuto command).
-        PathConstraints goToConstraints = new PathConstraints(3.0, 4.0,
-          Units.degreesToRadians(540), Units.degreesToRadians(720));
-        List<PathPlannerPath> group = PathPlannerAuto.getPathGroupFromAutoFile(selectedAuto.getName());
-
-        if (group == null || group.isEmpty()) {
-          SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
-          //Do Nothing
-        }else {
-        
-          /*Pose2d startPose = group.get(0).getStartingHolonomicPose().orElse(group.get(0).getStartingDifferentialPose());
-          startPose=FieldConstants.flipIfRed(startPose);
-          Command goToStart = AutoBuilder.pathfindToPose(
-            startPose,
-            goToConstraints,
-            0.0
-          );*/
-          
-          // "... Recovery" autos pathfind back on course if the robot gets knocked off a path
-          Command followAuto = RecoveryAuto.isRecoveryAuto(selectedAuto.getName())
-            ? RecoveryAuto.build(selectedAuto.getName(), m_swerve)
-            : new PathPlannerAuto(selectedAuto.getName());
-
-          // go to start pos then call auto
-          SmartDashboard.putString("Asher's Cool Message:","should be running sequence");
-          //add auto to scheduler
-          Pose2d currentPose = m_swerve.getPose2d();
-          if(currentPose.getX()>1 || currentPose.getY()>1) {
-            //disable pathing
-            //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          
-          } else { //no starting pose
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          }
-        }
-      } catch (Exception e) {
-        // if anything goes wrong (it probably will), fall back to whatever the original chooser provides
-        SmartDashboard.putString("Asher's Cool Message:",e.getMessage());
-      }
-    }
-  }
   //bline version of Double sweep TrenchIO, uses the same named commands
   private Command buildBLineDoubleSweepTrenchIO(){
     return BLineAuto_DoubleSweepTrenchIO.build(
@@ -222,6 +147,45 @@ public class RobotContainer {
         m_swerve::resetPose,
         () -> NamedCommands.getCommand("expandIntake"),
         () -> NamedCommands.getCommand("shotLookUpW5"));
+  }
+  private void InitialAutonPathfind(){
+    //Magic Comment
+    if (m_autoChooser == null) {
+      SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
+      return;
+    }
+    try {
+      Command selectedAuto = m_autoChooser.getSelected();
+      if (selectedAuto == null) {
+        SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
+        return;
+      }
+
+      //BLINE SCHEDULER
+      if (BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
+        SmartDashboard.putString("Asher's Cool Message:", "Running BLine auto");
+        CommandScheduler.getInstance().schedule(buildBLineDoubleSweepTrenchIO());
+        return;
+      }
+
+      //PATHPLANNER LEFTOVERS if we still want to run some pathplanner
+      List<PathPlannerPath> group = PathPlannerAuto.getPathGroupFromAutoFile(selectedAuto.getName());
+      if (group == null || group.isEmpty()) {
+        SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
+        return;
+      }
+
+      // "... Recovery" autos pathfind back on course if the robot gets knocked off a path
+      Command followAuto = RecoveryAuto.isRecoveryAuto(selectedAuto.getName())
+        ? RecoveryAuto.build(selectedAuto.getName(), m_swerve)
+        : new PathPlannerAuto(selectedAuto.getName());
+
+      SmartDashboard.putString("Asher's Cool Message:", "should be running sequence");
+      CommandScheduler.getInstance().schedule(followAuto);
+    } catch (Exception e) {
+      // if anything goes wrong (it probably will)
+      SmartDashboard.putString("Asher's Cool Message:", String.valueOf(e.getMessage()));
+    }
   }
   //
   public boolean hasHomed=false;
@@ -234,7 +198,7 @@ public class RobotContainer {
   private ShotCalculator m_ShotCalculator = new ShotCalculator();
   
 
-  //
+  //MAIN ROBOT CONTAINTER CONSTRUCTION
   public RobotContainer(){
     //filter turret limelight on center targets
     m_turretLimelight.setLimelightIDFilter(10,25);
