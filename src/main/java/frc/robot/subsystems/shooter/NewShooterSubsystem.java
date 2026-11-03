@@ -58,6 +58,7 @@ public class NewShooterSubsystem extends SubsystemBase {
     private CANcoder m_hoodCoder;
     private double testLastHood=0;
     private Pose2d m_pose;
+    private GenericEntry m_kickerRunningEntry;
     private GenericEntry m_speedAdjusterEntry;
    private PositionVoltage m_request= new PositionVoltage(0).withSlot(0);
  //  private MotionMagicVoltage mmRequest = new MotionMagicVoltage(0);
@@ -96,6 +97,9 @@ public class NewShooterSubsystem extends SubsystemBase {
    
     m_hoodMotor.setNeutralMode(NeutralModeValue.Brake);
    
+    m_kickerRunningEntry = Shuffleboard.getTab("Shooter")
+                              .add("Kicker Running", false)
+                              .getEntry();
     m_speedAdjusterEntry = Shuffleboard.getTab("Shooter")
                               .add("Speed Adjuster", 1.0)
                               .getEntry();
@@ -141,6 +145,7 @@ m_hoodMotor.getConfigurator().apply(talonFXConfigs);
 
   public void HoodSetPos(double hoodTarget) {
     m_simTargetHood = hoodTarget;
+    System.out.println("Hood Target is " + hoodTarget);
     m_hoodMotor.setControl(m_request.withPosition(hoodTarget));
   }
 
@@ -297,19 +302,20 @@ public Command shutdownCommand(){
     @Override
   public void periodic(){
     if (m_speedAdjusterEntry != null) {
-      double speedAdjuster = m_speedAdjusterEntry.getDouble(1.0);
-      SmartDashboard.putNumber("Speed Adjuster:", speedAdjuster);
-      Logger.recordOutput("Shooter/SpeedAdjuster", speedAdjuster); // multiplies every hub shot speed
+      SmartDashboard.putNumber("Speed Adjuster:", m_speedAdjusterEntry.getDouble(1.0));
     }
 
-    // Debug values go to Logger only (AdvantageScope / USB log); SmartDashboard is for what the drive team watches
-    double kickerSpeed = m_kickerMotor.get();
-    boolean kickerRunning = Math.abs(kickerSpeed) > 0.05;
+    SmartDashboard.putNumber("Shooter Velocity", m_1shooterMotor.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Hood CanCoder Value",m_hoodCoder.getAbsolutePosition().getValueAsDouble());  
+    SmartDashboard.putNumber("Hood 'Pos'",getHoodPos());  
+    boolean kickerRunning = Math.abs(m_kickerMotor.get()) > 0.05;
     SmartDashboard.putBoolean("Kicker Running", kickerRunning);
+    SmartDashboard.putNumber("Kicker Speed", m_kickerMotor.get());
+    if (m_kickerRunningEntry != null) {
+      m_kickerRunningEntry.setBoolean(kickerRunning);
+    }
     Logger.recordOutput("Shooter/KickerRunning", kickerRunning);
-    Logger.recordOutput("Shooter/KickerSpeed", kickerSpeed);
-    Logger.recordOutput("Shooter/KickerCurrent", m_kickerMotor.getOutputCurrent());
-    Logger.recordOutput("Shooter/HoodCurrent", m_hoodMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput("Shooter/KickerSpeed", m_kickerMotor.get());
     double shooterSpeed = m_1shooterMotor.getVelocity().getValueAsDouble();
     if (!Double.isNaN(m_coastToIdleSpeed) && shooterSpeed <= m_coastToIdleSpeed) {
       runShooterVelocity(m_coastToIdleSpeed); // coasted down to idle, now hold it
@@ -319,13 +325,8 @@ public Command shutdownCommand(){
     Logger.recordOutput("Shooter/ShooterMotor2Velocity",  m_2shooterMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor1Current", m_1shooterMotor.getSupplyCurrent().getValueAsDouble());
     Logger.recordOutput("Shooter/ShooterMotor2Current",  m_2shooterMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput("Shooter/TargetVelocity", m_simTargetVelocity); // last commanded setpoint (rps)
-    Logger.recordOutput("Shooter/ClosedLoopError", m_1shooterMotor.getClosedLoopError().getValueAsDouble());
-    Logger.recordOutput("Shooter/MotorVoltage", m_1shooterMotor.getMotorVoltage().getValueAsDouble());
-    double hoodCoder = m_hoodCoder.getAbsolutePosition().getValueAsDouble();
-    Logger.recordOutput("Shooter/Hood CanCoder Value", hoodCoder);
-    Logger.recordOutput("Shooter/Hood 'Pos'", hoodCoder < 0.95 ? hoodCoder : 0.0); // same as getHoodPos()
-    Logger.recordOutput("Shooter/HoodTarget", m_simTargetHood); // last commanded hood position
+    Logger.recordOutput("Shooter/Hood CanCoder Value", m_hoodCoder.getAbsolutePosition().getValueAsDouble());
+    Logger.recordOutput("Shooter/Hood 'Pos'",getHoodPos());
    
   }
 

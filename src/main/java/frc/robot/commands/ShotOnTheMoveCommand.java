@@ -162,10 +162,10 @@ double turretSourceAngle=targetShot.turretAngleDegrees;
          
   //System.out.println("Shooting On the Move - Speed "  + targetspeed  + 
   //                   "Target Angle:" + angle + " Static Angle:" + StaticTurretAngleTarget +" - State:" + m_state);
-  Logger.recordOutput("Turret/UtilTargetAngle",angle);
+  SmartDashboard.putNumber("Turret Util Target Angle",angle);
   double targetPos=m_turret.getTargetMotorPosition(angle);
-  Logger.recordOutput("Turret/UtilTargetPos",targetPos); 
-  publishDebug(pose, targetShot, staticShot, robotRelativeSpeeds, fieldRelativeSpeeds, turretVelX, turretVelY, angle, targetPos);
+  SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
+  publishDebug(targetShot, staticShot, robotRelativeSpeeds, fieldRelativeSpeeds, turretVelX, turretVelY, angle, targetPos);
   m_turret.moveMotor(targetPos); 
   
 switch(m_state){
@@ -361,11 +361,35 @@ switch(m_state){
     return returnValue;
   }
 
-  private void publishDebug(Pose2d pose, ShotSolution leadShot, ShotSolution staticShot, ChassisSpeeds robotRelativeSpeeds,
+  private void publishDebug(ShotSolution leadShot, ShotSolution staticShot, ChassisSpeeds robotRelativeSpeeds,
                             ChassisSpeeds fieldRelativeSpeeds, double turretVelX, double turretVelY, double turretAngle5454,
                             double targetMotorPosition){
     double leadAngleDelta = leadShot.turretAngleDegrees - staticShot.turretAngleDegrees;
 
+    SmartDashboard.putNumber("SOTM/DistanceMeters",leadShot.distanceMeters);
+    SmartDashboard.putNumber("SOTM/StaticDistanceMeters",staticShot.distanceMeters);
+    SmartDashboard.putNumber("SOTM/TimeOfFlightSec",leadShot.timeOfFlightSeconds);
+    SmartDashboard.putNumber("SOTM/ShooterSpeedRPS",leadShot.shooterSpeedRPS);
+    SmartDashboard.putNumber("SOTM/HoodPosition",leadShot.trajectoryAngleDegrees);
+    SmartDashboard.putNumber("SOTM/TurretAngleRawDeg",leadShot.turretAngleDegrees);
+    SmartDashboard.putNumber("SOTM/TurretAngle5454Deg",turretAngle5454);
+    SmartDashboard.putNumber("SOTM/TurretMotorTarget",targetMotorPosition);
+    SmartDashboard.putNumber("SOTM/TurretMotorActual",m_turret.getCurrentPosition());
+    SmartDashboard.putBoolean("SOTM/TurretAtTarget",checkTurretPos(targetMotorPosition));
+    SmartDashboard.putBoolean("SOTM/ShotValid",leadShot.isValid);
+    SmartDashboard.putNumber("SOTM/LeadAngleDeltaDeg",leadAngleDelta);
+    SmartDashboard.putNumber("SOTM/LeadDistanceMeters",leadShot.leadDistanceMeters);
+    SmartDashboard.putNumber("SOTM/AimBehindXMeters",-turretVelX * leadShot.timeOfFlightSeconds);
+    SmartDashboard.putNumber("SOTM/AimBehindYMeters",-turretVelY * leadShot.timeOfFlightSeconds);
+    SmartDashboard.putNumber("SOTM/PredictedTurretX",leadShot.predictedTurretX);
+    SmartDashboard.putNumber("SOTM/PredictedTurretY",leadShot.predictedTurretY);
+    SmartDashboard.putNumber("SOTM/RobotRelVxMps",robotRelativeSpeeds.vxMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/RobotRelVyMps",robotRelativeSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/RobotOmegaRadPerSec",robotRelativeSpeeds.omegaRadiansPerSecond);
+    SmartDashboard.putNumber("SOTM/FieldRelVxMps",fieldRelativeSpeeds.vxMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/FieldRelVyMps",fieldRelativeSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/TurretFieldVelXMps",turretVelX);
+    SmartDashboard.putNumber("SOTM/TurretFieldVelYMps",turretVelY);
 
     Logger.recordOutput("Shooter/SOTM/DistanceMeters",leadShot.distanceMeters);
     Logger.recordOutput("Shooter/SOTM/StaticDistanceMeters",staticShot.distanceMeters);
@@ -392,11 +416,11 @@ switch(m_state){
     Logger.recordOutput("Shooter/SOTM/TurretFieldVelXMps",turretVelX);
     Logger.recordOutput("Shooter/SOTM/TurretFieldVelYMps",turretVelY);
 
-    Pose2d turretPose = TurretUtil.getTurretPose(pose);
+    Pose2d turretPose = TurretUtil.getTurretPose(m_swerve.getPose2d());
     Pose2d targetPose2d = TurretUtil.getTargetPose(TurretUtil.TargetType.HUB);
 
     // Ideal Aim Line (Turret to Hub)
-    double targetTurretHeadingRad = pose.getRotation().getRadians() + Math.toRadians(leadShot.turretAngleDegrees);
+    double targetTurretHeadingRad = m_swerve.getPose2d().getRotation().getRadians() + Math.toRadians(leadShot.turretAngleDegrees);
     Pose3d idealStart3d = new Pose3d(turretPose.getX(), turretPose.getY(), 0.44, new Rotation3d(0, 0, targetTurretHeadingRad));
     Pose3d idealEnd3d = new Pose3d(targetPose2d.getX(), targetPose2d.getY(), 2.64, new Rotation3d());
     Logger.recordOutput("Shooter/SOTM/AimLine3d", new Pose3d[] { idealStart3d, idealEnd3d });
@@ -408,7 +432,7 @@ switch(m_state){
         : 360.0 + (actualMotorRotations * 7.87499);
     double actualTurretRelDeg = (actual5454Deg > 180.0) ? (360.0 - actual5454Deg) : -actual5454Deg;
 
-    double robotHeadingRad = pose.getRotation().getRadians();
+    double robotHeadingRad = m_swerve.getPose2d().getRotation().getRadians();
     double actualTurretFieldHeadingRad = robotHeadingRad + Math.toRadians(actualTurretRelDeg);
 
     double currentRps = Math.abs(m_shooter.getShooterSpeed());

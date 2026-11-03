@@ -64,7 +64,7 @@ public class ObsidianCANSparkMax extends SparkBase{
         newConfig.signals.analogPositionPeriodMs(1000);
         newConfig.signals.analogVelocityPeriodMs(1000);
         newConfig.signals.analogVoltagePeriodMs(1000);
-        newConfig.signals.outputCurrentPeriodMs(20); // used by kicker, intake fold and climb: current checks and logs need fresh data
+        newConfig.signals.outputCurrentPeriodMs(1000);
         newConfig.signals.externalOrAltEncoderPosition(1000);
         newConfig.signals.externalOrAltEncoderVelocity(1000);
 

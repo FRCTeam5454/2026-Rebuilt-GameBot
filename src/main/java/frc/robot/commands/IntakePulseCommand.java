@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -27,11 +26,8 @@ public class IntakePulseCommand extends Command {
     m_flipCountLimit = 3;
     
     SmartDashboard.putString("IntakePulse/State", "Starting");
-    Logger.recordOutput("Intake/Pulse/State", "Starting");
     SmartDashboard.putNumber("IntakePulse/HopperPulls", m_HopperPulls);
-    Logger.recordOutput("Intake/Pulse/HopperPulls", m_HopperPulls);
     SmartDashboard.putNumber("IntakePulse/FlipSpeed", m_flipSpeed);
-    Logger.recordOutput("Intake/Pulse/FlipSpeed", m_flipSpeed);
   }
 
   @Override
@@ -84,17 +80,11 @@ public class IntakePulseCommand extends Command {
     }
 
     SmartDashboard.putString("IntakePulse/State", "Running");
-    Logger.recordOutput("Intake/Pulse/State", "Running");
     SmartDashboard.putNumber("IntakePulse/HopperPulls", m_HopperPulls);
-    Logger.recordOutput("Intake/Pulse/HopperPulls", m_HopperPulls);
     SmartDashboard.putNumber("IntakePulse/FlipSpeed", m_flipSpeed);
-    Logger.recordOutput("Intake/Pulse/FlipSpeed", m_flipSpeed);
     SmartDashboard.putNumber("IntakePulse/FlipCount", m_flipCount);
-    Logger.recordOutput("Intake/Pulse/FlipCount", m_flipCount);
     SmartDashboard.putNumber("IntakePulse/FlipCountLimit", m_flipCountLimit);
-    Logger.recordOutput("Intake/Pulse/FlipCountLimit", m_flipCountLimit);
     SmartDashboard.putBoolean("IntakePulse/RollersActive", !m_intake.isinNoFlyZone());
-    Logger.recordOutput("Intake/Pulse/RollersActive", !m_intake.isinNoFlyZone());
   }
 
   @Override
@@ -104,7 +94,6 @@ public class IntakePulseCommand extends Command {
     m_intake.SetIntakeOutMode();
     
     SmartDashboard.putString("IntakePulse/State", interrupted ? "Interrupted" : "Finished");
-    Logger.recordOutput("Intake/Pulse/State", interrupted ? "Interrupted" : "Finished");
   }
 
   @Override

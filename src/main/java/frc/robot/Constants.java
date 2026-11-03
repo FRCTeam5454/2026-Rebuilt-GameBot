@@ -243,7 +243,7 @@ public final class Constants {
   public static final class HoodConstants{
 
     public static final int hoodCoderCANID=51;
-    public static final double hoodOffset=-0.35571289062;//0.2599;//-0.13232421875;//-0.2734375; //-0.132568359375;//-0.101806640625;//-0.125;//-0.091064453125;//-0.120849609375;//-0.09765625;//-0.642089;  //71484375;//-0.488037109375;
+    public static final double hoodOffset=-0.3515625;//-0.352783203125; //-0.35571289062;//0.2599;//-0.13232421875;//-0.2734375; //-0.132568359375;//-0.101806640625;//-0.125;//-0.091064453125;//-0.120849609375;//-0.09765625;//-0.642089;  //71484375;//-0.488037109375;
     
     public static final double hoodSpeed=0.09;
     public static final double hoodUpSpeed=-0.09;
@@ -324,8 +324,6 @@ public final class Constants {
     public static final double climbLimitHigh=0.49;
     public static final double climbForwardSpeed=-1.0;
     public static final double climbBackSpeed=1.0;
-    // longest a climb up/down can run before giving up, in case a limit switch fails
-    public static final double climbTimeout=3.0;
   }
 
   public static final class CoolPanelConstants{

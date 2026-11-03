@@ -15,8 +15,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -150,12 +148,10 @@ public class RobotContainer {
   public Command ShootDepotShootNZ() {
     return new PathPlannerAuto("ShootDepotShootNZ");
   }
-  /** Builds the auto picked in the chooser, or returns null if there isn't one. */
-  private Command InitialAutonPathfind(){
+  private void InitialAutonPathfind(){
     //Magic Comment
     if (m_autoChooser == null) {
       SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
-      Logger.recordOutput("Auto/Status", "No Auto Selected");
      // Don't Run anything
     }
     else {
@@ -164,7 +160,6 @@ public class RobotContainer {
         Command selectedAuto = m_autoChooser.getSelected();
         if (selectedAuto != null) {
           SmartDashboard.putString("Asher's Cool Message:", "Returning selected Command from auto chooser");
-          Logger.recordOutput("Auto/Status", "Returning selected Command from auto chooser");
         //Command autoCommand =  ( new PathPlannerAuto(selectedAuto));
       
         }
@@ -182,7 +177,6 @@ public class RobotContainer {
 
         if (group == null || group.isEmpty()) {
           SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
-          Logger.recordOutput("Auto/Status", "It aint running 2");
           //Do Nothing
         }else {
         
@@ -201,18 +195,22 @@ public class RobotContainer {
 
           // go to start pos then call auto
           SmartDashboard.putString("Asher's Cool Message:","should be running sequence");
-          Logger.recordOutput("Auto/Status", "should be running sequence");
-          //disabled pathing to the start pose: Commands.sequence(goToStart, followAuto)
-          // AutonMode schedules this after homing
-          return followAuto;
+          //add auto to scheduler
+          Pose2d currentPose = m_swerve.getPose2d();
+          if(currentPose.getX()>1 || currentPose.getY()>1) {
+            //disable pathing
+            //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
+            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
+          
+          } else { //no starting pose
+            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
+          }
         }
       } catch (Exception e) {
         // if anything goes wrong (it probably will), fall back to whatever the original chooser provides
         SmartDashboard.putString("Asher's Cool Message:",e.getMessage());
-        Logger.recordOutput("Auto/Status", String.valueOf(e.getMessage())); // getMessage() can be null
       }
     }
-    return null;
   }
   //bline version of Double sweep TrenchIO, uses the same named commands
   private Command buildBLineDoubleSweepTrenchIO(){
@@ -256,25 +254,6 @@ public class RobotContainer {
     m_pathChooser.addOption("ShootDepotShootNZ", "ShootDepotShootNZ");
     SmartDashboard.putData("Path Chooser", m_pathChooser);
     m_TurretSubsystem.playMusic("IndianaJones.chrp");
-    configureCommandLogging();
-  }
-
-  /** Logs Commands/<name> = true while a command runs, and who interrupted it, so match logs show what was running. */
-  private void configureCommandLogging(){
-    java.util.Map<String, Integer> runningCounts = new java.util.HashMap<>();
-    java.util.function.BiConsumer<Command, Boolean> logRunning = (command, running) -> {
-      // count, since the same name can be scheduled more than once (e.g. several ShotLookupCommands)
-      int count = runningCounts.merge(command.getName(), running ? 1 : -1, Integer::sum);
-      Logger.recordOutput("Commands/" + command.getName(), count > 0);
-    };
-    CommandScheduler scheduler = CommandScheduler.getInstance();
-    scheduler.onCommandInitialize(command -> logRunning.accept(command, true));
-    scheduler.onCommandFinish(command -> logRunning.accept(command, false));
-    scheduler.onCommandInterrupt((command, interruptor) -> {
-      logRunning.accept(command, false);
-      Logger.recordOutput("Commands/LastInterrupted",
-          command.getName() + " by " + interruptor.map(Command::getName).orElse("cancel/disable"));
-    });
   }
 
 
@@ -567,7 +546,7 @@ public class RobotContainer {
 
 
     try{
-      updateHubStatus();
+     /*  updateHubStatus();
       String targetString="";
       switch(m_tracking){
         case HUB:
@@ -585,14 +564,10 @@ public class RobotContainer {
       SmartDashboard.putString("ActiveHub",m_activeHub);
       SmartDashboard.putString("Active Phase",m_activeHubPhase);
       SmartDashboard.putNumber("Active Phase Time",m_activeHubTime);
-      Logger.recordOutput("Match/TrackingMode", m_tracking.toString());
-      Logger.recordOutput("Match/OurHubActive", m_hubMatch);
-      Logger.recordOutput("Match/ActiveHub", m_activeHub);
-      Logger.recordOutput("Match/ActivePhase", m_activeHubPhase);
-      Logger.recordOutput("Match/PhaseTimeLeft", m_activeHubTime);
-      double turretLimelightDistance=m_turretLimelight.getDistanceInverted();
-      SmartDashboard.putNumber("LimeLight Distance" , turretLimelightDistance);
-      Logger.recordOutput("Vision/TurretLimelightDistance", turretLimelightDistance);   
+      */
+      SmartDashboard.putNumber("LimeLight Distance" , m_turretLimelight.getDistanceInverted());   
+      SmartDashboard.putNumber("Hood Position is ", m_newShooter.getHoodPos());
+      SmartDashboard.putNumber("POTS Position is ", m_TurretSubsystem.getTurretPOTS());
       
     SmartDashboard.putBoolean("Is Climb Up ???",m_climb.isClimbUpLimit());
       SmartDashboard.putBoolean("Is Climb Down ???",m_climb.isClimbDownLimit());
@@ -642,7 +617,6 @@ public class RobotContainer {
    if(tilt > Constants.LimeLightValues.maxVisionTiltDeg){
      m_lastTiltedTime=Timer.getFPGATimestamp();
    }
-   Logger.recordOutput("Vision/TiltDeg", tilt);
    updatefromLimeLight(m_backLimelight);
    updatefromLimeLight(m_leftLimelight);
   }
@@ -651,45 +625,46 @@ public class RobotContainer {
    limelight.SetRobotOrientation(yaw,0);
    
    LimelightHelpers.PoseEstimate mt2 = limelight.getBotPoseEstimate_wpiBlue_MegaTag2();  
-   String prefix="Vision/" + limelight.getLimelightName() + "/";
-   double margin=Constants.LimeLightValues.fieldBoundsMargin;
-   Double lastTimestamp=m_lastVisionTimestamps.get(limelight.getLimelightName());
-   // first matching reason wins; null = accept the frame
-   String rejectReason=null;
-  if(mt2.tagCount == 0){
-    rejectReason="NoTags";
+   boolean doRejectUpdate=false; //default to accept vision update
+  // if we're spinning faster than maxVisionYawRate (deg/s), ignore vision updates - frames get motion blurred
+  // (ZWorld = yaw rate about the field's vertical axis, correct even if the Pigeon2 isn't mounted flat)
+  if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble()) > Constants.LimeLightValues.maxVisionYawRate)
+  {
+    doRejectUpdate = true;
+  }
+  if(mt2.tagCount == 0)
+  {
+    doRejectUpdate = true;
+  }
   //reject default position of (0,0) as this is default pose returned in error
   //conditions per Limelight documentation in April 2026
-  }else if(mt2.pose.getX()==0 && mt2.pose.getY()==0){
-    rejectReason="ZeroPose";
-  // only fuse each camera frame once - this runs every 20ms loop, but a frame can stay on NT for longer
-  }else if(lastTimestamp != null && mt2.timestampSeconds == lastTimestamp){
-    rejectReason="DuplicateFrame";
-  // spinning faster than maxVisionYawRate (deg/s) motion-blurs frames (ZWorld = yaw rate about the field vertical axis)
-  }else if(Math.abs(m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble()) > Constants.LimeLightValues.maxVisionYawRate){
-    rejectReason="YawRate";
+  if(mt2.pose.getX()==0 && mt2.pose.getY()==0)
+  {
+    doRejectUpdate = true;
+  }
   // reject frames captured while we were tilted - the camera frame lags the gyro, so compare against
   // the frame's own capture time (both are FPGA time) instead of just whether we're tilted right now
-  }else if(mt2.timestampSeconds <= m_lastTiltedTime){
-    rejectReason="Tilted";
-  // single tags far away are too noisy to trust
-  }else if(mt2.tagCount == 1 && mt2.avgTagDist > Constants.LimeLightValues.maxSingleTagDist){
-    rejectReason="FarSingleTag";
-  // the robot can't be off the field
-  }else if(mt2.pose.getX() < -margin || mt2.pose.getX() > FieldConstantsMA.fieldLength + margin
-     || mt2.pose.getY() < -margin || mt2.pose.getY() > FieldConstantsMA.fieldWidth + margin){
-    rejectReason="OffField";
+  if(mt2.timestampSeconds <= m_lastTiltedTime)
+  {
+    doRejectUpdate = true;
   }
-  boolean doRejectUpdate = rejectReason != null;
-  Logger.recordOutput(prefix + "Accepted", !doRejectUpdate);
-  Logger.recordOutput(prefix + "RejectReason", doRejectUpdate ? rejectReason : "");
-  Logger.recordOutput(prefix + "TagCount", mt2.tagCount);
-  if(mt2.tagCount > 0){
-    Logger.recordOutput(prefix + "Pose", mt2.pose);
-    Logger.recordOutput(prefix + "AvgTagDist", mt2.avgTagDist);
-    Logger.recordOutput(prefix + "LatencyMS", mt2.latency);
-    // how far this frame would move the pose; big jumps explain "teleporting" odometry
-    Logger.recordOutput(prefix + "Correction", mt2.pose.getTranslation().getDistance(m_swerve.getPose2d().getTranslation()));
+  // single tags far away are too noisy to trust
+  if(mt2.tagCount == 1 && mt2.avgTagDist > Constants.LimeLightValues.maxSingleTagDist)
+  {
+    doRejectUpdate = true;
+  }
+  // the robot can't be off the field
+  double margin=Constants.LimeLightValues.fieldBoundsMargin;
+  if(mt2.pose.getX() < -margin || mt2.pose.getX() > FieldConstantsMA.fieldLength + margin
+     || mt2.pose.getY() < -margin || mt2.pose.getY() > FieldConstantsMA.fieldWidth + margin)
+  {
+    doRejectUpdate = true;
+  }
+  // only fuse each camera frame once - this runs every 20ms loop, but a frame can stay on NT for longer
+  Double lastTimestamp=m_lastVisionTimestamps.get(limelight.getLimelightName());
+  if(lastTimestamp != null && mt2.timestampSeconds == lastTimestamp)
+  {
+    doRejectUpdate = true;
   }
   if(!doRejectUpdate)
     {
@@ -702,8 +677,6 @@ public class RobotContainer {
       if(justLanded){
         xyStdDev*=Constants.LimeLightValues.postLandingStdDevFactor;
       }
-      Logger.recordOutput(prefix + "JustLanded", justLanded);
-      Logger.recordOutput(prefix + "StdDev", xyStdDev);
       SmartDashboard.putBoolean("Vision Updating from Limelight " + limelight.getLimelightName(),true );
       double timestamp=Utils.fpgaToCurrentTime(mt2.timestampSeconds); // CONVERT Time Units
       // RobotState mirrors this pose (see CommandSwerveDrivetrain.periodic), so vision only goes in here
@@ -724,7 +697,10 @@ public class RobotContainer {
   public void DisabledPeriodic(){
      rumbleOff();
     // In disabledPeriodic or before match starts
-    m_backLimelight.SetIMUMode(1);
+   // m_backLimelight.SetIMUMode(1);
+   //update limelight distance
+    double distance=TurretUtil.getDistance(m_swerve.getPose2d(), TurretUtil.TargetType.HUB);
+   SmartDashboard.putNumber("Odom Distance-D",distance);
     // AllPeriodic() already runs every cycle from Robot.robotPeriodic() - don't call it again here.
     //m_LEDS.setLedState(LEDStates.DISABLED,false);
     //m_LEDS.activateLEDS();
@@ -794,19 +770,17 @@ Command pathfindingCommand = AutoBuilder.pathfindToPose(
 return pathfindingCommand;
 }
   public void AutonMode(){
-    Command homing = homeRobot();
+    homeRobot();
     //used fused IMU Mode
     m_backLimelight.SetIMUMode(4);
      setTracking(TurretTrackingMethod.HUB);
      m_newShooter.primeMotors(Constants.ShooterConstants.AutoIdleSpeed);
-    Command auto = InitialAutonPathfind();
-    // home the intake and climb before the auto starts, so autos that fold the intake have a zeroed encoder
-    CommandScheduler.getInstance().schedule(auto == null ? homing : Commands.sequence(homing, auto));
-
+    InitialAutonPathfind();
+    
   }
 
   public void TeleopMode(){
-    CommandScheduler.getInstance().schedule(homeRobot());
+    homeRobot();
     setTracking(TurretTrackingMethod.HUB);
     m_newShooter.idleShooter(Constants.ShooterConstants.IdleSpeed);
     //used fused IMU Mode
@@ -858,16 +832,15 @@ return pathfindingCommand;
    private void TargetTracking(TurretTrackingMethod trackingMethod ){
     double turretAngleTarget=0;
     TurretUtil.TargetType target;
-    Pose2d pose=m_swerve.getPose2d(); // read once per loop
     switch (trackingMethod){
       case HUB:
         target=TurretUtil.TargetType.HUB;   
-        turretAngleTarget=TurretUtil.get5454TurretAngle(pose,target);
+        turretAngleTarget=TurretUtil.get5454TurretAngle(m_swerve.getPose2d(),target);
         trackTurretToAngle(turretAngleTarget);  
         break;
       case PASS:
-        target = TurretUtil.getNearestPassTargetType(pose);
-        turretAngleTarget=TurretUtil.get5454TurretAngle(pose,target);
+        target = TurretUtil.getNearestPassTargetType(m_swerve.getPose2d());
+        turretAngleTarget=TurretUtil.get5454TurretAngle(m_swerve.getPose2d(),target);
         trackTurretToAngle(turretAngleTarget);
         break;  
       case TURRET:
@@ -879,14 +852,11 @@ return pathfindingCommand;
     }
    }
     private void trackTurretToAngle(double angle){
-      Logger.recordOutput("Turret/UtilTargetAngle",angle);
+      SmartDashboard.putNumber("Turret Util Target Angle",angle);
       double targetPos=m_TurretSubsystem.getTargetMotorPosition(angle);
-      Logger.recordOutput("Turret/UtilTargetPos",targetPos); 
-      double yawRateDegPerSec = m_swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
-      var speeds = m_swerve.getChassisSpeeds();
-      double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-      m_TurretSubsystem.trackTarget(targetPos, yawRateDegPerSec, speedMps);
-
+      SmartDashboard.putNumber("Turret Util Target Pos",targetPos); 
+      m_TurretSubsystem.moveMotor(targetPos);
+ 
 }
 
 
@@ -897,36 +867,31 @@ return pathfindingCommand;
   }
 
   public void AllPeriodic(){
-    // time our own per-loop work so match logs show whether it is eating the 20 ms budget
-    double startTime=Timer.getFPGATimestamp();
     updateOdomFromLimelights();
-    double visionDoneTime=Timer.getFPGATimestamp();
     m_Field2d.setRobotPose(m_swerve.getPose2d());
-
+    
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime()); //elastic
     SmartDashboard.putNumber("Voltage",RobotController.getBatteryVoltage()); //elastic
     refreshSmartDashboard();
-    Logger.recordOutput("Timing/VisionMS", (visionDoneTime-startTime)*1000);
-    Logger.recordOutput("Timing/AllPeriodicMS", (Timer.getFPGATimestamp()-startTime)*1000);
+    
   }
 
   
-  /**
-   * Homes the hood and turret right away, and returns a command that homes the intake and climb
-   * (both wait on limit switches, side by side). The caller schedules it - it used to block the loop.
-   */
-  public Command homeRobot(){
-    if(hasHomed){
-      return Commands.none();
+  public void homeRobot(){
+    if(!hasHomed){
+      //System.out.println("System is starting Homing- " + DriverStation.getMatchTime());
+     
+      m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
+      m_intake.homeIntake(Constants.homeTimeOut);
+      //System.out.println("Homing Hood");
+      m_newShooter.hoodHome();
+      //System.out.println("Homing Climb");
+      m_climb.homeClimb(Constants.homeTimeOut);
+      //System.out.println("Homing Turret");
+      m_TurretSubsystem.homeTurret();
+      hasHomed = true;
+      //System.out.println("System is completed Homing- " + DriverStation.getMatchTime());
     }
-    m_backLimelight.SetRobotOrientation(m_swerve.getPigeon2().getRotation2d().getDegrees(),0);
-    m_newShooter.hoodHome();
-    m_TurretSubsystem.homeTurret();
-    return Commands.parallel(m_intake.homeCommand(Constants.homeTimeOut),
-                             m_climb.homeCommand(Constants.homeTimeOut))
-        // if interrupted (e.g. disabled mid-home), leave hasHomed false so the next mode homes again
-        .finallyDo((interrupted)->{ if(!interrupted){ hasHomed=true; } })
-        .withName("HomeRobot");
   }
  
   private void resetDefaultCommand(){

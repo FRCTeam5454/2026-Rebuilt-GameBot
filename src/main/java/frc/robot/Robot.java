@@ -6,7 +6,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utilities.LimelightHelpers;
-import frc.robot.utilities.NoFMSNT4Publisher;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -49,7 +48,7 @@ if (isReal()) {
    // Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
     //Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
 }
-Logger.addDataReceiver(new NoFMSNT4Publisher()); // Publish to NetworkTables, except on the field (USB log still has everything)
+Logger.addDataReceiver(new NT4Publisher()); // Always publish to NetworkTables (both real and simulation)
 
 Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
   

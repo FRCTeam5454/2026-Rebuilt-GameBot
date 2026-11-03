@@ -12,8 +12,6 @@ import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -66,33 +64,25 @@ public class IntakeSubsystem extends SubsystemBase {
     return !m_intakeSwitch.get();
   }
 
-  /**
-   * Pulls the intake in until the limit switch trips (or maxHomeTime seconds pass), then zeros the
-   * fold encoder. Runs through the scheduler instead of a while loop, so the rest of the robot keeps running.
-   */
-  public Command homeCommand(double maxHomeTime){
+  public void homeIntake(double maxHomeTime){
     if (RobotBase.isSimulation()) {
-      return Commands.runOnce(()->finishHoming(false), this).withName("IntakeHome");
+      m_fold.stopMotor();
+      m_fold.getEncoder().setPosition(0.0);
+      SetIntakeInMode();
+      m_homed = true;
+      return;
     }
-    return Commands.startEnd(()->m_fold.set(-Constants.IntakeConstants.foldHomeSpeed), ()->m_fold.stopMotor(), this)
-        .until(this::isIntakeSwitched)
-        .withTimeout(maxHomeTime)
-        .finallyDo((interrupted)->{
-          m_fold.stopMotor();
-          // switch tripped OR timed out -> zero the encoder (a timeout counts as finishing, not interrupted).
-          // Only skip it if another command or a disable cut homing off at an unknown spot.
-          if(!interrupted){
-            finishHoming(!isIntakeSwitched());
-          }
-        })
-        .withName("IntakeHome");
-  }
-
-  private void finishHoming(boolean timedOut){
-    m_fold.stopMotor();
+    //pull intake until we hit limit switch and then reset position
+     double startTime = Timer.getFPGATimestamp();
+     double endTime = startTime + maxHomeTime;
+    //System.out.println("Intake is starting homing");
+    while(!isIntakeSwitched() && Timer.getFPGATimestamp()<endTime){
+     m_fold.set(-Constants.IntakeConstants.foldHomeSpeed);
+    }
+    m_fold.stopMotor(); // stop intake
     m_fold.getEncoder().setPosition(0.0); // reset encoder to zero at home in
+    //System.out.println("Intake has homed");
     SetIntakeInMode();
-    Logger.recordOutput("Intake/HomeTimedOut", timedOut);
     m_homed=true;
   }
   public void SetIntakeInMode(){
@@ -198,19 +188,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // debug values go to Logger only; SmartDashboard is for what the drive team watches
-    boolean switched = isIntakeSwitched();
-    SmartDashboard.putBoolean("Intake Switch", switched);
-    Logger.recordOutput("Intake/Switch", switched);
-    Logger.recordOutput("Intake/OutMode", m_IntakeOutMode);
-    Logger.recordOutput("Intake/Homed", m_homed);
-    Logger.recordOutput("Intake/FoldPosition", m_fold.getEncoder().getPosition());
-    Logger.recordOutput("Intake/FoldCurrent", m_fold.getOutputCurrent());
-    Logger.recordOutput("Intake/FoldOutput", m_fold.get());
-    Logger.recordOutput("Intake/RollerOutput", m_intakeMotor.get());
-    Logger.recordOutput("Intake/RollerSupplyCurrent", m_intakeMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput("Intake/RollerTorqueCurrent", m_intakeMotor.getTorqueCurrent().getValueAsDouble());
-    Logger.recordOutput("Intake/RollerTempC", m_intakeMotor.getDeviceTemp().getValueAsDouble());
+    SmartDashboard.putNumber("Intake Fold Current", m_fold.getOutputCurrent());
+    SmartDashboard.putNumber("Intake Position", m_fold.getEncoder().getPosition());
+    SmartDashboard.putBoolean("Intake Switch",isIntakeSwitched());
+    SmartDashboard.putNumber("Intake Supply Current",m_intakeMotor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Intake Temperature",m_intakeMotor.getDeviceTemp().getValueAsDouble());
+    SmartDashboard.putNumber("Intake Torque Current",m_intakeMotor.getTorqueCurrent().getValueAsDouble());
 
     // //System.out.println("Amp " + m_fold.getOutputCurrent());
     // This method will be called once per scheduler run
