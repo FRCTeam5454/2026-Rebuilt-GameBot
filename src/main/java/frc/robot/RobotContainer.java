@@ -141,19 +141,20 @@ public class RobotContainer {
     CommandScheduler.getInstance().schedule(Commands.sequence(extend, align, retract));
   }
 
-  // Auto Setup
-  public Command Left2Neutral() {
-    // This method loads the auto when it is called, however, it is recommended
-    // to first load your paths/autos when code starts, then return the
-    // pre-loaded auto/path
-    return new PathPlannerAuto("Left2Neutral");
+
+        //Autos
+  
+  private Command buildBLineDoubleSweepTrenchIO(){
+    return BLineAuto_DoubleSweepTrenchIO.build(
+        m_swerve,
+        m_swerve::getPose2d,
+        m_swerve::getChassisSpeeds,
+        m_swerve::driveRobotRelative,
+        m_swerve::resetPose,
+        () -> NamedCommands.getCommand("expandIntake"),
+        () -> NamedCommands.getCommand("shotLookUpW5"));
   }
-  public Command Right2Left() {
-    return new PathPlannerAuto("Right2Left");
-  }
-  public Command ShootDepotShootNZ() {
-    return new PathPlannerAuto("ShootDepotShootNZ");
-  }
+
   private void InitialAutonPathfind(){
     //Magic Comment
     if (m_autoChooser == null) {
@@ -172,7 +173,8 @@ public class RobotContainer {
 
         //bline autos arent .auto files so build them here
         if (selectedAuto != null && BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
-          return buildBLineDoubleSweepTrenchIO();
+          CommandScheduler.getInstance().schedule(buildBLineDoubleSweepTrenchIO());
+          return;
         }
 
         // Load the path group to obtain the initial pose of the first trajectory.
@@ -216,16 +218,6 @@ public class RobotContainer {
     }
   }
   //bline version of Double sweep TrenchIO, uses the same named commands
-  private Command buildBLineDoubleSweepTrenchIO(){
-    return BLineAuto_DoubleSweepTrenchIO.build(
-        m_swerve,
-        m_swerve::getPose2d,
-        m_swerve::getChassisSpeeds,
-        m_swerve::driveRobotRelative,
-        m_swerve::resetPose,
-        () -> NamedCommands.getCommand("expandIntake"),
-        () -> NamedCommands.getCommand("shotLookUpW5"));
-  }
   //
   public boolean hasHomed=false;
   public boolean m_hasResetGyro=false;
