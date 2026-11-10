@@ -464,7 +464,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .addOdometryObservation(
             new OdometryObservation(
                 Timer.getTimestamp(),
-                this.getState().ModulePositions,
+                this.getStateCopy().ModulePositions,
                 Optional.ofNullable(this.getPigeon2().isConnected() ?
                                 Rotation2d.fromDegrees(this.getPigeon2().getYaw().getValueAsDouble()): null)));
     RobotState.getInstance().setRobotVelocity(getChassisSpeeds());

@@ -155,66 +155,37 @@ public class RobotContainer {
         () -> NamedCommands.getCommand("shotLookUpW5"));
   }
 
-  private void InitialAutonPathfind(){
+   private void InitialAutonPathfind(){
     //Magic Comment
     if (m_autoChooser == null) {
       SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
-     // Don't Run anything
+      return;
     }
-    else {
-      try {
-        // Prefer the pre-built Command selected in the auto chooser
-        Command selectedAuto = m_autoChooser.getSelected();
-        if (selectedAuto != null) {
-          SmartDashboard.putString("Asher's Cool Message:", "Returning selected Command from auto chooser");
-        //Command autoCommand =  ( new PathPlannerAuto(selectedAuto));
-      
-        }
-
-        //bline autos arent .auto files so build them here
-        if (selectedAuto != null && BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
-          CommandScheduler.getInstance().schedule(buildBLineDoubleSweepTrenchIO());
-          return;
-        }
-
-        // Load the path group to obtain the initial pose of the first trajectory.
-        // Use suitable constraints here (these only affect loading; path-following will be handled by the PathPlannerAuto command).
-        PathConstraints goToConstraints = new PathConstraints(3.0, 4.0,
-          Units.degreesToRadians(540), Units.degreesToRadians(720));
-        List<PathPlannerPath> group = PathPlannerAuto.getPathGroupFromAutoFile(selectedAuto.getName());
-
-        if (group == null || group.isEmpty()) {
-          SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
-          //Do Nothing
-        }else {
-        
-          /*Pose2d startPose = group.get(0).getStartingHolonomicPose().orElse(group.get(0).getStartingDifferentialPose());
-          startPose=FieldConstants.flipIfRed(startPose);
-          Command goToStart = AutoBuilder.pathfindToPose(
-            startPose,
-            goToConstraints,
-            0.0
-          );*/
-          
-          Command followAuto = new PathPlannerAuto(selectedAuto.getName());
-
-          // go to start pos then call auto
-          SmartDashboard.putString("Asher's Cool Message:","should be running sequence");
-          //add auto to scheduler
-          Pose2d currentPose = m_swerve.getPose2d();
-          if(currentPose.getX()>1 || currentPose.getY()>1) {
-            //disable pathing
-            //            CommandScheduler.getInstance().schedule(Commands.sequence(goToStart, followAuto));
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          
-          } else { //no starting pose
-            CommandScheduler.getInstance().schedule(Commands.sequence(followAuto));
-          }
-        }
-      } catch (Exception e) {
-        // if anything goes wrong (it probably will), fall back to whatever the original chooser provides
-        SmartDashboard.putString("Asher's Cool Message:",e.getMessage());
+    try {
+      Command selectedAuto = m_autoChooser.getSelected();
+      if (selectedAuto == null) {
+        SmartDashboard.putString("Asher's Cool Message:", "No Auto Selected");
+        return;
       }
+
+      //bline autos arent .auto files so build and schedule them here
+      if (BLineAuto_DoubleSweepTrenchIO.kName.equals(selectedAuto.getName())) {
+        SmartDashboard.putString("Asher's Cool Message:", "Running BLine auto");
+        CommandScheduler.getInstance().schedule(buildBLineDoubleSweepTrenchIO());
+        return;
+      }
+
+      List<PathPlannerPath> group = PathPlannerAuto.getPathGroupFromAutoFile(selectedAuto.getName());
+      if (group == null || group.isEmpty()) {
+        SmartDashboard.putString("Asher's Cool Message:", "It aint running 2");
+        return;
+      }
+
+      SmartDashboard.putString("Asher's Cool Message:", "should be running sequence");
+      CommandScheduler.getInstance().schedule(new PathPlannerAuto(selectedAuto.getName()));
+    } catch (Exception e) {
+      // if anything goes wrong (it probably will)
+      SmartDashboard.putString("Asher's Cool Message:", String.valueOf(e.getMessage()));
     }
   }
   //bline version of Double sweep TrenchIO, uses the same named commands
@@ -594,6 +565,7 @@ public class RobotContainer {
     if(!m_hasResetGyro){
       m_hasResetGyro=true;
       m_swerve.getPigeon2().reset();
+      makefalsestartPose();
     }
     // LEDs are driven by m_LEDs.periodic(), which shows the disabled pattern on its own
 
@@ -669,10 +641,9 @@ public class RobotContainer {
   }
 
   public void makefalsestartPose(){
-    
-  Pose2d startPose = new Pose2d(4,7.5, Rotation2d.fromDegrees(2));
+  Pose2d startPose = new Pose2d(7.9,3.451, Rotation2d.fromDegrees(2));
   m_swerve.addVisionMeasurement(startPose,Utils.getCurrentTimeSeconds());
-
+  RobotState.getInstance().addVisionObservationRaw(startPose, Utils.getCurrentTimeSeconds());
 }
   public Command makeAutoCommandPPTest(){
 
